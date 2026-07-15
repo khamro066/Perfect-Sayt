@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:box-shadow .2s ease,transform .2s ease;height:100%" style-hover="box-shadow:0 14px 34px rgba(0,0,0,.10);transform:translateY(-3px)" onClick="{{ open }}">
+  <div style="position:relative;width:100%;aspect-ratio:1/1;background:var(--surface-2)">
+    <image-slot id="{{ p.slotId }}" shape="rect" placeholder="{{ p.name }} · 800×800px"></image-slot>
+    <div style="position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;pointer-events:none">
+      <sc-if value="{{ p.isNew }}"><span style="background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;width:max-content">Yangi</span></sc-if>
+      <sc-if value="{{ hasDiscount }}"><span style="background:var(--danger);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;width:max-content">-{{ p.discount }}%</span></sc-if>
+      <sc-if value="{{ soldOut }}"><span style="background:var(--ink);color:var(--bg);font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;width:max-content">Tugagan</span></sc-if>
+    </div>
+    <button style="position:absolute;top:9px;right:9px;width:36px;height:36px;border:none;border-radius:999px;background:var(--surface);color:{{ heartColor }};font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.14)" onClick="{{ fav }}">{{ heart }}</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px;padding:14px 15px 16px;flex:1">
+    <span style="font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600">{{ p.brand }}</span>
+    <span style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19px;line-height:1.25;color:var(--ink)">{{ p.name }}</span>
+    <div style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted)"><span style="color:var(--star)">★</span> {{ p.rating }} <span>({{ p.ratingCount }})</span></div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:2px">
+      <span style="font-size:16px;font-weight:700;color:var(--accent)">{{ p.priceStr }}</span>
+      <sc-if value="{{ hasDiscount }}"><span style="font-size:12.5px;color:var(--muted);text-decoration:line-through">{{ p.oldPriceStr }}</span></sc-if>
+    </div>
+    <div style="display:flex;gap:5px;margin-top:2px">
+      <sc-for list="{{ colors }}" as="c" hint-placeholder-count="2"><span style="width:14px;height:14px;border-radius:999px;border:1px solid var(--line);background:{{ c }}"></span></sc-for>
+    </div>
+    <button style="margin-top:auto;width:100%;border:1px solid var(--accent);background:transparent;color:var(--accent);font-weight:600;font-size:13px;padding:10px;border-radius:10px;cursor:pointer;transition:all .18s ease" style-hover="background:var(--accent);color:var(--accent-ink)" onClick="{{ add }}">{{ addLabel }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:250,&quot;height&quot;:370},&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;},&quot;fav&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false},&quot;onOpen&quot;:{&quot;editor&quot;:null},&quot;onFav&quot;:{&quot;editor&quot;:null},&quot;onAdd&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props.p || {};
+    const fav = !!this.props.fav;
+    const soldOut = !p.inStock;
+    return {
+      p,
+      colors: p.colors || [],
+      hasDiscount: (p.discount || 0) > 0,
+      soldOut,
+      heart: fav ? "\u2665" : "\u2661",
+      heartColor: fav ? "var(--accent)" : "var(--muted)",
+      addLabel: soldOut ? "Oldindan buyurtma" : "Savatga qo'shish",
+      open: () => this.props.onOpen && this.props.onOpen(p.id),
+      fav: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.props.onFav && this.props.onFav(p.id); },
+      add: (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        if (soldOut) { this.props.onOpen && this.props.onOpen(p.id); }
+        else { this.props.onAdd && this.props.onAdd(p.id); }
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

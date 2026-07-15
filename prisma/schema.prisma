@@ -1,0 +1,218 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums (README section 2 & 3.1 — order status flow, review moderation)
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  Yangi
+  Tasdiqlandi
+  Tayyorlanmoqda
+  Yolda          @map("Yo'lda")
+  Yetkazildi
+  BekorQilindi   @map("Bekor qilindi")
+}
+
+enum OrderKind {
+  order
+  preorder
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  brand          String
+  gender         String
+  categoryId     String   @map("category_id")
+  category       Category @relation(fields: [categoryId], references: [id])
+  material       String
+  price          Decimal  @db.Decimal(12, 2)
+  oldPrice       Decimal? @map("old_price") @db.Decimal(12, 2)
+  rating         Decimal  @default(0) @db.Decimal(2, 1)
+  ratingCount    Int      @default(0) @map("rating_count")
+  description    String
+  productionDays Int?     @map("production_days")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  colors     ProductColor[]
+  sizes      ProductSize[]
+  stock      Stock[]
+  orderLines OrderLine[]
+  reviews    Review[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductColor {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  hex       String
+
+  @@unique([productId, hex])
+  @@map("product_colors")
+}
+
+model ProductSize {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      Int
+
+  @@unique([productId, size])
+  @@map("product_sizes")
+}
+
+// model × rang × o'lcham × qoldiq
+model Stock {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colorHex  String   @map("color_hex")
+  size      Int
+  quantity  Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([productId, colorHex, size])
+  @@map("stock")
+}
+
+// ---------------------------------------------------------------------------
+// Customers & Orders
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id        String   @id @default(cuid())
+  ism       String
+  familiya  String?
+  phone     String   @unique
+  viloyat   String?
+  manzil    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  orders  Order[]
+  reviews Review[]
+
+  @@map("customers")
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  orderNumber  String      @unique @map("order_number")
+  customerId   String      @map("customer_id")
+  customer     Customer    @relation(fields: [customerId], references: [id])
+  total        Decimal     @db.Decimal(12, 2)
+  status       OrderStatus @default(Yangi)
+  isPreorder   Boolean     @default(false) @map("is_preorder")
+  kind         OrderKind
+  stockApplied Boolean     @default(false) @map("stock_applied")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  lines         OrderLine[]
+  statusHistory OrderStatusHistory[]
+  reviews       Review[]
+  notifications Notification[]
+
+  @@index([status])
+  @@index([isPreorder])
+  @@map("orders")
+}
+
+model OrderLine {
+  id        String  @id @default(cuid())
+  orderId   String  @map("order_id")
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id])
+  colorHex  String  @map("color_hex")
+  size      Int
+  qty       Int
+  unitPrice Decimal @map("unit_price") @db.Decimal(12, 2)
+
+  @@map("order_lines")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String      @map("order_id")
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  changedAt DateTime    @default(now()) @map("changed_at")
+
+  @@map("order_status_history")
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+model Review {
+  id         String       @id @default(cuid())
+  productId  String       @map("product_id")
+  product    Product      @relation(fields: [productId], references: [id])
+  customerId String       @map("customer_id")
+  customer   Customer     @relation(fields: [customerId], references: [id])
+  orderId    String       @map("order_id")
+  order      Order        @relation(fields: [orderId], references: [id])
+  rating     Int
+  text       String
+  photoUrl   String?      @map("photo_url")
+  status     ReviewStatus @default(pending)
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  @@index([status])
+  @@index([productId])
+  @@map("reviews")
+}
+
+// ---------------------------------------------------------------------------
+// Admin notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id             String    @id @default(cuid())
+  orderId        String    @map("order_id")
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerName   String    @map("customer_name")
+  phone          String
+  productSummary String    @map("product_summary")
+  amount         Decimal   @db.Decimal(12, 2)
+  kind           OrderKind
+  read           Boolean   @default(false)
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([read])
+  @@map("notifications")
+}
