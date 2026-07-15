@@ -1,26 +1,156 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #eef2f8;
+  --surface: #ffffff;
+  --surface-2: #e6ecf5;
+  --ink: #101828;
+  --muted: #5b6472;
+  --line: #d7e0ec;
+  --accent: #0e2a52;
+  --accent-ink: #ffffff;
+  --accent-soft: #dde6f4;
+  --deep: #0b2545;
+  --deep-ink: #ffffff;
+  --deep-muted: #aebbcf;
+  --deep-line: rgba(255, 255, 255, 0.14);
+  --deep-highlight: #c9a24b;
+  --success: #1f8a5b;
+  --success-soft: #e3f3eb;
+  --warning: #b7791f;
+  --warning-soft: #f7ecd9;
+  --danger: #a5432e;
+  --danger-soft: #f5e5e1;
+  --star: #c9a24b;
+  --preorder-bg: #f0e4fb;
+  --preorder-ink: #7a3fc9;
+
+  --radius-card: 16px;
+  --radius-block: 24px;
+  --radius-btn: 11px;
+  --radius-pill: 999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-theme="dark"] {
+  --bg: #0a0e16;
+  --surface: #111827;
+  --surface-2: #1a2333;
+  --ink: #eef1f7;
+  --muted: #a3aebd;
+  --line: #293244;
+  --accent: #4d7cc2;
+  --accent-ink: #08101d;
+  --accent-soft: #182338;
+  --deep: #060b14;
+  --deep-ink: #eef1f7;
+  --deep-muted: #8b96a8;
+  --deep-line: rgba(238, 241, 247, 0.1);
+  --deep-highlight: #d9b66f;
+  --success: #4fb187;
+  --success-soft: #12281f;
+  --warning: #e0b04a;
+  --warning-soft: #2b2210;
+  --danger: #e0836a;
+  --danger-soft: #2b1a15;
+  --star: #d9b66f;
+  --preorder-bg: #2a1f3d;
+  --preorder-ink: #c199f0;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --bg: #0a0e16;
+    --surface: #111827;
+    --surface-2: #1a2333;
+    --ink: #eef1f7;
+    --muted: #a3aebd;
+    --line: #293244;
+    --accent: #4d7cc2;
+    --accent-ink: #08101d;
+    --accent-soft: #182338;
+    --deep: #060b14;
+    --deep-ink: #eef1f7;
+    --deep-muted: #8b96a8;
+    --deep-line: rgba(238, 241, 247, 0.1);
+    --deep-highlight: #d9b66f;
+    --success: #4fb187;
+    --success-soft: #12281f;
+    --warning: #e0b04a;
+    --warning-soft: #2b2210;
+    --danger: #e0836a;
+    --danger-soft: #2b1a15;
+    --star: #d9b66f;
+    --preorder-bg: #2a1f3d;
+    --preorder-ink: #c199f0;
   }
 }
 
+@theme inline {
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-deep: var(--deep);
+  --color-deep-ink: var(--deep-ink);
+  --color-deep-muted: var(--deep-muted);
+  --color-deep-line: var(--deep-line);
+  --color-deep-highlight: var(--deep-highlight);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-star: var(--star);
+  --color-preorder-bg: var(--preorder-bg);
+  --color-preorder-ink: var(--preorder-ink);
+
+  --radius-card: var(--radius-card);
+  --radius-block: var(--radius-block);
+  --radius-btn: var(--radius-btn);
+  --radius-pill: var(--radius-pill);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), serif;
+  font-weight: 500;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+
+@keyframes pop-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.animate-pop-badge {
+  animation: pop-badge 0.3s ease;
+}
+
+@keyframes mini-cart-pop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-mini-cart-pop {
+  animation: mini-cart-pop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
