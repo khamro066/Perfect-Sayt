@@ -8,6 +8,9 @@ import { FavoritesProvider } from "@/lib/favorites-context";
 import { OrdersProvider } from "@/lib/orders-context";
 import { CustomerProvider } from "@/lib/customer-context";
 import { ReviewsProvider } from "@/lib/reviews-context";
+import { AdminAuthProvider } from "@/lib/admin-auth-context";
+import { NotificationsProvider } from "@/lib/notifications-context";
+import { AdminDataProvider } from "@/lib/admin-data-context";
 
 const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-heading",
@@ -39,15 +42,21 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-bg text-ink font-body">
         <ThemeProvider>
           <ToastProvider>
-            <CustomerProvider>
-              <OrdersProvider>
-                <ReviewsProvider>
-                  <FavoritesProvider>
-                    <CartProvider>{children}</CartProvider>
-                  </FavoritesProvider>
-                </ReviewsProvider>
-              </OrdersProvider>
-            </CustomerProvider>
+            <AdminAuthProvider>
+              <NotificationsProvider>
+                <AdminDataProvider>
+                  <CustomerProvider>
+                    <OrdersProvider>
+                      <ReviewsProvider>
+                        <FavoritesProvider>
+                          <CartProvider>{children}</CartProvider>
+                        </FavoritesProvider>
+                      </ReviewsProvider>
+                    </OrdersProvider>
+                  </CustomerProvider>
+                </AdminDataProvider>
+              </NotificationsProvider>
+            </AdminAuthProvider>
           </ToastProvider>
         </ThemeProvider>
       </body>

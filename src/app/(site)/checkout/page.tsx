@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { useCustomer } from "@/lib/customer-context";
 import { useOrders } from "@/lib/orders-context";
+import { useNotifications } from "@/lib/notifications-context";
 import { PRODUCTS, PROVINCES, getStock } from "@/lib/mock-data";
 import { SELLER_CONTACT } from "@/lib/constants";
 import { formatSom } from "@/lib/format";
@@ -26,6 +27,7 @@ export default function CheckoutPage() {
   const { showToast } = useToast();
   const { customer, setCustomer } = useCustomer();
   const { addOrder } = useOrders();
+  const { push: pushNotification } = useNotifications();
 
   const [ism, setIsm] = useState(customer?.ism ?? "");
   const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
@@ -74,6 +76,12 @@ export default function CheckoutPage() {
     };
 
     addOrder(order);
+    pushNotification({
+      customerName: order.customerName,
+      productSummary: order.lines.map((l) => l.productName).join(", "),
+      amount: order.total,
+      kind: "order",
+    });
     setCustomer({ ism, familiya, phone, viloyat, manzil: address });
     if (isPreorder) {
       showToast("Omborda yetarli emas — bu buyurtma OLDINDAN BUYURTMA sifatida qabul qilindi");

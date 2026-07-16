@@ -8,11 +8,11 @@ import { Minus, Plus } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { PRODUCTS, getTotalStock } from "@/lib/mock-data";
-import { colorName } from "@/lib/colors";
 import { formatSom, formatDateRangeUz } from "@/lib/format";
 import { useToast } from "@/lib/toast-context";
 import { useOrders } from "@/lib/orders-context";
 import { useCustomer } from "@/lib/customer-context";
+import { useNotifications } from "@/lib/notifications-context";
 import { Order } from "@/lib/types";
 
 function StepStrip() {
@@ -44,6 +44,7 @@ function PreorderContent() {
   const { showToast } = useToast();
   const { addOrder } = useOrders();
   const { customer, setCustomer } = useCustomer();
+  const { push: pushNotification } = useNotifications();
 
   const productId = searchParams.get("product");
   const product = productId ? PRODUCTS.find((p) => p.id === productId) : undefined;
@@ -83,6 +84,12 @@ function PreorderContent() {
       createdAt: new Date().toISOString().slice(0, 10),
     };
     addOrder(order);
+    pushNotification({
+      customerName: order.customerName,
+      productSummary: product.name,
+      amount: order.total,
+      kind: "preorder",
+    });
     setCustomer({ ism, familiya, phone, manzil });
     router.push(`/tasdiqlash/${orderNumber}?kind=preorder`);
   }
