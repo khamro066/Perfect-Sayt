@@ -6,7 +6,7 @@ import { PRODUCTS as SEED_PRODUCTS, STOCK as SEED_STOCK, CATEGORIES as SEED_CATE
 
 interface AdminDataContextValue {
   products: Product[];
-  addProduct: (p: Product) => void;
+  addProduct: (p: Product, initialStockTotal?: number) => void;
   deleteProduct: (id: string) => void;
 
   stock: StockEntry[];
@@ -58,12 +58,14 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
   }, [products, stock, categories, hydrated]);
 
-  const addProduct = (p: Product) => {
+  const addProduct: AdminDataContextValue["addProduct"] = (p, initialStockTotal) => {
     setProducts((prev) => [p, ...prev]);
+    const comboCount = p.colors.length * p.sizes.length;
+    const perCombo = initialStockTotal && comboCount > 0 ? Math.floor(initialStockTotal / comboCount) : 0;
     setStock((prev) => [
       ...prev,
       ...p.colors.flatMap((colorHex) =>
-        p.sizes.map((size) => ({ productId: p.id, colorHex, size, quantity: 0 }))
+        p.sizes.map((size) => ({ productId: p.id, colorHex, size, quantity: perCombo }))
       ),
     ]);
   };

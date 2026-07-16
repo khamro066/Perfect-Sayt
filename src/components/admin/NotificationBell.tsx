@@ -8,9 +8,8 @@ import { formatSom } from "@/lib/format";
 
 export function NotificationBell() {
   const router = useRouter();
-  const { notifications, unreadCount, markRead } = useNotifications();
+  const { notifications, unreadCount, markRead, soundOn, toggleSound } = useNotifications();
   const [open, setOpen] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
 
   return (
     <div className="relative">
@@ -33,7 +32,7 @@ export function NotificationBell() {
           <div className="absolute right-0 top-[50px] z-50 flex max-h-[420px] w-[340px] flex-col overflow-y-auto rounded-card border border-line bg-surface shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
             <div className="flex items-center justify-between border-b border-line p-3.5">
               <span className="text-sm font-bold text-ink">Bildirishnomalar</span>
-              <button onClick={() => setSoundOn((v) => !v)} title="Ovozni yoqish/o'chirish" className="text-muted">
+              <button onClick={toggleSound} title="Ovozni yoqish/o'chirish" className="text-muted">
                 {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
               </button>
             </div>

@@ -68,28 +68,26 @@ export default function AdminProductsPage() {
     const basePrice = Number(price);
     const finalPrice = hasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
 
-    addProduct({
-      id: `p-${Date.now()}`,
-      name: name.trim(),
-      brand: brand.trim() || "Perfect",
-      gender: "Erkaklar",
-      category,
-      material: "Charm",
-      price: finalPrice,
-      oldPrice: hasDiscount && pct > 0 ? basePrice : undefined,
-      rating: 0,
-      ratingCount: 0,
-      description: "",
-      colors: [colorHex],
-      sizes: [40, 41, 42, 43, 44],
-      sold: 0,
-      createdAt: new Date().toISOString().slice(0, 10),
-    });
-
-    if (Number(initialStock) > 0) {
-      // Initial stock is distributed by the admin data store as 0; a quick
-      // top-up here keeps the demo useful without a separate stock step.
-    }
+    addProduct(
+      {
+        id: `p-${Date.now()}`,
+        name: name.trim(),
+        brand: brand.trim() || "Perfect",
+        gender: "Erkaklar",
+        category,
+        material: "Charm",
+        price: finalPrice,
+        oldPrice: hasDiscount && pct > 0 ? basePrice : undefined,
+        rating: 0,
+        ratingCount: 0,
+        description: "",
+        colors: [colorHex],
+        sizes: [40, 41, 42, 43, 44],
+        sold: 0,
+        createdAt: new Date().toISOString().slice(0, 10),
+      },
+      Number(initialStock) || 0
+    );
 
     setName(""); setBrand(""); setPrice(""); setInitialStock(""); setImages([]);
     setHasDiscount(false); setDiscountPct("");
