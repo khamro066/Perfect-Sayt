@@ -35,9 +35,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        // Hydrating from localStorage after mount — unavailable during SSR.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLines(JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // Hydrating from localStorage after mount — unavailable during SSR.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setLines(parsed);
+        }
       } catch {
         // ignore corrupt cart data
       }

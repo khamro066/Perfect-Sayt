@@ -30,9 +30,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        // Hydrating from localStorage after mount — unavailable during SSR.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setNotifications(JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // Hydrating from localStorage after mount — unavailable during SSR.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setNotifications(parsed);
+        }
       } catch {
         // ignore corrupt notifications data
       }
