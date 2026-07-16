@@ -39,6 +39,8 @@ export default function ProductPage() {
     if (!product) return;
     const raw = localStorage.getItem(RECENT_KEY);
     let ids: string[] = raw ? JSON.parse(raw) : [];
+    // Hydrating from localStorage after mount — unavailable during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRecentIds(ids.filter((id) => id !== product.id).slice(0, 8));
     ids = [product.id, ...ids.filter((id) => id !== product.id)].slice(0, 9);
     localStorage.setItem(RECENT_KEY, JSON.stringify(ids));

@@ -147,6 +147,7 @@ export default function AdminProductsPage() {
                     className="relative aspect-square overflow-hidden rounded-[10px]"
                     style={{ boxShadow: img.primary ? "0 0 0 2px var(--accent)" : "0 0 0 2px transparent" }}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- transient blob: object URL from local file input, next/image can't optimize these */}
                     <img src={img.url} alt="" className="h-full w-full object-cover" />
                     <button
                       onClick={() => setImages((prev) => prev.filter((i) => i.id !== img.id))}

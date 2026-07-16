@@ -23,6 +23,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
+    // Hydrating from localStorage/matchMedia after mount — these aren't available
+    // during SSR, so this can't be a lazy useState initializer.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(getInitialTheme());
   }, []);
 

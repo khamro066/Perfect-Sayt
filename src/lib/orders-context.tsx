@@ -22,6 +22,8 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
+        // Hydrating from localStorage after mount — unavailable during SSR.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOrders(JSON.parse(raw));
       } catch {
         // ignore corrupt orders data

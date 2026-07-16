@@ -20,6 +20,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Hydrating from sessionStorage after mount — unavailable during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAuthed(sessionStorage.getItem(STORAGE_KEY) === "1");
     setReady(true);
   }, []);

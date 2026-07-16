@@ -40,7 +40,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         {lines.length === 0 ? (
-          <p className="p-6 text-center text-sm text-muted">Savatchangiz bo'sh</p>
+          <p className="p-6 text-center text-sm text-muted">Savatchangiz bo&apos;sh</p>
         ) : (
           <>
             <div className="flex max-h-[340px] flex-col gap-3 overflow-y-auto p-4">
@@ -53,7 +53,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-heading text-sm font-semibold text-ink">{product.name}</p>
                       <p className="text-xs text-muted">
-                        O'lcham {line.size} · {colorName(line.colorHex)}
+                        O&apos;lcham {line.size} · {colorName(line.colorHex)}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <button
@@ -95,7 +95,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
                   onClick={onClose}
                   className="flex-1 rounded-btn border border-line py-2.5 text-center text-sm font-semibold text-ink"
                 >
-                  Savatchani ko'rish
+                  Savatchani ko&apos;rish
                 </Link>
                 <Link
                   href="/checkout"

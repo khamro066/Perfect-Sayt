@@ -32,13 +32,16 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Hydrating from localStorage after mount — unavailable during SSR.
     try {
       const p = localStorage.getItem(PRODUCTS_KEY);
+      /* eslint-disable react-hooks/set-state-in-effect */
       if (p) setProducts(JSON.parse(p));
       const s = localStorage.getItem(STOCK_KEY);
       if (s) setStock(JSON.parse(s));
       const c = localStorage.getItem(CATEGORIES_KEY);
       if (c) setCategories(JSON.parse(c));
+      /* eslint-enable react-hooks/set-state-in-effect */
     } catch {
       // ignore corrupt admin data
     }
