@@ -112,22 +112,30 @@ export default function HomePage() {
       <ProductRow title="Yangi mahsulotlar" href="/katalog?sort=new" products={newArrivals} />
       <ProductRow title="Eng ko'p sotilganlar" href="/katalog?sort=popular" products={bestSellers} />
 
-      <section className="mx-auto max-w-[1280px] px-6 py-8">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-0 overflow-hidden rounded-block border border-line">
-          <div className="flex flex-col justify-center gap-4 bg-surface p-9">
-            <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">Tanlangan kolleksiya</span>
-            <h2 className="font-heading text-[clamp(26px,3.5vw,38px)] font-medium text-ink">Klassika, qayta kashf etilgan</h2>
-            <p className="text-[15px] text-muted">
+      <section className="mx-auto max-w-[1280px] px-6 py-5">
+        <div className="relative grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] overflow-hidden rounded-[22px] border border-line bg-accent-soft">
+          <div className="flex flex-col justify-center gap-3.5 p-[clamp(28px,4vw,52px)]">
+            <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-accent">Tanlangan kolleksiya</span>
+            <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-medium text-ink">Klassika, qayta kashf etilgan</h2>
+            <p className="max-w-[340px] text-[15px] leading-[1.6] text-muted">
               Har mavsumda tanlab olingan eng sifatli modellar — charm, zamsh va zamonaviy dizayn uyg&apos;unligi.
             </p>
             <Link
               href="/katalog"
-              className="w-fit rounded-btn bg-ink px-5 py-3 text-sm font-semibold text-bg"
+              className="mt-1.5 w-fit rounded-btn bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
             >
               Kolleksiyani ko&apos;rish
             </Link>
           </div>
-          <PlaceholderImage label="Tanlangan kolleksiya" className="min-h-[320px] w-full" />
+          <div className="relative min-h-[320px] w-full bg-surface-2">
+            <Image
+              src="/images/hero-banner-navy-loafer.jpg"
+              alt="Klassik charm loafer"
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
         </div>
       </section>
 
