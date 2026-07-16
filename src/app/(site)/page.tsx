@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ShieldCheck, PackageCheck, Sparkles } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
@@ -53,6 +54,18 @@ export default function HomePage() {
               "radial-gradient(130% 130% at 100% 0%, var(--accent-soft) 0%, #cfdbee 32%, var(--surface) 58%, var(--bg) 100%)",
           }}
         >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden pl-[44%]"
+          >
+            <Image
+              src="/brand/perfect-logo-white.png"
+              alt=""
+              width={340}
+              height={162}
+              className="h-auto w-[340px] max-w-full opacity-[0.12]"
+            />
+          </div>
           <div className="relative max-w-[640px]">
             <span className="inline-block rounded-pill border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink">
               Perfect Shoes

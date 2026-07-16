@@ -37,7 +37,14 @@ export function Header() {
     <header className="sticky top-0 z-40 bg-deep">
       <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-5 px-6 py-3.5">
         <Link href="/">
-          <Image src="/brand/perfect-logo-white.png" alt="Perfect Shoes" width={140} height={40} className="h-10 w-auto" priority />
+          <Image
+            src="/brand/perfect-logo-white.png"
+            alt="Perfect Shoes"
+            width={140}
+            height={40}
+            className="h-10 w-auto brightness-0 invert"
+            priority
+          />
         </Link>
         <div className="flex-1" />
         <div className="flex items-center gap-1.5">

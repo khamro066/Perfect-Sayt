@@ -29,7 +29,13 @@ export default function AdminLoginPage() {
         className="flex w-full max-w-[400px] flex-col gap-4.5 rounded-block border border-line bg-surface p-9 shadow-[0_24px_60px_rgba(0,0,0,0.12)]"
       >
         <div className="flex justify-center">
-          <Image src="/brand/perfect-logo-blue.jpg" alt="Perfect Shoes" width={160} height={48} className="h-12 w-auto" />
+          <Image
+            src="/brand/perfect-logo-white.png"
+            alt="Perfect"
+            width={101}
+            height={48}
+            className="h-12 w-auto"
+          />
         </div>
         <div className="text-center">
           <p className="font-bold text-ink">Admin panelga kirish</p>
