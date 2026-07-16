@@ -2,10 +2,12 @@
 
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
+import clsx from "clsx";
 import { useAdminData } from "@/lib/admin-data-context";
 import { useToast } from "@/lib/toast-context";
 import { useOrders } from "@/lib/orders-context";
 import { ALL_COLORS, colorName } from "@/lib/colors";
+import { SIZES } from "@/lib/mock-data";
 import { formatSom } from "@/lib/format";
 import { Product } from "@/lib/types";
 
@@ -17,6 +19,16 @@ interface UploadedImage {
 
 const ACTIVE_STATUSES = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda"];
 
+function toggle<T>(list: T[], value: T): T[] {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+function stockStatus(qty: number) {
+  if (qty <= 0) return { label: "Tugadi", color: "var(--danger)" };
+  if (qty < 5) return { label: "Kam qoldi", color: "var(--warning)" };
+  return { label: "Yetarli", color: "var(--success)" };
+}
+
 export default function AdminProductsPage() {
   const { products, categories, addProduct, deleteProduct, totalStockFor } = useAdminData();
   const { orders } = useOrders();
@@ -26,9 +38,10 @@ export default function AdminProductsPage() {
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState(categories[0] ?? "");
-  const [colorHex, setColorHex] = useState(ALL_COLORS[0]);
   const [price, setPrice] = useState("");
-  const [initialStock, setInitialStock] = useState("");
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, string>>({});
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [hasDiscount, setHasDiscount] = useState(false);
   const [discountPct, setDiscountPct] = useState("");
@@ -64,9 +77,25 @@ export default function AdminProductsPage() {
       showToast("Nom va narxni kiriting");
       return;
     }
+    if (selectedColors.length === 0) {
+      showToast("Kamida bitta rangni tanlang");
+      return;
+    }
+    if (selectedSizes.length === 0) {
+      showToast("Kamida bitta o'lchamni tanlang");
+      return;
+    }
     const pct = Math.min(90, Math.max(0, Number(discountPct) || 0));
     const basePrice = Number(price);
     const finalPrice = hasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
+
+    const stockEntries = selectedColors.flatMap((hex) =>
+      selectedSizes.map((size) => ({
+        colorHex: hex,
+        size,
+        quantity: Math.max(0, Math.floor(Number(quantities[`${hex}-${size}`]) || 0)),
+      }))
+    );
 
     addProduct(
       {
@@ -81,15 +110,16 @@ export default function AdminProductsPage() {
         rating: 0,
         ratingCount: 0,
         description: "",
-        colors: [colorHex],
-        sizes: [40, 41, 42, 43, 44],
+        colors: selectedColors,
+        sizes: [...selectedSizes].sort((a, b) => a - b),
         sold: 0,
         createdAt: new Date().toISOString().slice(0, 10),
       },
-      Number(initialStock) || 0
+      stockEntries
     );
 
-    setName(""); setBrand(""); setPrice(""); setInitialStock(""); setImages([]);
+    setName(""); setBrand(""); setPrice(""); setImages([]);
+    setSelectedColors([]); setSelectedSizes([]); setQuantities({});
     setHasDiscount(false); setDiscountPct("");
     showToast("Mahsulot qo'shildi");
   }
@@ -108,16 +138,93 @@ export default function AdminProductsPage() {
           <LabeledInput label="Nomi" value={name} onChange={setName} placeholder="Mahsulot nomi" />
           <LabeledInput label="Brend" value={brand} onChange={setBrand} placeholder="Brend (ixtiyoriy)" />
           <LabeledSelect label="Kategoriya" value={category} onChange={setCategory} options={categories} />
-          <LabeledSelect
-            label="Rang"
-            value={colorHex}
-            onChange={setColorHex}
-            options={ALL_COLORS}
-            renderOption={(hex) => colorName(hex)}
-          />
           <LabeledInput label="Narx (so'm)" value={price} onChange={setPrice} placeholder="890000" type="number" />
-          <LabeledInput label="Ombordagi soni" value={initialStock} onChange={setInitialStock} placeholder="10" type="number" />
         </div>
+
+        <div className="mt-4">
+          <p className="mb-2 text-[13px] font-semibold text-ink">Rang(lar)</p>
+          <div className="flex flex-wrap gap-2.5">
+            {ALL_COLORS.map((hex) => (
+              <button
+                key={hex}
+                type="button"
+                title={colorName(hex)}
+                onClick={() => setSelectedColors(toggle(selectedColors, hex))}
+                className="h-[30px] w-[30px] rounded-full border border-line"
+                style={{
+                  background: hex,
+                  boxShadow: selectedColors.includes(hex)
+                    ? "0 0 0 2px var(--surface), 0 0 0 4px var(--accent)"
+                    : undefined,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="mb-2 text-[13px] font-semibold text-ink">O&apos;lchamlar</p>
+          <div className="flex flex-wrap gap-2">
+            {SIZES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSelectedSizes(toggle(selectedSizes, s))}
+                className={clsx(
+                  "min-w-[46px] rounded-[10px] border px-2 py-2.5 text-sm font-semibold",
+                  selectedSizes.includes(s)
+                    ? "border-accent bg-accent text-accent-ink"
+                    : "border-line bg-surface text-ink"
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {selectedColors.length > 0 && selectedSizes.length > 0 && (
+          <div className="mt-4 rounded-[12px] bg-surface-2 p-4">
+            <p className="mb-1 text-[13px] font-semibold text-ink">Boshlang&apos;ich qoldiqlar</p>
+            <p className="mb-3 text-xs text-muted">
+              Har bir rang × o&apos;lcham birikmasi uchun aniq miqdorni kiriting.
+            </p>
+            <div className="grid grid-cols-[1.4fr_0.8fr_1fr_1fr] gap-3 border-b border-line pb-2 text-xs font-bold uppercase tracking-[0.05em] text-muted">
+              <span>Rang</span><span>O&apos;lcham</span><span>Qoldiq</span><span>Holat</span>
+            </div>
+            {selectedColors.flatMap((hex) =>
+              selectedSizes
+                .slice()
+                .sort((a, b) => a - b)
+                .map((size) => {
+                  const key = `${hex}-${size}`;
+                  const qtyValue = quantities[key] ?? "";
+                  const status = stockStatus(Math.floor(Number(qtyValue) || 0));
+                  return (
+                    <div
+                      key={key}
+                      className="grid grid-cols-[1.4fr_0.8fr_1fr_1fr] items-center gap-3 border-b border-line py-2.5 text-[13.5px] text-ink last:border-b-0"
+                    >
+                      <span className="flex items-center gap-1.5 text-muted">
+                        <span className="h-3.5 w-3.5 rounded-full border border-line" style={{ background: hex }} />
+                        {colorName(hex)}
+                      </span>
+                      <span>{size}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        value={qtyValue}
+                        onChange={(e) => setQuantities((prev) => ({ ...prev, [key]: e.target.value }))}
+                        placeholder="0"
+                        className="w-24 rounded-[8px] border border-line bg-surface px-2.5 py-1.5 text-[13px] outline-none"
+                      />
+                      <span className="font-bold" style={{ color: status.color }}>{status.label}</span>
+                    </div>
+                  );
+                })
+            )}
+          </div>
+        )}
 
         <div className="mt-4 flex flex-col gap-3 rounded-[12px] bg-surface-2 p-4">
           <p className="text-[13px] font-semibold text-ink">Mahsulot rasmlari</p>
@@ -288,8 +395,8 @@ function LabeledInput({
 }
 
 function LabeledSelect({
-  label, value, onChange, options, renderOption,
-}: { label: string; value: string; onChange: (v: string) => void; options: readonly string[]; renderOption?: (o: string) => string }) {
+  label, value, onChange, options,
+}: { label: string; value: string; onChange: (v: string) => void; options: readonly string[] }) {
   return (
     <label className="flex flex-col gap-1.5 text-[12.5px] text-muted">
       {label}
@@ -299,7 +406,7 @@ function LabeledSelect({
         className="rounded-[10px] border border-line bg-bg px-3.5 py-2.5 text-sm text-ink outline-none"
       >
         {options.map((o) => (
-          <option key={o} value={o}>{renderOption ? renderOption(o) : o}</option>
+          <option key={o} value={o}>{o}</option>
         ))}
       </select>
     </label>

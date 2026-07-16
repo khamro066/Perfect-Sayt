@@ -6,7 +6,7 @@ import { PRODUCTS as SEED_PRODUCTS, STOCK as SEED_STOCK, CATEGORIES as SEED_CATE
 
 interface AdminDataContextValue {
   products: Product[];
-  addProduct: (p: Product, initialStockTotal?: number) => void;
+  addProduct: (p: Product, stockEntries?: { colorHex: string; size: number; quantity: number }[]) => void;
   deleteProduct: (id: string) => void;
 
   stock: StockEntry[];
@@ -58,15 +58,17 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
   }, [products, stock, categories, hydrated]);
 
-  const addProduct: AdminDataContextValue["addProduct"] = (p, initialStockTotal) => {
+  const addProduct: AdminDataContextValue["addProduct"] = (p, stockEntries) => {
     setProducts((prev) => [p, ...prev]);
-    const comboCount = p.colors.length * p.sizes.length;
-    const perCombo = initialStockTotal && comboCount > 0 ? Math.floor(initialStockTotal / comboCount) : 0;
+    // Exact per-color/size quantities as entered by the admin, falling back
+    // to zeroed rows (e.g. for pre-order products, which start with no stock).
+    const entries =
+      stockEntries && stockEntries.length > 0
+        ? stockEntries
+        : p.colors.flatMap((colorHex) => p.sizes.map((size) => ({ colorHex, size, quantity: 0 })));
     setStock((prev) => [
       ...prev,
-      ...p.colors.flatMap((colorHex) =>
-        p.sizes.map((size) => ({ productId: p.id, colorHex, size, quantity: perCombo }))
-      ),
+      ...entries.map((e) => ({ productId: p.id, colorHex: e.colorHex, size: e.size, quantity: Math.max(0, e.quantity) })),
     ]);
   };
 
