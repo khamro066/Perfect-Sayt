@@ -1,9 +1,8 @@
 "use client";
 
-import { PRODUCTS, STOCK } from "@/lib/mock-data";
-import { useOrders } from "@/lib/orders-context";
+import { useEffect, useState } from "react";
 import { formatSom } from "@/lib/format";
-import { OrderStatus } from "@/lib/types";
+import { Order, OrderStatus } from "@/lib/types";
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
   "Yangi": "var(--star)",
@@ -14,26 +13,31 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   "Bekor qilindi": "var(--danger)",
 };
 
-export default function AdminDashboardPage() {
-  const { orders } = useOrders();
+interface DashboardData {
+  totalProducts: number;
+  totalStock: number;
+  activePreorders: number;
+  monthlyRevenue: number;
+  recentOrders: Order[];
+}
 
-  const totalProducts = PRODUCTS.length;
-  const totalStock = STOCK.reduce((sum, s) => sum + s.quantity, 0);
-  const activePreorders = orders.filter(
-    (o) => o.isPreorder && o.status !== "Yetkazildi" && o.status !== "Bekor qilindi"
-  ).length;
-  const monthlyRevenue = orders
-    .filter((o) => o.status !== "Bekor qilindi")
-    .reduce((sum, o) => sum + o.total, 0);
+export default function AdminDashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/dashboard")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  if (!data) return <p className="text-sm text-muted">Yuklanmoqda…</p>;
 
   const cards = [
-    { label: "Jami mahsulotlar", value: String(totalProducts) },
-    { label: "Ombordagi juftlar", value: String(totalStock) },
-    { label: "Faol oldindan buyurtmalar", value: String(activePreorders) },
-    { label: "Oylik daromad", value: formatSom(monthlyRevenue) },
+    { label: "Jami mahsulotlar", value: String(data.totalProducts) },
+    { label: "Ombordagi juftlar", value: String(data.totalStock) },
+    { label: "Faol oldindan buyurtmalar", value: String(data.activePreorders) },
+    { label: "Oylik daromad", value: formatSom(data.monthlyRevenue) },
   ];
-
-  const recentOrders = [...orders].slice(0, 10);
 
   return (
     <div className="flex flex-col gap-6.5">
@@ -57,7 +61,7 @@ export default function AdminDashboardPage() {
               <span>Summa</span>
               <span>Holat</span>
             </div>
-            {recentOrders.map((o) => (
+            {data.recentOrders.map((o) => (
               <div key={o.orderNumber} className="grid grid-cols-[1.2fr_1.5fr_1fr_1fr_1fr] items-center gap-3 border-b border-line py-3 text-[13.5px] text-ink">
                 <span className="flex items-center gap-1.5 font-bold">
                   {o.orderNumber}

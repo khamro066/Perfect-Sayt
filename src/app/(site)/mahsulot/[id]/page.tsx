@@ -3,17 +3,18 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Star, Minus, Plus } from "lucide-react";
-import { PRODUCTS, getStock, getTotalStock } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
 import { formatSom, formatDateRangeUz } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { useFavorites } from "@/lib/favorites-context";
 import { useToast } from "@/lib/toast-context";
-import { useReviews } from "@/lib/reviews-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { SizeChartModal } from "@/components/product/SizeChartModal";
 import { ProductCard } from "@/components/product/ProductCard";
+import { Product, Review } from "@/lib/types";
 
 const RECENT_KEY = "perfect-shoes-recent";
 const PREORDER_MIN_QTY = 3;
@@ -21,12 +22,13 @@ const PREORDER_MIN_QTY = 3;
 export default function ProductPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const product = PRODUCTS.find((p) => p.id === params.id);
+  const { products, getStock, getTotalStock } = useProductsData();
+  const product = products.find((p) => p.id === params.id);
 
   const { addLine } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { showToast } = useToast();
-  const { reviews } = useReviews();
+  const [approvedReviews, setApprovedReviews] = useState<Review[]>([]);
 
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [colorIndex, setColorIndex] = useState(0);
@@ -49,8 +51,11 @@ export default function ProductPage() {
     setQty(1);
     setGalleryIndex(0);
     window.scrollTo(0, 0);
+    fetch(`/api/products/${product.id}/reviews`)
+      .then((res) => res.json())
+      .then(setApprovedReviews);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id]);
+  }, [params.id, product?.id]);
 
   if (!product) {
     return (
@@ -72,11 +77,11 @@ export default function ProductPage() {
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
   const favorited = isFavorite(product.id);
+  const images = product.images ?? [];
 
-  const approvedReviews = reviews.filter((r) => r.productId === product.id && r.status === "approved");
-  const recentProducts = recentIds.map((id) => PRODUCTS.find((p) => p.id === id)).filter(Boolean) as typeof PRODUCTS;
-  const recommended = PRODUCTS.filter((p) => p.id !== product.id && p.gender === product.gender).slice(0, 4);
-  const similar = PRODUCTS.filter((p) => p.id !== product.id && p.brand === product.brand).slice(0, 4);
+  const recentProducts = recentIds.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
+  const recommended = products.filter((p) => p.id !== product.id && p.gender === product.gender).slice(0, 4);
+  const similar = products.filter((p) => p.id !== product.id && p.brand === product.brand).slice(0, 4);
 
   function handleAddToCart(goToCheckout: boolean) {
     if (size === null) {
@@ -105,19 +110,29 @@ export default function ProductPage() {
 
       <div className="flex flex-wrap gap-10">
         <div className="min-w-0 flex-[1_1_420px]">
-          <PlaceholderImage
-            label={`${product.name} · ${colorName(selectedColor)} · sichqoncha bilan kattalashtiring`}
-            className="aspect-square w-full rounded-[20px] border border-line"
-          />
+          <div className="relative aspect-square w-full overflow-hidden rounded-[20px] border border-line">
+            {images[galleryIndex] ? (
+              <Image src={images[galleryIndex]} alt={product.name} fill sizes="500px" className="object-cover" />
+            ) : (
+              <PlaceholderImage
+                label={`${product.name} · ${colorName(selectedColor)} · sichqoncha bilan kattalashtiring`}
+                className="h-full w-full"
+              />
+            )}
+          </div>
           <div className="mt-3 grid grid-cols-4 gap-3">
             {[0, 1, 2, 3].map((i) => (
               <button
                 key={i}
                 onClick={() => setGalleryIndex(i)}
-                className="aspect-square overflow-hidden rounded-[12px]"
+                className="relative aspect-square overflow-hidden rounded-[12px]"
                 style={{ boxShadow: galleryIndex === i ? "0 0 0 2px var(--accent)" : "0 0 0 2px transparent" }}
               >
-                <PlaceholderImage label={`${i + 1}`} className="h-full w-full" />
+                {images[i] ? (
+                  <Image src={images[i]} alt="" fill sizes="120px" className="object-cover" />
+                ) : (
+                  <PlaceholderImage label={`${i + 1}`} className="h-full w-full" />
+                )}
               </button>
             ))}
           </div>
@@ -331,7 +346,7 @@ export default function ProductPage() {
   );
 }
 
-function ProductSection({ title, products }: { title: string; products: typeof PRODUCTS }) {
+function ProductSection({ title, products }: { title: string; products: Product[] }) {
   if (products.length === 0) return null;
   return (
     <section className="mt-10">

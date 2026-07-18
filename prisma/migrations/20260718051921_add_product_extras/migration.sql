@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "products" ADD COLUMN     "images" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "is_new" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "sold" INTEGER NOT NULL DEFAULT 0;

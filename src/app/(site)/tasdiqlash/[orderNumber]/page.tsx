@@ -1,17 +1,22 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { useOrders } from "@/lib/orders-context";
 import { formatDateRangeUz } from "@/lib/format";
+import { Order } from "@/lib/types";
 
 function ConfirmContent() {
   const params = useParams<{ orderNumber: string }>();
   const searchParams = useSearchParams();
-  const { getByNumber } = useOrders();
-  const order = getByNumber(params.orderNumber);
+  const [order, setOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/orders/${params.orderNumber}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setOrder);
+  }, [params.orderNumber]);
 
   const isPreorderConfirm = searchParams.get("kind") === "preorder";
   const flaggedPreorder = !isPreorderConfirm && order?.isPreorder;

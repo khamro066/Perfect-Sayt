@@ -6,3 +6,12 @@ export const SELLER_CONTACT = {
   phoneDisplay: "+998 95 670 80 08",
   phoneHref: "tel:+998956708008",
 } as const;
+
+export const PROVINCES = [
+  "Toshkent shahri", "Toshkent viloyati", "Samarqand", "Buxoro", "Andijon",
+  "Farg'ona", "Namangan", "Qashqadaryo", "Surxondaryo", "Xorazm",
+  "Navoiy", "Jizzax", "Sirdaryo", "Qoraqalpog'iston",
+] as const;
+
+export const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45] as const;
+

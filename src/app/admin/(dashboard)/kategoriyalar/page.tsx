@@ -1,40 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import { useAdminData } from "@/lib/admin-data-context";
+import { useEffect, useState } from "react";
 import { useToast } from "@/lib/toast-context";
 
+interface Category {
+  id: string;
+  name: string;
+  productCount: number;
+}
+
 export default function AdminCategoriesPage() {
-  const { categories, products, addCategory, renameCategory, deleteCategory } = useAdminData();
   const { showToast } = useToast();
+  const [categories, setCategories] = useState<Category[]>([]);
   const [newName, setNewName] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
-  function submitAdd() {
-    const result = addCategory(newName);
-    if (result === "empty") return showToast("Kategoriya nomini kiriting");
-    if (result === "duplicate") return showToast("Bunday kategoriya allaqachon mavjud");
+  function refetch() {
+    fetch("/api/admin/categories").then((res) => res.json()).then(setCategories);
+  }
+
+  useEffect(refetch, []);
+
+  async function submitAdd() {
+    const res = await fetch("/api/admin/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName }),
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error);
     setNewName("");
     showToast("Kategoriya qo'shildi");
+    refetch();
   }
 
-  function submitRename(oldName: string) {
-    const result = renameCategory(oldName, editValue);
-    if (result === "empty") return showToast("Kategoriya nomini kiriting");
-    if (result === "duplicate") return showToast("Bunday kategoriya allaqachon mavjud");
+  async function submitRename(id: string) {
+    const res = await fetch(`/api/admin/categories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editValue }),
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error);
     setEditing(null);
     showToast("Kategoriya yangilandi");
+    refetch();
   }
 
-  function confirmDelete(name: string) {
-    const result = deleteCategory(name);
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const res = await fetch(`/api/admin/categories/${deleteTarget.id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
     setDeleteTarget(null);
-    if (result === "in-use") {
-      showToast("Bu kategoriyada mahsulotlar mavjud — avval ularni boshqa kategoriyaga o'tkazing");
+    if (!res.ok) {
+      showToast(data.error ?? "Xatolik yuz berdi");
     } else {
       showToast("Kategoriya o'chirildi");
+      refetch();
     }
   }
 
@@ -59,10 +83,9 @@ export default function AdminCategoriesPage() {
         <h2 className="font-bold text-ink">Mavjud kategoriyalar</h2>
         <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5">
           {categories.map((c) => {
-            const count = products.filter((p) => p.category === c).length;
-            const isEditing = editing === c;
+            const isEditing = editing === c.id;
             return (
-              <div key={c} className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-bg p-4">
+              <div key={c.id} className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-bg p-4">
                 {isEditing ? (
                   <>
                     <input
@@ -71,7 +94,7 @@ export default function AdminCategoriesPage() {
                       className="rounded-[10px] border border-accent bg-surface px-3 py-2 text-sm outline-none"
                     />
                     <div className="flex gap-2">
-                      <button onClick={() => submitRename(c)} className="flex-1 rounded-[8px] bg-accent py-2 text-xs font-bold text-accent-ink">
+                      <button onClick={() => submitRename(c.id)} className="flex-1 rounded-[8px] bg-accent py-2 text-xs font-bold text-accent-ink">
                         Saqlash
                       </button>
                       <button onClick={() => setEditing(null)} className="flex-1 rounded-[8px] border border-line py-2 text-xs font-semibold text-ink">
@@ -82,12 +105,12 @@ export default function AdminCategoriesPage() {
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-[14.5px] font-bold text-ink">{c}</span>
-                      <span className="text-xs text-muted">{count} mahsulot</span>
+                      <span className="text-[14.5px] font-bold text-ink">{c.name}</span>
+                      <span className="text-xs text-muted">{c.productCount} mahsulot</span>
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => { setEditing(c); setEditValue(c); }}
+                        onClick={() => { setEditing(c.id); setEditValue(c.name); }}
                         className="flex-1 rounded-[8px] border border-line py-2 text-xs font-semibold text-ink"
                       >
                         Tahrirlash
@@ -111,12 +134,12 @@ export default function AdminCategoriesPage() {
         <div className="fixed inset-0 z-[270] flex items-center justify-center bg-black/40 p-5" onClick={() => setDeleteTarget(null)}>
           <div className="w-full max-w-[380px] rounded-block bg-surface p-7" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-bold text-ink">Kategoriyani o&apos;chirish</h3>
-            <p className="mt-2 text-sm text-ink">«{deleteTarget}» kategoriyasini o&apos;chirmoqchimisiz?</p>
+            <p className="mt-2 text-sm text-ink">«{deleteTarget.name}» kategoriyasini o&apos;chirmoqchimisiz?</p>
             <div className="mt-4 flex gap-2.5">
               <button onClick={() => setDeleteTarget(null)} className="flex-1 rounded-[12px] border border-line py-3 text-sm font-semibold text-ink">
                 Bekor qilish
               </button>
-              <button onClick={() => confirmDelete(deleteTarget)} className="flex-1 rounded-[12px] bg-danger py-3 text-sm font-bold text-white">
+              <button onClick={confirmDelete} className="flex-1 rounded-[12px] bg-danger py-3 text-sm font-bold text-white">
                 O&apos;chirish
               </button>
             </div>

@@ -1,27 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
-import { useOrders } from "@/lib/orders-context";
+import { useEffect, useState } from "react";
 import { formatSom } from "@/lib/format";
+import { Customer } from "@/lib/types";
 
 export default function AdminCustomersPage() {
-  const { orders } = useOrders();
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
-  const customers = useMemo(() => {
-    const byPhone = new Map<string, { name: string; phone: string; address?: string; total: number; count: number }>();
-    for (const o of orders) {
-      const existing = byPhone.get(o.phone);
-      if (existing) {
-        existing.total += o.total;
-        existing.count += 1;
-        existing.name = o.customerName;
-        existing.address = o.address;
-      } else {
-        byPhone.set(o.phone, { name: o.customerName, phone: o.phone, address: o.address, total: o.total, count: 1 });
-      }
-    }
-    return Array.from(byPhone.values());
-  }, [orders]);
+  useEffect(() => {
+    fetch("/api/admin/customers").then((res) => res.json()).then(setCustomers);
+  }, []);
 
   return (
     <div className="rounded-card border border-line bg-surface p-5.5">
@@ -39,11 +27,11 @@ export default function AdminCustomersPage() {
           ) : (
             customers.map((c) => (
               <div key={c.phone} className="grid grid-cols-[1.2fr_1.2fr_1.6fr_0.9fr_0.9fr] items-center gap-3 border-b border-line py-3 text-[13px] text-ink">
-                <span className="font-bold">{c.name}</span>
+                <span className="font-bold">{c.ism} {c.familiya}</span>
                 <span className="text-muted">{c.phone}</span>
-                <span className="truncate text-muted">{c.address ?? "—"}</span>
-                <span className="font-bold">{formatSom(c.total)}</span>
-                <span className="font-bold">{c.count}</span>
+                <span className="truncate text-muted">{c.manzil ?? "—"}</span>
+                <span className="font-bold">{formatSom(c.totalSpent)}</span>
+                <span className="font-bold">{c.orderCount}</span>
               </div>
             ))
           )}

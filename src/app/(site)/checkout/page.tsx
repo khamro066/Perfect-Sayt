@@ -7,27 +7,19 @@ import clsx from "clsx";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { useCustomer } from "@/lib/customer-context";
-import { useOrders } from "@/lib/orders-context";
-import { useNotifications } from "@/lib/notifications-context";
-import { PRODUCTS, PROVINCES, getStock } from "@/lib/mock-data";
-import { SELLER_CONTACT } from "@/lib/constants";
+import { useProductsData } from "@/lib/products-data";
+import { SELLER_CONTACT, PROVINCES } from "@/lib/constants";
+import { DELIVERY_METHODS, deliveryFeeFor } from "@/lib/delivery";
 import { formatSom } from "@/lib/format";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
-import { Order } from "@/lib/types";
-
-const DELIVERY_METHODS = [
-  { id: "kuryer", label: "Kuryer orqali (Toshkent bo'ylab)", eta: "1-2 kun", fee: 25000 },
-  { id: "express", label: "BTS Express (viloyatlarga)", eta: "2-4 kun", fee: 40000 },
-  { id: "pickup", label: "Do'kondan olib ketish", eta: "Bugun tayyor", fee: 0 },
-];
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { lines, subtotal, clear } = useCart();
+  const { products } = useProductsData();
   const { showToast } = useToast();
   const { customer, setCustomer } = useCustomer();
-  const { addOrder } = useOrders();
-  const { push: pushNotification } = useNotifications();
+  const [submitting, setSubmitting] = useState(false);
 
   const [ism, setIsm] = useState(customer?.ism ?? "");
   const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
@@ -38,51 +30,35 @@ export default function CheckoutPage() {
   const [delivery, setDelivery] = useState("kuryer");
   const [payment, setPayment] = useState<"cash" | "card">("cash");
 
-  const deliveryFee = DELIVERY_METHODS.find((d) => d.id === delivery)?.fee ?? 0;
+  const deliveryFee = deliveryFeeFor(delivery);
   const total = subtotal + deliveryFee;
 
-  function placeOrder() {
+  async function placeOrder() {
     if (!ism.trim()) return showToast("Ismingizni kiriting");
     if (!phone.trim()) return showToast("Telefon raqamini kiriting");
     if (!manzil.trim()) return showToast("Yetkazib berish manzilini kiriting");
     if (!payment) return showToast("To'lov usulini tanlang");
 
-    const isPreorder = lines.some((l) => l.qty > getStock(l.productId, l.colorHex, l.size));
-    const orderNumber = `PS-${Math.floor(100000 + Math.random() * 900000)}`;
-    const address = tuman ? `${tuman}, ${manzil}` : manzil;
-
-    const order: Order = {
-      id: orderNumber,
-      orderNumber,
-      customerName: `${ism} ${familiya}`.trim(),
-      phone,
-      address: `${viloyat}, ${address}`,
-      payment: payment === "cash" ? "Naqd pul" : "Karta orqali",
-      total,
-      status: "Yangi",
-      isPreorder,
-      lines: lines.map((l) => {
-        const product = PRODUCTS.find((p) => p.id === l.productId)!;
-        return {
-          productId: l.productId,
-          productName: product.name,
-          colorHex: l.colorHex,
-          size: l.size,
-          qty: l.qty,
-          unitPrice: product.price,
-        };
+    setSubmitting(true);
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ism, familiya, phone, viloyat, tuman, manzil,
+        deliveryMethod: delivery, payment,
+        lines: lines.map((l) => ({ productId: l.productId, colorHex: l.colorHex, size: l.size, qty: l.qty })),
       }),
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-
-    addOrder(order);
-    pushNotification({
-      customerName: order.customerName,
-      productSummary: order.lines.map((l) => l.productName).join(", "),
-      amount: order.total,
-      kind: "order",
     });
-    setCustomer({ ism, familiya, phone, viloyat, manzil: address });
+    setSubmitting(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.error ?? "Xatolik yuz berdi, qayta urinib ko'ring");
+      return;
+    }
+
+    const { orderNumber, isPreorder } = await res.json();
+    setCustomer({ ism, familiya, phone, viloyat, manzil });
     if (isPreorder) {
       showToast("Omborda yetarli emas — bu buyurtma OLDINDAN BUYURTMA sifatida qabul qilindi");
     }
@@ -195,7 +171,7 @@ export default function CheckoutPage() {
           <h2 className="mb-4 font-bold text-ink">Buyurtma</h2>
           <div className="flex max-h-[230px] flex-col gap-3 overflow-y-auto">
             {lines.map((line) => {
-              const product = PRODUCTS.find((p) => p.id === line.productId);
+              const product = products.find((p) => p.id === line.productId);
               if (!product) return null;
               return (
                 <div key={`${line.productId}-${line.colorHex}-${line.size}`} className="flex items-center gap-3">
@@ -223,8 +199,12 @@ export default function CheckoutPage() {
             <span>Jami</span>
             <span>{formatSom(total)}</span>
           </div>
-          <button onClick={placeOrder} className="w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink">
-            Buyurtmani tasdiqlash
+          <button
+            onClick={placeOrder}
+            disabled={submitting}
+            className="w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-60"
+          >
+            {submitting ? "Yuborilmoqda…" : "Buyurtmani tasdiqlash"}
           </button>
         </aside>
       </div>

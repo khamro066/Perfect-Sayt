@@ -1,18 +1,19 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
-import { PRODUCTS, CATEGORIES, BRANDS, MATERIALS } from "@/lib/mock-data";
-import { getTotalStock } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
 import { formatSom } from "@/lib/format";
 
 const GENDERS = ["Erkaklar", "Ayollar", "Bolalar", "Uniseks"];
 const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
 const COLORS = ["#1b1a16", "#f4f1ea", "#8a8880", "#6b4a2f", "#2c4a7a", "#0a5c3a", "#a83232", "#d8c7a8"];
 const RATINGS = [4.5, 4.0, 3.5];
+const BRANDS = ["Qadam", "Zamin", "Uzstep", "Terra", "Volna", "Silk Road", "Atlas"];
+const MATERIALS = ["Charm", "Zamsh", "Mesh", "Tekstil", "Rezina"];
 
 const SORT_OPTIONS = [
   { value: "new", label: "Eng yangi" },
@@ -29,6 +30,14 @@ function toggle<T>(list: T[], value: T): T[] {
 
 function CatalogContent() {
   const searchParams = useSearchParams();
+  const { products, getTotalStock } = useProductsData();
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then(setAllCategories);
+  }, []);
 
   const [sizes, setSizes] = useState<number[]>([]);
   const [genders, setGenders] = useState<string[]>([]);
@@ -65,7 +74,7 @@ function CatalogContent() {
   }
 
   const results = useMemo(() => {
-    let list = PRODUCTS.filter((p) => {
+    let list = products.filter((p) => {
       if (sizes.length && !sizes.some((s) => p.sizes.includes(s))) return false;
       if (genders.length && !genders.includes(p.gender)) return false;
       if (categories.length && !categories.includes(p.category)) return false;
@@ -102,7 +111,7 @@ function CatalogContent() {
     });
 
     return list;
-  }, [sizes, genders, categories, brands, colors, materials, priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular, sort]);
+  }, [products, sizes, genders, categories, brands, colors, materials, priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular, sort, getTotalStock]);
 
   return (
     <div className="mx-auto max-w-[1280px] px-6 py-7 pb-10">
@@ -152,7 +161,7 @@ function CatalogContent() {
                 brands, setBrands, colors, setColors, materials, setMaterials,
                 priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
                 onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
-                clearFilters,
+                clearFilters, allCategories,
               }}
             />
           </div>
@@ -167,7 +176,7 @@ function CatalogContent() {
               brands, setBrands, colors, setColors, materials, setMaterials,
               priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
               onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
-              clearFilters,
+              clearFilters, allCategories,
             }}
           />
         </aside>
@@ -206,6 +215,7 @@ interface FilterProps {
   onlyNew: boolean; setOnlyNew: (v: boolean) => void;
   popular: boolean; setPopular: (v: boolean) => void;
   clearFilters: () => void;
+  allCategories: string[];
 }
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
@@ -261,7 +271,7 @@ function FilterSidebar(p: FilterProps) {
 
       <FilterSection label="Kategoriya">
         <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map((c) => (
+          {p.allCategories.map((c) => (
             <Pill key={c} active={p.categories.includes(c)} onClick={() => p.setCategories(toggle(p.categories, c))}>
               {c}
             </Pill>

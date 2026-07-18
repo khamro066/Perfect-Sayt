@@ -1,7 +1,7 @@
 "use client";
 
-import { useReviews } from "@/lib/reviews-context";
-import { useAdminData } from "@/lib/admin-data-context";
+import { useEffect, useState } from "react";
+import { Review } from "@/lib/types";
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: "Kutilmoqda", color: "var(--star)" },
@@ -10,8 +10,31 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 export default function AdminReviewsPage() {
-  const { reviews, setStatus, deleteReview } = useReviews();
-  const { products } = useAdminData();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/admin/reviews").then((res) => res.json()).then(setReviews);
+    fetch("/api/admin/products")
+      .then((res) => res.json())
+      .then((products: { id: string; name: string }[]) => {
+        setProductNames(Object.fromEntries(products.map((p) => [p.id, p.name])));
+      });
+  }, []);
+
+  async function setStatus(id: string, status: "approved" | "rejected") {
+    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    await fetch(`/api/admin/reviews/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async function deleteReview(id: string) {
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+    await fetch(`/api/admin/reviews/${id}`, { method: "DELETE" });
+  }
 
   return (
     <div className="rounded-card border border-line bg-surface p-5.5">
@@ -25,13 +48,12 @@ export default function AdminReviewsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {reviews.map((r) => {
-            const product = products.find((p) => p.id === r.productId);
             const st = STATUS_LABEL[r.status];
             return (
               <div key={r.id} className="flex flex-col gap-2 rounded-[14px] border border-line p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-bold text-ink">{product?.name ?? r.productId}</p>
+                    <p className="text-sm font-bold text-ink">{productNames[r.productId] ?? r.productId}</p>
                     <p className="text-[12.5px] text-muted">{r.customerName} · {r.createdAt}</p>
                   </div>
                   <span className="rounded-pill bg-surface-2 px-2.5 py-1 text-xs font-bold" style={{ color: st.color }}>

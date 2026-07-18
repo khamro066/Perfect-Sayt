@@ -3,10 +3,14 @@ import Image from "next/image";
 import { ShieldCheck, PackageCheck, Sparkles } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
-import { PRODUCTS, CATEGORIES } from "@/lib/mock-data";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
+import { prisma } from "@/lib/prisma";
+import { serializeProduct } from "@/lib/serializers";
+import { Product } from "@/lib/types";
 
-const HOME_CATEGORIES = CATEGORIES.filter((c) => c !== "Krossovka");
+// Product/category data changes constantly (admin adds products, stock
+// changes) — render this per-request rather than freezing it at build time.
+export const dynamic = "force-dynamic";
 
 const TRUST_ITEMS = [
   { icon: ShieldCheck, title: "Sifat kafolati", desc: "Barcha mahsulotlar yuqori sifatli materiallardan" },
@@ -20,7 +24,7 @@ const REVIEWS = [
   { name: "Malika Yusupova", city: "Farg'ona", rating: 4, text: "Sayt qulay, qidiruv tez ishlaydi. Chegirmalar ajoyib. Faqat rangi rasmga nisbatan biroz och." },
 ];
 
-function ProductRow({ title, href, products }: { title: string; href: string; products: typeof PRODUCTS }) {
+function ProductRow({ title, href, products }: { title: string; href: string; products: Product[] }) {
   if (products.length === 0) return null;
   return (
     <section className="mx-auto max-w-[1280px] px-6 py-8">
@@ -39,10 +43,21 @@ function ProductRow({ title, href, products }: { title: string; href: string; pr
   );
 }
 
-export default function HomePage() {
-  const newArrivals = PRODUCTS.filter((p) => p.isNew).slice(0, 4);
-  const bestSellers = [...PRODUCTS].sort((a, b) => b.sold - a.sold).slice(0, 4);
-  const discounted = PRODUCTS.filter((p) => p.oldPrice).slice(0, 4);
+export default async function HomePage() {
+  const [dbProducts, dbCategories] = await Promise.all([
+    prisma.product.findMany({
+      where: { deletedAt: null },
+      include: { category: true, colors: true, sizes: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+  ]);
+
+  const products = dbProducts.map(serializeProduct);
+  const homeCategories = dbCategories.map((c) => c.name).filter((c) => c !== "Krossovka");
+  const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
+  const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 4);
+  const discounted = products.filter((p) => p.oldPrice).slice(0, 4);
 
   return (
     <>
@@ -100,7 +115,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
-          {HOME_CATEGORIES.map((cat) => (
+          {homeCategories.map((cat) => (
             <Link key={cat} href={`/katalog?category=${cat}`} className="flex flex-col items-center gap-2.5">
               <PlaceholderImage label={cat} className="aspect-square w-full rounded-card" />
               <span className="text-sm font-semibold text-ink">{cat}</span>

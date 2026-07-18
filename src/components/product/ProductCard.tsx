@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Heart, Star } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatSom } from "@/lib/format";
-import { getTotalStock } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
 import { useFavorites } from "@/lib/favorites-context";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
@@ -16,6 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addLine } = useCart();
   const { showToast } = useToast();
+  const { getTotalStock } = useProductsData();
 
   const stock = getTotalStock(product.id);
   const soldOut = stock <= 0;
@@ -40,7 +42,11 @@ export function ProductCard({ product }: { product: Product }) {
       className="group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface transition-[box-shadow,transform] duration-200 hover:-translate-y-[3px] hover:shadow-[0_14px_34px_rgba(0,0,0,0.10)]"
     >
       <div className="relative aspect-square w-full bg-surface-2">
-        <PlaceholderImage label={`${product.name} · 800×800px`} className="h-full w-full" />
+        {product.images?.[0] ? (
+          <Image src={product.images[0]} alt={product.name} fill sizes="260px" className="object-cover" />
+        ) : (
+          <PlaceholderImage label={`${product.name} · 800×800px`} className="h-full w-full" />
+        )}
         <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col gap-1.5">
           {product.isNew && (
             <span className="rounded-pill bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-ink">

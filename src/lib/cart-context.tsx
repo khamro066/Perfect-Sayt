@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { PRODUCTS } from "./mock-data";
+import { useProductsData } from "./products-data";
 
 export interface CartLine {
   productId: string;
@@ -28,6 +28,7 @@ function sameLine(a: CartLine, b: Pick<CartLine, "productId" | "colorHex" | "siz
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { products } = useProductsData();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -78,7 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const count = lines.reduce((sum, l) => sum + l.qty, 0);
   const subtotal = lines.reduce((sum, l) => {
-    const product = PRODUCTS.find((p) => p.id === l.productId);
+    const product = products.find((p) => p.id === l.productId);
     return sum + (product?.price ?? 0) * l.qty;
   }, 0);
 

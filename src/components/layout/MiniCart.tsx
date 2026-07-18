@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { X, Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { PRODUCTS } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
 import { formatSom } from "@/lib/format";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function MiniCart({ onClose }: { onClose: () => void }) {
   const { lines, removeLine, setQty, subtotal } = useCart();
+  const { products } = useProductsData();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function startTimer() {
@@ -45,7 +46,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
           <>
             <div className="flex max-h-[340px] flex-col gap-3 overflow-y-auto p-4">
               {lines.map((line) => {
-                const product = PRODUCTS.find((p) => p.id === line.productId);
+                const product = products.find((p) => p.id === line.productId);
                 if (!product) return null;
                 return (
                   <div key={`${line.productId}-${line.colorHex}-${line.size}`} className="flex items-center gap-3">

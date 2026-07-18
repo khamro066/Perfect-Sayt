@@ -1,12 +1,26 @@
 "use client";
 
-import { useOrders } from "@/lib/orders-context";
-import { OrderStatus } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { Order, OrderStatus } from "@/lib/types";
 
 const STATUSES: OrderStatus[] = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda", "Yetkazildi", "Bekor qilindi"];
 
 export default function AdminPreordersPage() {
-  const { orders, setStatus } = useOrders();
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/orders").then((res) => res.json()).then(setOrders);
+  }, []);
+
+  async function setStatus(order: Order, status: OrderStatus) {
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status } : o)));
+    await fetch(`/api/admin/orders/${order.id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  }
+
   const preorders = orders.filter((o) => o.isPreorder);
 
   return (
@@ -37,7 +51,7 @@ export default function AdminPreordersPage() {
                   <span className="text-muted">14–21 kun</span>
                   <select
                     value={o.status}
-                    onChange={(e) => setStatus(o.orderNumber, e.target.value as OrderStatus)}
+                    onChange={(e) => setStatus(o, e.target.value as OrderStatus)}
                     className="rounded-[9px] border border-line bg-bg px-2.5 py-2 text-[12.5px] font-semibold outline-none"
                   >
                     {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}

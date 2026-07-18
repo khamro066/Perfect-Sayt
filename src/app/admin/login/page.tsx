@@ -2,23 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useAdminAuth } from "@/lib/admin-auth-context";
 import { useToast } from "@/lib/toast-context";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { login } = useAdminAuth();
   const { showToast } = useToast();
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (login(password)) {
-      router.push("/admin");
-    } else {
+    setSubmitting(true);
+    const result = await signIn("credentials", { password, redirect: false });
+    setSubmitting(false);
+    if (result?.error) {
       showToast("Parol noto'g'ri");
+    } else {
+      router.push("/admin");
+      router.refresh();
     }
   }
 
@@ -51,8 +55,12 @@ export default function AdminLoginPage() {
             className="rounded-btn border border-line bg-bg px-3.5 py-3 text-sm text-ink outline-none"
           />
         </label>
-        <button type="submit" className="rounded-btn bg-accent py-3.5 text-[15px] font-semibold text-accent-ink">
-          Kirish
+        <button
+          type="submit"
+          disabled={submitting}
+          className="rounded-btn bg-accent py-3.5 text-[15px] font-semibold text-accent-ink disabled:opacity-60"
+        >
+          {submitting ? "Tekshirilmoqda…" : "Kirish"}
         </button>
         <p className="text-center text-xs text-muted">Namoyish uchun parol: admin2026</p>
         <Link href="/" className="text-center text-[13px] text-muted hover:text-ink">

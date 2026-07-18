@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { useOrders } from "@/lib/orders-context";
 import { colorName } from "@/lib/colors";
 import { formatSom } from "@/lib/format";
-import { OrderStatus } from "@/lib/types";
+import { Order, OrderStatus } from "@/lib/types";
 
 const STATUSES: OrderStatus[] = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda", "Yetkazildi", "Bekor qilindi"];
 
@@ -20,9 +19,22 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 };
 
 export default function AdminOrdersPage() {
-  const { orders, setStatus } = useOrders();
+  const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/orders").then((res) => res.json()).then(setOrders);
+  }, []);
+
+  async function setStatus(order: Order, status: OrderStatus) {
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status } : o)));
+    await fetch(`/api/admin/orders/${order.id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  }
 
   const filtered = orders.filter((o) => (filter === "all" ? true : o.status === filter));
 
@@ -72,7 +84,7 @@ export default function AdminOrdersPage() {
               <select
                 value={o.status}
                 onClick={(e) => e.stopPropagation()}
-                onChange={(e) => setStatus(o.orderNumber, e.target.value as OrderStatus)}
+                onChange={(e) => setStatus(o, e.target.value as OrderStatus)}
                 className="rounded-[9px] border border-line bg-bg px-2.5 py-2 text-[12.5px] font-semibold outline-none"
                 style={{ color: STATUS_COLOR[o.status] }}
               >

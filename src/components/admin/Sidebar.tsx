@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import clsx from "clsx";
 import { X } from "lucide-react";
-import { useAdminAuth } from "@/lib/admin-auth-context";
+import { signOut } from "next-auth/react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Boshqaruv paneli" },
@@ -22,8 +22,6 @@ const NAV_ITEMS = [
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { logout } = useAdminAuth();
 
   const content = (
     <>
@@ -51,10 +49,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         );
       })}
       <button
-        onClick={() => {
-          logout();
-          router.push("/");
-        }}
+        onClick={() => signOut({ callbackUrl: "/" })}
         className="mt-auto rounded-[10px] border border-line px-3.5 py-2.5 text-left text-sm font-semibold text-ink"
       >
         ← Do&apos;konga qaytish

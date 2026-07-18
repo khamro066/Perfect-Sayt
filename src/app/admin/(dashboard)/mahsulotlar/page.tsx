@@ -1,23 +1,25 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import clsx from "clsx";
-import { useAdminData } from "@/lib/admin-data-context";
 import { useToast } from "@/lib/toast-context";
-import { useOrders } from "@/lib/orders-context";
 import { ALL_COLORS, colorName } from "@/lib/colors";
-import { SIZES } from "@/lib/mock-data";
+import { SIZES } from "@/lib/constants";
 import { formatSom } from "@/lib/format";
 import { Product } from "@/lib/types";
 
 interface UploadedImage {
   id: string;
   url: string;
+  file: File;
   primary: boolean;
 }
 
-const ACTIVE_STATUSES = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda"];
+interface AdminProduct extends Product {
+  totalStock: number;
+  activeOrderCount: number;
+}
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -30,14 +32,15 @@ function stockStatus(qty: number) {
 }
 
 export default function AdminProductsPage() {
-  const { products, categories, addProduct, deleteProduct, totalStockFor } = useAdminData();
-  const { orders } = useOrders();
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
-  const [category, setCategory] = useState(categories[0] ?? "");
+  const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
@@ -45,7 +48,22 @@ export default function AdminProductsPage() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [hasDiscount, setHasDiscount] = useState(false);
   const [discountPct, setDiscountPct] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminProduct | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  function refetch() {
+    fetch("/api/admin/products").then((res) => res.json()).then(setProducts);
+  }
+
+  useEffect(() => {
+    refetch();
+    fetch("/api/admin/categories")
+      .then((res) => res.json())
+      .then((cats: { name: string }[]) => {
+        setCategories(cats.map((c) => c.name));
+        setCategory((prev) => prev || cats[0]?.name || "");
+      });
+  }, []);
 
   function handleFiles(files: FileList | null) {
     if (!files) return;
@@ -66,13 +84,13 @@ export default function AdminProductsPage() {
           URL.revokeObjectURL(url);
           return;
         }
-        setImages((prev) => [...prev, { id: `${Date.now()}-${file.name}`, url, primary: prev.length === 0 }]);
+        setImages((prev) => [...prev, { id: `${Date.now()}-${file.name}`, url, file, primary: prev.length === 0 }]);
       };
       img.src = url;
     });
   }
 
-  function submit() {
+  async function submit() {
     if (!name.trim() || !price) {
       showToast("Nom va narxni kiriting");
       return;
@@ -85,49 +103,77 @@ export default function AdminProductsPage() {
       showToast("Kamida bitta o'lchamni tanlang");
       return;
     }
-    const pct = Math.min(90, Math.max(0, Number(discountPct) || 0));
-    const basePrice = Number(price);
-    const finalPrice = hasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
 
-    const stockEntries = selectedColors.flatMap((hex) =>
-      selectedSizes.map((size) => ({
-        colorHex: hex,
-        size,
-        quantity: Math.max(0, Math.floor(Number(quantities[`${hex}-${size}`]) || 0)),
-      }))
-    );
+    setSubmitting(true);
+    try {
+      const ordered = [...images].sort((a, b) => (a.primary === b.primary ? 0 : a.primary ? -1 : 1));
+      const imageUrls: string[] = [];
+      for (const img of ordered) {
+        const formData = new FormData();
+        formData.append("file", img.file);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error ?? "Rasm yuklanmadi");
+          setSubmitting(false);
+          return;
+        }
+        imageUrls.push(data.url);
+      }
 
-    addProduct(
-      {
-        id: `p-${Date.now()}`,
-        name: name.trim(),
-        brand: brand.trim() || "Perfect",
-        gender: "Erkaklar",
-        category,
-        material: "Charm",
-        price: finalPrice,
-        oldPrice: hasDiscount && pct > 0 ? basePrice : undefined,
-        rating: 0,
-        ratingCount: 0,
-        description: "",
-        colors: selectedColors,
-        sizes: [...selectedSizes].sort((a, b) => a - b),
-        sold: 0,
-        createdAt: new Date().toISOString().slice(0, 10),
-      },
-      stockEntries
-    );
+      const pct = Math.min(90, Math.max(0, Number(discountPct) || 0));
+      const basePrice = Number(price);
+      const finalPrice = hasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
 
-    setName(""); setBrand(""); setPrice(""); setImages([]);
-    setSelectedColors([]); setSelectedSizes([]); setQuantities({});
-    setHasDiscount(false); setDiscountPct("");
-    showToast("Mahsulot qo'shildi");
+      const stockEntries = selectedColors.flatMap((hex) =>
+        selectedSizes.map((size) => ({
+          colorHex: hex,
+          size,
+          quantity: Math.max(0, Math.floor(Number(quantities[`${hex}-${size}`]) || 0)),
+        }))
+      );
+
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          brand: brand.trim() || "Perfect",
+          gender: "Erkaklar",
+          category,
+          material: "Charm",
+          price: finalPrice,
+          oldPrice: hasDiscount && pct > 0 ? basePrice : undefined,
+          description: "",
+          images: imageUrls,
+          colors: selectedColors,
+          sizes: selectedSizes,
+          stockEntries,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error ?? "Xatolik yuz berdi");
+        return;
+      }
+
+      setName(""); setBrand(""); setPrice(""); setImages([]);
+      setSelectedColors([]); setSelectedSizes([]); setQuantities({});
+      setHasDiscount(false); setDiscountPct("");
+      showToast("Mahsulot qo'shildi");
+      refetch();
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  function activeOrderCount(productId: string) {
-    return orders.filter(
-      (o) => ACTIVE_STATUSES.includes(o.status) && o.lines.some((l) => l.productId === productId)
-    ).length;
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    await fetch(`/api/admin/products/${deleteTarget.id}`, { method: "DELETE" });
+    setDeleteTarget(null);
+    showToast("Mahsulot o'chirildi");
+    refetch();
   }
 
   return (
@@ -304,8 +350,12 @@ export default function AdminProductsPage() {
           )}
         </div>
 
-        <button onClick={submit} className="mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">
-          + Mahsulotni qo&apos;shish
+        <button
+          onClick={submit}
+          disabled={submitting}
+          className="mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink disabled:opacity-60"
+        >
+          {submitting ? "Yuklanmoqda…" : "+ Mahsulotni qo'shish"}
         </button>
       </div>
 
@@ -317,7 +367,7 @@ export default function AdminProductsPage() {
               <span>Nomi</span><span>Brend</span><span>Kategoriya</span><span>Narx</span><span>Ombor</span><span />
             </div>
             {products.map((p) => {
-              const stock = totalStockFor(p.id);
+              const stock = p.totalStock;
               const stockLabel = stock <= 0 ? "Tugagan" : stock <= 5 ? "Kam qoldi" : "Mavjud";
               const stockColor = stock <= 0 ? "var(--danger)" : stock <= 5 ? "var(--warning)" : "var(--success)";
               return (
@@ -350,23 +400,16 @@ export default function AdminProductsPage() {
             <p className="text-sm leading-relaxed text-ink">
               «{deleteTarget.name}» mahsulotini o&apos;chirishga ishonchingiz komilmi? Bu amalni orqaga qaytarib bo&apos;lmaydi.
             </p>
-            {activeOrderCount(deleteTarget.id) > 0 && (
+            {deleteTarget.activeOrderCount > 0 && (
               <div className="mt-3 rounded-[10px] border border-danger p-3.5 text-[13.5px] leading-relaxed text-danger" style={{ background: "rgba(200,60,50,0.08)" }}>
-                Bu mahsulot {activeOrderCount(deleteTarget.id)} ta faol buyurtmada mavjud. Baribir o&apos;chirilsinmi?
+                Bu mahsulot {deleteTarget.activeOrderCount} ta faol buyurtmada mavjud. Baribir o&apos;chirilsinmi?
               </div>
             )}
             <div className="mt-4 flex gap-2.5">
               <button onClick={() => setDeleteTarget(null)} className="flex-1 rounded-[12px] border border-line bg-surface py-3.5 text-sm font-semibold text-ink">
                 Bekor qilish
               </button>
-              <button
-                onClick={() => {
-                  deleteProduct(deleteTarget.id);
-                  setDeleteTarget(null);
-                  showToast("Mahsulot o'chirildi");
-                }}
-                className="flex-1 rounded-[12px] bg-danger py-3.5 text-sm font-bold text-white"
-              >
+              <button onClick={confirmDelete} className="flex-1 rounded-[12px] bg-danger py-3.5 text-sm font-bold text-white">
                 O&apos;chirish
               </button>
             </div>

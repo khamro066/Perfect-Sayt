@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { unlockNotificationAudio, playNotificationDing } from "./notification-sound";
 
 export interface AdminNotification {
@@ -16,51 +16,37 @@ export interface AdminNotification {
 interface NotificationsContextValue {
   notifications: AdminNotification[];
   unreadCount: number;
-  push: (n: Omit<AdminNotification, "id" | "time" | "read">) => void;
   markRead: (id: string) => void;
   soundOn: boolean;
   toggleSound: () => void;
 }
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
-const STORAGE_KEY = "perfect-shoes-notifications";
 const SOUND_KEY = "perfect-shoes-notif-sound";
+const POLL_INTERVAL_MS = 7000;
 
 export function NotificationsProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [soundOn, setSoundOn] = useState(true);
-  const [hydrated, setHydrated] = useState(false);
+  const knownIds = useRef<Set<string> | null>(null);
+  const soundOnRef = useRef(soundOn);
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          // Hydrating from localStorage after mount — unavailable during SSR.
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          setNotifications(parsed);
-        }
-      } catch {
-        // ignore corrupt notifications data
-      }
+    soundOnRef.current = soundOn;
+  }, [soundOn]);
+
+  useEffect(() => {
+    // Hydrating from localStorage after mount — unavailable during SSR.
+    const stored = localStorage.getItem(SOUND_KEY);
+    if (stored !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSoundOn(stored === "1");
     }
-    const storedSound = localStorage.getItem(SOUND_KEY);
-    if (storedSound !== null) {
-      setSoundOn(storedSound === "1");
-    }
-    setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-  }, [notifications, hydrated]);
-
-  useEffect(() => {
     // AudioContext starts "suspended" until a real user gesture — unlock it
-    // on the first interaction anywhere in the app, well before any
-    // notification is likely to arrive, rather than relying on the
-    // notification event itself (which isn't a user gesture).
+    // on the first interaction anywhere in the admin panel.
     const unlock = () => {
       unlockNotificationAudio();
       window.removeEventListener("pointerdown", unlock);
@@ -74,14 +60,39 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     };
   }, []);
 
-  const push: NotificationsContextValue["push"] = (n) => {
-    const time = new Date().toTimeString().slice(0, 5);
-    setNotifications((prev) => [{ ...n, id: `n-${Date.now()}`, time, read: false }, ...prev].slice(0, 30));
-    if (soundOn) playNotificationDing();
-  };
+  useEffect(() => {
+    let cancelled = false;
 
-  const markRead = (id: string) =>
+    async function poll() {
+      try {
+        const res = await fetch("/api/admin/notifications");
+        if (!res.ok) return;
+        const data: AdminNotification[] = await res.json();
+        if (cancelled) return;
+
+        if (knownIds.current) {
+          const newOnes = data.filter((n) => !knownIds.current!.has(n.id) && !n.read);
+          if (newOnes.length > 0 && soundOnRef.current) playNotificationDing();
+        }
+        knownIds.current = new Set(data.map((n) => n.id));
+        setNotifications(data);
+      } catch {
+        // network hiccup — next poll will retry
+      }
+    }
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const markRead = async (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await fetch(`/api/admin/notifications/${id}/read`, { method: "PATCH" });
+  };
 
   const toggleSound = () => {
     setSoundOn((prev) => {
@@ -94,9 +105,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <NotificationsContext.Provider
-      value={{ notifications, unreadCount, push, markRead, soundOn, toggleSound }}
-    >
+    <NotificationsContext.Provider value={{ notifications, unreadCount, markRead, soundOn, toggleSound }}>
       {children}
     </NotificationsContext.Provider>
   );

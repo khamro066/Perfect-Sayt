@@ -7,13 +7,10 @@ import clsx from "clsx";
 import { Minus, Plus } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
-import { PRODUCTS, getTotalStock } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
 import { formatSom, formatDateRangeUz } from "@/lib/format";
 import { useToast } from "@/lib/toast-context";
-import { useOrders } from "@/lib/orders-context";
 import { useCustomer } from "@/lib/customer-context";
-import { useNotifications } from "@/lib/notifications-context";
-import { Order } from "@/lib/types";
 
 function StepStrip() {
   const steps = [
@@ -42,12 +39,12 @@ function PreorderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { showToast } = useToast();
-  const { addOrder } = useOrders();
+  const { products, getTotalStock } = useProductsData();
   const { customer, setCustomer } = useCustomer();
-  const { push: pushNotification } = useNotifications();
+  const [submitting, setSubmitting] = useState(false);
 
   const productId = searchParams.get("product");
-  const product = productId ? PRODUCTS.find((p) => p.id === productId) : undefined;
+  const product = productId ? products.find((p) => p.id === productId) : undefined;
 
   const [colorHex, setColorHex] = useState(searchParams.get("color") ?? product?.colors[0] ?? "");
   const [size, setSize] = useState<number | null>(
@@ -60,37 +57,29 @@ function PreorderContent() {
   const [manzil, setManzil] = useState("");
   const [payType, setPayType] = useState<"full" | "deposit">("deposit");
 
-  const preorderCandidates = PRODUCTS.filter((p) => getTotalStock(p.id) <= 0);
+  const preorderCandidates = products.filter((p) => getTotalStock(p.id) <= 0);
 
-  function submit() {
+  async function submit() {
     if (!product) return;
     if (!ism.trim() || !phone.trim() || size === null) {
       showToast("Ism, telefon va o'lchamni to'ldiring");
       return;
     }
-    // eslint-disable-next-line react-hooks/purity -- only ever invoked from the onClick handler below, never during render
-    const orderNumber = `PRE-${Math.floor(10000 + Math.random() * 90000)}`;
-    const total = product.price * qty;
-    const order: Order = {
-      id: orderNumber,
-      orderNumber,
-      customerName: `${ism} ${familiya}`.trim(),
-      phone,
-      address: manzil,
-      payment: payType === "full" ? "To'liq to'lov" : "Oldindan to'lov (30%)",
-      total,
-      status: "Yangi",
-      isPreorder: true,
-      lines: [{ productId: product.id, productName: product.name, colorHex, size, qty, unitPrice: product.price }],
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-    addOrder(order);
-    pushNotification({
-      customerName: order.customerName,
-      productSummary: product.name,
-      amount: order.total,
-      kind: "preorder",
+    setSubmitting(true);
+    const res = await fetch("/api/preorders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId: product.id, colorHex, size, qty, ism, familiya, phone, manzil, payType }),
     });
+    setSubmitting(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.error ?? "Xatolik yuz berdi, qayta urinib ko'ring");
+      return;
+    }
+
+    const { orderNumber } = await res.json();
     setCustomer({ ism, familiya, phone, manzil });
     router.push(`/tasdiqlash/${orderNumber}?kind=preorder`);
   }
@@ -227,8 +216,12 @@ function PreorderContent() {
                 bold
               />
             </div>
-            <button onClick={submit} className="mt-4 w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink">
-              Oldindan buyurtmani tasdiqlash
+            <button
+              onClick={submit}
+              disabled={submitting}
+              className="mt-4 w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-60"
+            >
+              {submitting ? "Yuborilmoqda…" : "Oldindan buyurtmani tasdiqlash"}
             </button>
             <p className="mt-3 text-xs text-muted">Tasdiqlangach SMS va Telegram orqali xabar yuboriladi.</p>
           </aside>

@@ -2,7 +2,7 @@ export interface Product {
   id: string;
   name: string;
   brand: string;
-  gender: "Erkaklar" | "Ayollar" | "Bolalar" | "Uniseks";
+  gender: string;
   category: string;
   material: string;
   price: number;
@@ -15,6 +15,7 @@ export interface Product {
   sizes: number[];
   isNew?: boolean;
   sold: number;
+  images?: string[];
   createdAt: string;
 }
 
@@ -63,6 +64,7 @@ export interface Order {
   status: OrderStatus;
   isPreorder: boolean;
   lines: OrderLine[];
+  reviewedProductIds?: string[];
   createdAt: string;
 }
 

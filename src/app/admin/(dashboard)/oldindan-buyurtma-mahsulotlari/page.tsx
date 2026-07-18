@@ -1,47 +1,73 @@
 "use client";
 
-import { useState } from "react";
-import { useAdminData } from "@/lib/admin-data-context";
+import { useEffect, useState } from "react";
 import { useToast } from "@/lib/toast-context";
 import { ALL_COLORS, colorName } from "@/lib/colors";
 import { formatSom } from "@/lib/format";
+import { Product } from "@/lib/types";
+
+interface AdminProduct extends Product {
+  totalStock: number;
+}
 
 export default function AdminPreorderProductsPage() {
-  const { products, categories, addProduct, totalStockFor } = useAdminData();
   const { showToast } = useToast();
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
 
   const [name, setName] = useState("");
-  const [category, setCategory] = useState(categories[0] ?? "");
+  const [category, setCategory] = useState("");
   const [colorHex, setColorHex] = useState(ALL_COLORS[0]);
   const [price, setPrice] = useState("");
   const [days, setDays] = useState("");
 
-  const outOfStock = products.filter((p) => totalStockFor(p.id) <= 0);
+  function refetch() {
+    fetch("/api/admin/products").then((res) => res.json()).then(setProducts);
+  }
 
-  function submit() {
+  useEffect(() => {
+    refetch();
+    fetch("/api/admin/categories")
+      .then((res) => res.json())
+      .then((cats: { name: string }[]) => {
+        setCategories(cats.map((c) => c.name));
+        setCategory((prev) => prev || cats[0]?.name || "");
+      });
+  }, []);
+
+  const outOfStock = products.filter((p) => p.totalStock <= 0);
+
+  async function submit() {
     if (!name.trim() || !price) {
       showToast("Nom va narxni kiriting");
       return;
     }
-    addProduct({
-      id: `pre-${Date.now()}`,
-      name: name.trim(),
-      brand: "Perfect",
-      gender: "Erkaklar",
-      category,
-      material: "Charm",
-      price: Number(price),
-      rating: 0,
-      ratingCount: 0,
-      description: "",
-      colors: [colorHex],
-      sizes: [40, 41, 42, 43, 44],
-      productionDays: Number(days) > 0 ? Number(days) : 21,
-      sold: 0,
-      createdAt: new Date().toISOString().slice(0, 10),
+    const res = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name.trim(),
+        brand: "Perfect",
+        gender: "Erkaklar",
+        category,
+        material: "Charm",
+        price: Number(price),
+        description: "",
+        productionDays: Number(days) > 0 ? Number(days) : 21,
+        colors: [colorHex],
+        sizes: [40, 41, 42, 43, 44],
+        // No stockEntries -> defaults to 0 for every combo, which is exactly
+        // right for a product that hasn't been produced yet.
+      }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.error ?? "Xatolik yuz berdi");
+      return;
+    }
     setName(""); setPrice(""); setDays("");
     showToast("Oldindan buyurtma mahsuloti qo'shildi");
+    refetch();
   }
 
   return (

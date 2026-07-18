@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
-import { PRODUCTS } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
 import { formatSom } from "@/lib/format";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
@@ -14,6 +14,7 @@ const COUPONS: Record<string, number> = { SALOM10: 0.1, PERFECT15: 0.15 };
 
 export default function CartPage() {
   const { lines, removeLine, setQty, subtotal } = useCart();
+  const { products } = useProductsData();
   const { showToast } = useToast();
   const [couponInput, setCouponInput] = useState("");
   const [couponRate, setCouponRate] = useState(0);
@@ -54,7 +55,7 @@ export default function CartPage() {
       <div className="flex flex-wrap gap-7">
         <div className="min-w-0 flex-[2_1_460px] flex flex-col gap-3">
           {lines.map((line) => {
-            const product = PRODUCTS.find((p) => p.id === line.productId);
+            const product = products.find((p) => p.id === line.productId);
             if (!product) return null;
             return (
               <div key={`${line.productId}-${line.colorHex}-${line.size}`} className="flex flex-wrap items-center gap-4 rounded-card border border-line p-4">

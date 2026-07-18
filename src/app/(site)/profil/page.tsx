@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { useCustomer } from "@/lib/customer-context";
-import { useOrders } from "@/lib/orders-context";
 import { useFavorites } from "@/lib/favorites-context";
-import { useReviews } from "@/lib/reviews-context";
-import { PRODUCTS } from "@/lib/mock-data";
+import { useProductsData } from "@/lib/products-data";
+import { useToast } from "@/lib/toast-context";
 import { formatSom } from "@/lib/format";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ReviewModal } from "@/components/product/ReviewModal";
-import { OrderStatus } from "@/lib/types";
+import { Order, OrderStatus } from "@/lib/types";
 
 const TABS = [
   { id: "orders", label: "Buyurtmalarim" },
@@ -31,9 +30,10 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 
 export default function ProfilePage() {
   const { customer, setCustomer } = useCustomer();
-  const { orders } = useOrders();
   const { favorites } = useFavorites();
-  const { isReviewed, addReview } = useReviews();
+  const { products } = useProductsData();
+  const { showToast } = useToast();
+  const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("orders");
   const [reviewTarget, setReviewTarget] = useState<{ orderNumber: string; productId: string; productName: string } | null>(null);
 
@@ -41,9 +41,16 @@ export default function ProfilePage() {
   const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
   const [phone, setPhone] = useState(customer?.phone ?? "");
 
-  const myOrders = customer ? orders.filter((o) => o.phone === customer.phone && !o.isPreorder) : [];
-  const myPreorders = customer ? orders.filter((o) => o.phone === customer.phone && o.isPreorder) : [];
-  const favProducts = PRODUCTS.filter((p) => favorites.includes(p.id));
+  useEffect(() => {
+    if (!customer) return;
+    fetch(`/api/orders?phone=${encodeURIComponent(customer.phone)}`)
+      .then((res) => res.json())
+      .then(setOrders);
+  }, [customer]);
+
+  const myOrders = orders.filter((o) => !o.isPreorder);
+  const myPreorders = orders.filter((o) => o.isPreorder);
+  const favProducts = products.filter((p) => favorites.includes(p.id));
 
   if (!customer) {
     return (
@@ -95,8 +102,8 @@ export default function ProfilePage() {
               {myOrders.length === 0 && <p className="text-sm text-muted">Hali buyurtmalar yo&apos;q.</p>}
               {myOrders.map((o) => {
                 const line = o.lines[0];
-                const product = PRODUCTS.find((p) => p.id === line?.productId);
-                const reviewed = product ? isReviewed(o.orderNumber, product.id) : false;
+                const product = products.find((p) => p.id === line?.productId);
+                const reviewed = product ? (o.reviewedProductIds ?? []).includes(product.id) : false;
                 return (
                   <div key={o.orderNumber} className="rounded-card border border-line p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -208,15 +215,31 @@ export default function ProfilePage() {
         <ReviewModal
           productName={reviewTarget.productName}
           onClose={() => setReviewTarget(null)}
-          onSubmit={(rating, text) =>
-            addReview({
-              productId: reviewTarget.productId,
-              orderNumber: reviewTarget.orderNumber,
-              customerName: `${customer.ism} ${customer.familiya ?? ""}`.trim(),
-              rating,
-              text,
-            })
-          }
+          onSubmit={async (rating, text) => {
+            const res = await fetch("/api/reviews", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                productId: reviewTarget.productId,
+                orderNumber: reviewTarget.orderNumber,
+                phone: customer.phone,
+                rating,
+                text,
+              }),
+            });
+            if (res.ok) {
+              setOrders((prev) =>
+                prev.map((o) =>
+                  o.orderNumber === reviewTarget.orderNumber
+                    ? { ...o, reviewedProductIds: [...(o.reviewedProductIds ?? []), reviewTarget.productId] }
+                    : o
+                )
+              );
+            } else {
+              const data = await res.json().catch(() => ({}));
+              showToast(data.error ?? "Sharhni yuborib bo'lmadi");
+            }
+          }}
         />
       )}
     </div>
