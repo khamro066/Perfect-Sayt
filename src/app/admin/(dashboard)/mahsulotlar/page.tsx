@@ -91,6 +91,10 @@ export default function AdminProductsPage() {
   }
 
   async function submit() {
+    if (!category) {
+      showToast("Kategoriyalar hali yuklanmoqda, biroz kuting");
+      return;
+    }
     if (!name.trim() || !price) {
       showToast("Nom va narxni kiriting");
       return;
@@ -352,7 +356,7 @@ export default function AdminProductsPage() {
 
         <button
           onClick={submit}
-          disabled={submitting}
+          disabled={submitting || !category}
           className="mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink disabled:opacity-60"
         >
           {submitting ? "Yuklanmoqda…" : "+ Mahsulotni qo'shish"}
