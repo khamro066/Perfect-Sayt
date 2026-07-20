@@ -54,7 +54,9 @@ export default async function HomePage() {
   ]);
 
   const products = dbProducts.map(serializeProduct);
-  const homeCategories = dbCategories.map((c) => c.name).filter((c) => c !== "Krossovka");
+  const homeCategories = dbCategories
+    .filter((c) => c.name !== "Krossovka")
+    .map((c) => ({ name: c.name, image: c.image }));
   const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
   const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 4);
   const discounted = products.filter((p) => p.oldPrice).slice(0, 4);
@@ -116,9 +118,15 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
           {homeCategories.map((cat) => (
-            <Link key={cat} href={`/katalog?category=${cat}`} className="flex flex-col items-center gap-2.5">
-              <PlaceholderImage label={cat} className="aspect-square w-full rounded-card" />
-              <span className="text-sm font-semibold text-ink">{cat}</span>
+            <Link key={cat.name} href={`/katalog?category=${cat.name}`} className="flex flex-col items-center gap-2.5">
+              {cat.image ? (
+                <div className="relative aspect-square w-full overflow-hidden rounded-card">
+                  <Image src={cat.image} alt={cat.name} fill sizes="150px" className="object-cover" />
+                </div>
+              ) : (
+                <PlaceholderImage label={cat.name} className="aspect-square w-full rounded-card" />
+              )}
+              <span className="text-sm font-semibold text-ink">{cat.name}</span>
             </Link>
           ))}
         </div>

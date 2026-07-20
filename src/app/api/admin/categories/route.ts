@@ -7,12 +7,12 @@ export async function GET() {
     orderBy: { name: "asc" },
   });
   return NextResponse.json(
-    categories.map((c) => ({ id: c.id, name: c.name, productCount: c._count.products }))
+    categories.map((c) => ({ id: c.id, name: c.name, image: c.image, productCount: c._count.products }))
   );
 }
 
 export async function POST(req: NextRequest) {
-  const { name } = (await req.json()) as { name?: string };
+  const { name, image } = (await req.json()) as { name?: string; image?: string | null };
   const trimmed = name?.trim();
   if (!trimmed) return NextResponse.json({ error: "Kategoriya nomini kiriting" }, { status: 400 });
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (existing) return NextResponse.json({ error: "Bunday kategoriya allaqachon mavjud" }, { status: 409 });
 
   const category = await prisma.category.create({
-    data: { name: trimmed, slug: trimmed.toLowerCase().replace(/\s+/g, "-") },
+    data: { name: trimmed, slug: trimmed.toLowerCase().replace(/\s+/g, "-"), image: image || null },
   });
-  return NextResponse.json({ id: category.id, name: category.name, productCount: 0 });
+  return NextResponse.json({ id: category.id, name: category.name, image: category.image, productCount: 0 });
 }

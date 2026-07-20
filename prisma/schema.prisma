@@ -43,6 +43,7 @@ model Category {
   id        String    @id @default(cuid())
   name      String    @unique
   slug      String    @unique
+  image     String?
   createdAt DateTime  @default(now()) @map("created_at")
   products  Product[]
 

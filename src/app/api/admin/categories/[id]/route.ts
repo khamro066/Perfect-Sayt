@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { name } = (await req.json()) as { name?: string };
+  const { name, image } = (await req.json()) as { name?: string; image?: string | null };
   const trimmed = name?.trim();
   if (!trimmed) return NextResponse.json({ error: "Kategoriya nomini kiriting" }, { status: 400 });
 
@@ -16,9 +16,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   // automatically — no need to touch the products table.
   const category = await prisma.category.update({
     where: { id },
-    data: { name: trimmed, slug: trimmed.toLowerCase().replace(/\s+/g, "-") },
+    data: {
+      name: trimmed,
+      slug: trimmed.toLowerCase().replace(/\s+/g, "-"),
+      ...(image !== undefined ? { image: image || null } : {}),
+    },
   });
-  return NextResponse.json({ id: category.id, name: category.name });
+  return NextResponse.json({ id: category.id, name: category.name, image: category.image });
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
