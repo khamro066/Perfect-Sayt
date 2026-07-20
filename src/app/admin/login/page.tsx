@@ -62,7 +62,6 @@ export default function AdminLoginPage() {
         >
           {submitting ? "Tekshirilmoqda…" : "Kirish"}
         </button>
-        <p className="text-center text-xs text-muted">Namoyish uchun parol: admin2026</p>
         <Link href="/" className="text-center text-[13px] text-muted hover:text-ink">
           ← Do&apos;konga qaytish
         </Link>
