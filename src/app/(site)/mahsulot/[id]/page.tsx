@@ -299,10 +299,6 @@ export default function ProductPage() {
               <p className="text-muted">1–4 ish kuni · butun O&apos;zbekiston</p>
             </div>
             <div>
-              <p className="font-semibold text-ink">Qaytarish</p>
-              <p className="text-muted">14 kun ichida bepul qaytarish</p>
-            </div>
-            <div>
               <p className="font-semibold text-ink">Material</p>
               <p className="text-muted">{product.material}</p>
             </div>

@@ -12,7 +12,6 @@ const SHOP_LINKS = [
 
 const HELP_LINKS = [
   { label: "Oldindan buyurtma", href: "/oldindan-buyurtma" },
-  { label: "Qaytarish siyosati", href: "/katalog" },
   { label: "Buyurtmani kuzatish", href: "/profil" },
   { label: "Bog'lanish", href: "/aloqa" },
 ];
