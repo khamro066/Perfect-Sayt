@@ -63,7 +63,11 @@ export default function CheckoutPage() {
       showToast("Omborda yetarli emas — bu buyurtma OLDINDAN BUYURTMA sifatida qabul qilindi");
     }
     clear();
-    router.push(`/tasdiqlash/${orderNumber}?kind=order`);
+    if (payment === "card") {
+      router.push(`/tolov/${orderNumber}`);
+    } else {
+      router.push(`/tasdiqlash/${orderNumber}?kind=order`);
+    }
   }
 
   if (lines.length === 0) {

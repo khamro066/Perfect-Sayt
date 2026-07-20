@@ -21,6 +21,7 @@ const TABS = [
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
   "Yangi": "var(--star)",
+  "To'lov tekshirilmoqda": "var(--star)",
   "Tasdiqlandi": "#2c6fb0",
   "Tayyorlanmoqda": "#2c6fb0",
   "Yo'lda": "#2c6fb0",

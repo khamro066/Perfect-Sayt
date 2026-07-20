@@ -38,6 +38,7 @@ export interface Review {
 
 export type OrderStatus =
   | "Yangi"
+  | "To'lov tekshirilmoqda"
   | "Tasdiqlandi"
   | "Tayyorlanmoqda"
   | "Yo'lda"

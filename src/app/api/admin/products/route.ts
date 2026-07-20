@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeProduct } from "@/lib/serializers";
 
-const ACTIVE_STATUSES = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yolda"] as const;
+const ACTIVE_STATUSES = ["Yangi", "TolovTekshirilmoqda", "Tasdiqlandi", "Tayyorlanmoqda", "Yolda"] as const;
 
 export async function GET() {
   const products = await prisma.product.findMany({

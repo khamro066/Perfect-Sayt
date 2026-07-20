@@ -20,6 +20,7 @@ function ConfirmContent() {
 
   const isPreorderConfirm = searchParams.get("kind") === "preorder";
   const flaggedPreorder = !isPreorderConfirm && order?.isPreorder;
+  const pendingPayment = !isPreorderConfirm && order?.status === "To'lov tekshirilmoqda";
 
   return (
     <div className="mx-auto max-w-[640px] px-6 py-14 pb-16">
@@ -37,10 +38,19 @@ function ConfirmContent() {
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-medium text-ink">Buyurtma tasdiqlandi</h1>
+            <h1 className="text-2xl font-medium text-ink">
+              {pendingPayment ? "Buyurtma qabul qilindi" : "Buyurtma tasdiqlandi"}
+            </h1>
             <p className="mt-2 text-sm text-muted">
-              Xaridingiz uchun rahmat! Buyurtmangiz qabul qilindi va tayyorlanmoqda.
+              {pendingPayment
+                ? "Xaridingiz uchun rahmat! To'lovingiz hozircha tasdiqlanmagan."
+                : "Xaridingiz uchun rahmat! Buyurtmangiz qabul qilindi va tayyorlanmoqda."}
             </p>
+            {pendingPayment && (
+              <div className="mt-4 rounded-[12px] border p-3.5 text-sm" style={{ background: "var(--accent-soft)", borderColor: "var(--accent)", color: "var(--ink)" }}>
+                💳 Sotuvchi Telegram&apos;da yuborgan chekingizni tekshirgach, buyurtma tasdiqlanadi.
+              </div>
+            )}
             {flaggedPreorder && (
               <div className="mt-4 rounded-[12px] border p-3.5 text-sm" style={{ background: "#f5eaff", borderColor: "#c9a8f0", color: "#6b3fa0" }}>
                 ⏳ Diqqat: so&apos;ralgan miqdor omborda yetarli emas — bu buyurtma OLDINDAN BUYURTMA sifatida qabul qilindi.
@@ -57,6 +67,8 @@ function ConfirmContent() {
               <Row label="Taxminiy yetkazish" value={formatDateRangeUz(14, 21)} />
               <Row label="Holat" value="Kutilmoqda" color="var(--star)" />
             </>
+          ) : pendingPayment ? (
+            <Row label="Holat" value="To'lov tekshirilmoqda" color="var(--star)" />
           ) : (
             <>
               <Row label="Taxminiy yetkazish" value={formatDateRangeUz(2, 4)} />

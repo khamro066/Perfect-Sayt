@@ -17,6 +17,7 @@ datasource db {
 
 enum OrderStatus {
   Yangi
+  TolovTekshirilmoqda @map("To'lov tekshirilmoqda")
   Tasdiqlandi
   Tayyorlanmoqda
   Yolda          @map("Yo'lda")
@@ -27,6 +28,14 @@ enum OrderStatus {
 enum OrderKind {
   order
   preorder
+}
+
+// Separate from OrderKind — notifications can also flag a card payment
+// awaiting manual verification, which isn't an order "kind" in itself.
+enum NotificationKind {
+  order
+  preorder
+  payment
 }
 
 enum ReviewStatus {
@@ -217,7 +226,7 @@ model Notification {
   phone          String
   productSummary String    @map("product_summary")
   amount         Decimal   @db.Decimal(12, 2)
-  kind           OrderKind
+  kind           NotificationKind
   read           Boolean   @default(false)
   createdAt      DateTime  @default(now()) @map("created_at")
 

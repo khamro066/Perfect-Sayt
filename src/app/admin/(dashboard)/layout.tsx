@@ -15,6 +15,7 @@ const TITLES: Record<string, string> = {
   "/admin/kategoriyalar": "Kategoriyalar",
   "/admin/ombor": "Ombor nazorati",
   "/admin/buyurtmalar": "Buyurtmalar",
+  "/admin/tolov-tekshirish": "To'lov tekshirish",
   "/admin/sharhlar": "Sharhlar",
   "/admin/oldindan-buyurtmalar": "Oldindan buyurtmalar",
   "/admin/oldindan-buyurtma-mahsulotlari": "Oldindan buyurtma mahsulotlari",

@@ -10,7 +10,7 @@ export interface AdminNotification {
   customerName: string;
   productSummary: string;
   amount: number;
-  kind: "order" | "preorder";
+  kind: "order" | "preorder" | "payment";
 }
 
 interface NotificationsContextValue {

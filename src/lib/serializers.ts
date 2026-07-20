@@ -53,7 +53,14 @@ export function serializeOrder(o: OrderWithRelations) {
     address: o.address ?? undefined,
     payment: o.payment ?? undefined,
     total: Number(o.total),
-    status: o.status === "Yolda" ? "Yo'lda" : o.status === "BekorQilindi" ? "Bekor qilindi" : o.status,
+    status:
+      o.status === "Yolda"
+        ? "Yo'lda"
+        : o.status === "BekorQilindi"
+        ? "Bekor qilindi"
+        : o.status === "TolovTekshirilmoqda"
+        ? "To'lov tekshirilmoqda"
+        : o.status,
     isPreorder: o.isPreorder,
     lines: o.lines.map((l) => ({
       productId: l.productId,
@@ -80,9 +87,12 @@ export function serializeReview(r: DbReview & { customer: DbCustomer }) {
   };
 }
 
-/** Maps the frontend's literal "Yo'lda" / "Bekor qilindi" strings to Prisma enum keys. */
-export function toOrderStatusEnum(status: string): "Yangi" | "Tasdiqlandi" | "Tayyorlanmoqda" | "Yolda" | "Yetkazildi" | "BekorQilindi" {
+/** Maps the frontend's literal "Yo'lda" / "Bekor qilindi" / "To'lov tekshirilmoqda" strings to Prisma enum keys. */
+export function toOrderStatusEnum(
+  status: string
+): "Yangi" | "TolovTekshirilmoqda" | "Tasdiqlandi" | "Tayyorlanmoqda" | "Yolda" | "Yetkazildi" | "BekorQilindi" {
   if (status === "Yo'lda") return "Yolda";
   if (status === "Bekor qilindi") return "BekorQilindi";
+  if (status === "To'lov tekshirilmoqda") return "TolovTekshirilmoqda";
   return status as "Yangi" | "Tasdiqlandi" | "Tayyorlanmoqda" | "Yetkazildi";
 }

@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/admin/kategoriyalar", label: "Kategoriyalar" },
   { href: "/admin/ombor", label: "Ombor nazorati" },
   { href: "/admin/buyurtmalar", label: "Buyurtmalar" },
+  { href: "/admin/tolov-tekshirish", label: "To'lov tekshirish" },
   { href: "/admin/sharhlar", label: "Sharhlar" },
   { href: "/admin/oldindan-buyurtmalar", label: "Oldindan buyurtmalar" },
   { href: "/admin/oldindan-buyurtma-mahsulotlari", label: "Oldindan buyurtma mahsulotlari" },

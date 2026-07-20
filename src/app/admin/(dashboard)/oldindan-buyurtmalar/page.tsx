@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Order, OrderStatus } from "@/lib/types";
 
-const STATUSES: OrderStatus[] = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda", "Yetkazildi", "Bekor qilindi"];
+const STATUSES: OrderStatus[] = ["Yangi", "To'lov tekshirilmoqda", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda", "Yetkazildi", "Bekor qilindi"];
 
 export default function AdminPreordersPage() {
   const [orders, setOrders] = useState<Order[]>([]);

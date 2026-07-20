@@ -45,7 +45,13 @@ export function NotificationBell() {
                   onClick={() => {
                     markRead(n.id);
                     setOpen(false);
-                    router.push(n.kind === "preorder" ? "/admin/oldindan-buyurtmalar" : "/admin/buyurtmalar");
+                    router.push(
+                      n.kind === "preorder"
+                        ? "/admin/oldindan-buyurtmalar"
+                        : n.kind === "payment"
+                        ? "/admin/tolov-tekshirish"
+                        : "/admin/buyurtmalar"
+                    );
                   }}
                   className="flex flex-col gap-0.5 border-b border-line p-3.5 text-left"
                   style={{ background: n.read ? "transparent" : "var(--accent-soft)" }}

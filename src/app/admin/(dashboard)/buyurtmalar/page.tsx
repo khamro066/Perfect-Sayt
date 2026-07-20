@@ -7,10 +7,11 @@ import { colorName } from "@/lib/colors";
 import { formatSom } from "@/lib/format";
 import { Order, OrderStatus } from "@/lib/types";
 
-const STATUSES: OrderStatus[] = ["Yangi", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda", "Yetkazildi", "Bekor qilindi"];
+const STATUSES: OrderStatus[] = ["Yangi", "To'lov tekshirilmoqda", "Tasdiqlandi", "Tayyorlanmoqda", "Yo'lda", "Yetkazildi", "Bekor qilindi"];
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
   "Yangi": "var(--star)",
+  "To'lov tekshirilmoqda": "var(--star)",
   "Tasdiqlandi": "#2c6fb0",
   "Tayyorlanmoqda": "#2c6fb0",
   "Yo'lda": "#2c6fb0",
