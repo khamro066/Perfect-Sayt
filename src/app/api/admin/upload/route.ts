@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
-import { supabaseAdmin, SUPABASE_BUCKET } from "@/lib/supabase";
+import { getSupabaseAdmin, SUPABASE_BUCKET } from "@/lib/supabase";
 
 const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp"]);
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
   const ext = metadata.format === "jpeg" ? "jpg" : metadata.format;
   const filename = `${randomUUID()}.${ext}`;
 
+  const supabaseAdmin = getSupabaseAdmin();
   const { error } = await supabaseAdmin.storage.from(SUPABASE_BUCKET).upload(filename, buffer, {
     contentType: `image/${metadata.format}`,
     upsert: false,
