@@ -51,9 +51,17 @@ export default function AdminPaymentVerificationPage() {
               const isOpen = expanded === o.orderNumber;
               return (
                 <div key={o.orderNumber} className="border-b border-line">
-                  <button
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setExpanded(isOpen ? null : o.orderNumber)}
-                    className="grid w-full grid-cols-[0.3fr_1.1fr_1.4fr_0.9fr_1fr_1.6fr] items-center gap-3 py-3 text-left text-[13.5px] text-ink"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setExpanded(isOpen ? null : o.orderNumber);
+                      }
+                    }}
+                    className="grid w-full cursor-pointer grid-cols-[0.3fr_1.1fr_1.4fr_0.9fr_1fr_1.6fr] items-center gap-3 py-3 text-left text-[13.5px] text-ink"
                   >
                     <span className="text-muted">{isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</span>
                     <span className="font-bold">{o.orderNumber}</span>
@@ -74,7 +82,7 @@ export default function AdminPaymentVerificationPage() {
                         Bekor qilish
                       </button>
                     </span>
-                  </button>
+                  </div>
                   {isOpen && (
                     <div className="bg-surface-2 py-4 pl-8.5 pr-2">
                       <div className="flex flex-wrap gap-5 pb-2.5 text-[13px] text-ink">
