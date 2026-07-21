@@ -6,16 +6,17 @@ not copied directly into the app.
 
 ## Stack
 
-- Next.js 14 (App Router) + TypeScript — frontend and API routes
+- Next.js 16 (App Router) + TypeScript — frontend and API routes
 - PostgreSQL (Neon) + Prisma — database and ORM
 - Tailwind CSS — styling, mapped to the design tokens in the spec
-- NextAuth.js — admin auth (Step 4)
-- Cloudflare R2 — product image storage (Step 4)
+- NextAuth.js — admin auth
+- Supabase Storage — product & category image storage
 
 ## Getting started
 
-1. Copy `.env.example` to `.env` and fill in `DATABASE_URL` with a real Postgres
-   connection string (e.g. from a free [Neon](https://neon.tech) project).
+1. Copy `.env.example` to `.env` and fill in the real values (Postgres connection
+   string, admin password hash, NextAuth secret, Supabase credentials — see the
+   comments in `.env.example` for where to get each one).
 2. Install dependencies:
    ```
    npm install
