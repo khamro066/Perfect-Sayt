@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import sharp from "sharp";
+import { supabaseAdmin, SUPABASE_BUCKET } from "@/lib/supabase";
 
 const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp"]);
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 const MIN_DIMENSION = 600;
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "products");
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -40,10 +37,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `${file.name}: rasm juda kichik (kamida 600×600px)` }, { status: 400 });
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
   const ext = metadata.format === "jpeg" ? "jpg" : metadata.format;
   const filename = `${randomUUID()}.${ext}`;
-  await writeFile(path.join(UPLOAD_DIR, filename), buffer);
 
-  return NextResponse.json({ url: `/uploads/products/${filename}` });
+  const { error } = await supabaseAdmin.storage.from(SUPABASE_BUCKET).upload(filename, buffer, {
+    contentType: `image/${metadata.format}`,
+    upsert: false,
+  });
+
+  if (error) {
+    return NextResponse.json({ error: `${file.name}: rasm yuklashda xatolik yuz berdi` }, { status: 500 });
+  }
+
+  const { data } = supabaseAdmin.storage.from(SUPABASE_BUCKET).getPublicUrl(filename);
+
+  return NextResponse.json({ url: data.publicUrl });
 }
