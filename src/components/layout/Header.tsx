@@ -70,14 +70,13 @@ export function Header() {
               <button
                 onClick={handleCartClick}
                 aria-label="Savatcha"
-                className="flex h-[42px] items-center gap-2 rounded-btn border border-deep-line px-3 text-sm font-medium text-deep-ink transition-colors hover:bg-white/10 sm:px-4"
+                className="relative flex h-[42px] w-[42px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
               >
-                <span className="hidden sm:inline">Savatcha</span>
-                <ShoppingBag size={18} className="sm:hidden" />
+                <ShoppingBag size={17} />
                 {count > 0 && (
                   <span
                     key={count}
-                    className="animate-pop-badge flex min-w-5 h-5 items-center justify-center rounded-pill bg-deep-ink px-1 text-[11px] font-bold text-deep"
+                    className="animate-pop-badge absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-pill bg-deep-ink px-1 text-[11px] font-bold text-deep"
                   >
                     {count}
                   </span>
