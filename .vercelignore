@@ -1,0 +1,5 @@
+# Never upload local secrets — Vercel's own dashboard-configured
+# Environment Variables are the source of truth for deployments.
+.env
+.env.local
+.env*.local
