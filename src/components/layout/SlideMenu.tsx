@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { X, Send, Phone } from "lucide-react";
-import { SELLER_CONTACT } from "@/lib/constants";
+import { X } from "lucide-react";
 
 const PRIMARY_LINKS = [
   { label: "Yangi mahsulotlar", href: "/katalog?sort=new" },
@@ -78,22 +77,6 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
               Bog&apos;lanish / Yordam
             </Link>
           </nav>
-          <div className="mt-2 flex flex-col gap-1.5 px-3.5">
-            <a
-              href={SELLER_CONTACT.telegramUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 text-[13px] text-muted transition-colors hover:text-ink"
-            >
-              <Send size={13} /> {SELLER_CONTACT.telegramUsername}
-            </a>
-            <a
-              href={SELLER_CONTACT.phoneHref}
-              className="flex items-center gap-2 text-[13px] text-muted transition-colors hover:text-ink"
-            >
-              <Phone size={13} /> {SELLER_CONTACT.phoneDisplay}
-            </a>
-          </div>
         </div>
       </div>
     </div>
