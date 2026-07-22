@@ -10,7 +10,7 @@ export function PlaceholderImage({
   return (
     <div
       className={clsx(
-        "flex items-center justify-center bg-surface-2 text-center text-xs text-muted p-3",
+        "flex items-center justify-center overflow-hidden bg-surface-2 text-center text-xs text-muted p-3",
         className
       )}
     >
