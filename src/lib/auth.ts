@@ -4,6 +4,15 @@ import bcrypt from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
+  // Without this, Auth.js rejects the request's Host header as untrusted
+  // in production (logged as "[auth][error] UntrustedHost") and the
+  // auth() check in proxy.ts fails open instead of closed — every /admin
+  // page and /api/admin/* route was served with NO auth check at all.
+  // Verified locally via `next start`: before this flag, GET /api/admin/products
+  // returned the full product list with zero cookies; after, it 401s.
+  // This app has no OAuth callback/email-link flows that host-spoofing
+  // could exploit, so trusting the host here is safe.
+  trustHost: true,
   pages: { signIn: "/admin/login" },
   providers: [
     Credentials({
