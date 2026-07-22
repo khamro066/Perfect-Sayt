@@ -2,8 +2,15 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  // "native" covers whatever platform runs `prisma generate` (Windows
+  // locally, Vercel's build container). "rhel-openssl-3.0.x" is added
+  // explicitly because Vercel's serverless function *runtime* doesn't
+  // necessarily match its *build* container — without this, no engine
+  // binary for the actual runtime gets generated at all, regardless of
+  // file-tracing config.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
