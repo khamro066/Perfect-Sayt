@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { SELLER_CONTACT } from "@/lib/constants";
 import { useToast } from "@/lib/toast-context";
@@ -9,6 +10,7 @@ import { useToast } from "@/lib/toast-context";
 export default function PaymentPage() {
   const params = useParams<{ orderNumber: string }>();
   const router = useRouter();
+  const t = useTranslations("payment");
   const { showToast } = useToast();
   const [step, setStep] = useState<"qr" | "telegram">("qr");
   const [submitting, setSubmitting] = useState(false);
@@ -20,7 +22,7 @@ export default function PaymentPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      showToast(data.error ?? "Xatolik yuz berdi, qayta urinib ko'ring");
+      showToast(data.error ?? t("toastError"));
       return;
     }
     setStep("telegram");
@@ -31,9 +33,12 @@ export default function PaymentPage() {
       <div className="rounded-block bg-surface p-[clamp(28px,5vw,48px)] text-center">
         {step === "qr" ? (
           <>
-            <h1 className="text-2xl font-medium text-ink">Karta orqali to&apos;lov</h1>
+            <h1 className="text-2xl font-medium text-ink">{t("title")}</h1>
             <p className="mt-2 text-sm text-muted">
-              Buyurtma raqami: <b className="text-ink">{params.orderNumber}</b>
+              {t.rich("orderNumber", {
+                number: params.orderNumber,
+                b: (chunks) => <b className="text-ink">{chunks}</b>,
+              })}
             </p>
 
             {/*
@@ -42,11 +47,11 @@ export default function PaymentPage() {
                 <Image src="/images/payment-qr.png" alt="To'lov QR kodi" width={300} height={300} className="mx-auto mt-6 rounded-card" />
             */}
             <div className="mx-auto mt-6 flex h-[300px] w-[300px] items-center justify-center rounded-card border border-line bg-surface-2 p-4 text-center text-xs text-muted">
-              <span>QR kod (haqiqiy rasm keyinroq qo&apos;shiladi)</span>
+              <span>{t("qrPlaceholder")}</span>
             </div>
 
             <p className="mx-auto mt-5 max-w-[380px] text-sm text-muted">
-              To&apos;lovni amalga oshirish uchun yuqoridagi QR kodni skanerlang.
+              {t("scanInstruction")}
             </p>
 
             <button
@@ -54,14 +59,14 @@ export default function PaymentPage() {
               disabled={submitting}
               className="mt-6 w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-60"
             >
-              {submitting ? "Tekshirilmoqda…" : "To'ladim"}
+              {submitting ? t("checking") : t("paidButton")}
             </button>
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-medium text-ink">Chekingizni yuboring</h1>
+            <h1 className="text-2xl font-medium text-ink">{t("receiptTitle")}</h1>
             <p className="mx-auto mt-2 max-w-[380px] text-sm text-muted">
-              Chekingizni shu Telegram orqali yuboring — sotuvchi tekshirgach, buyurtmangiz tasdiqlanadi.
+              {t("receiptDesc")}
             </p>
 
             <a
@@ -70,14 +75,14 @@ export default function PaymentPage() {
               rel="noreferrer"
               className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-pill bg-accent px-5 py-3 text-sm font-semibold text-accent-ink"
             >
-              <Send size={16} /> Sotuvchi bilan bog&apos;lanish
+              <Send size={16} /> {t("contactSeller")}
             </a>
 
             <button
               onClick={() => router.push(`/tasdiqlash/${params.orderNumber}?kind=order`)}
               className="mt-4 w-full rounded-btn border border-line py-3.5 text-sm font-semibold text-ink"
             >
-              Davom etish
+              {t("continueButton")}
             </button>
           </>
         )}

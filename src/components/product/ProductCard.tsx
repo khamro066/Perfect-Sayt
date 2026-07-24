@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Heart, Star } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatSom } from "@/lib/format";
@@ -14,6 +15,7 @@ import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
+  const t = useTranslations("productCard");
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addLine } = useCart();
   const { showToast } = useToast();
@@ -33,7 +35,7 @@ export function ProductCard({ product }: { product: Product }) {
       return;
     }
     addLine({ productId: product.id, colorHex: product.colors[0], size: product.sizes[0], qty: 1 });
-    showToast("Savatga qo'shildi");
+    showToast(t("toastAddedToCart"));
   }
 
   return (
@@ -50,7 +52,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col gap-1.5">
           {product.isNew && (
             <span className="rounded-pill bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-ink">
-              Yangi
+              {t("newBadge")}
             </span>
           )}
           {discount > 0 && (
@@ -60,7 +62,7 @@ export function ProductCard({ product }: { product: Product }) {
           )}
           {soldOut && (
             <span className="rounded-pill bg-ink px-2.5 py-1 text-[11px] font-semibold text-bg">
-              Tugagan
+              {t("soldOutBadge")}
             </span>
           )}
         </div>
@@ -71,7 +73,7 @@ export function ProductCard({ product }: { product: Product }) {
             toggleFavorite(product.id);
           }}
           className="absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.14)]"
-          aria-label="Sevimlilarga qo'shish"
+          aria-label={t("addToFavorites")}
         >
           <Heart
             size={16}
@@ -111,7 +113,7 @@ export function ProductCard({ product }: { product: Product }) {
           onClick={handleFooterClick}
           className="mt-auto rounded-btn border border-accent px-2.5 py-2.5 text-[13px] font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-ink"
         >
-          {soldOut ? "Oldindan buyurtma" : "Savatga qo'shish"}
+          {soldOut ? t("preorder") : t("addToCart")}
         </button>
       </div>
     </Link>

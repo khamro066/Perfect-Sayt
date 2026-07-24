@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import clsx from "clsx";
 import { Minus, Plus } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -13,10 +14,11 @@ import { useToast } from "@/lib/toast-context";
 import { useCustomer } from "@/lib/customer-context";
 
 function StepStrip() {
+  const t = useTranslations("preorder");
   const steps = [
-    { title: "Model, o'lcham va miqdorni tanlang", desc: "Kerakli mahsulot xususiyatlarini belgilang." },
-    { title: "Ma'lumot va to'lov turini kiriting", desc: "To'liq, oldindan (30%) yoki yetkazishda to'lash." },
-    { title: "Ishlab chiqarilgach yetkazamiz", desc: "Holat SMS va Telegram orqali kuzatiladi." },
+    { title: t("step1Title"), desc: t("step1Desc") },
+    { title: t("step2Title"), desc: t("step2Desc") },
+    { title: t("step3Title"), desc: t("step3Desc") },
   ];
   return (
     <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5">
@@ -38,6 +40,7 @@ function StepStrip() {
 function PreorderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const t = useTranslations("preorder");
   const { showToast } = useToast();
   const { products, getTotalStock } = useProductsData();
   const { customer, setCustomer } = useCustomer();
@@ -62,7 +65,7 @@ function PreorderContent() {
   async function submit() {
     if (!product) return;
     if (!ism.trim() || !phone.trim() || size === null) {
-      showToast("Ism, telefon va o'lchamni to'ldiring");
+      showToast(t("toastFillRequired"));
       return;
     }
     setSubmitting(true);
@@ -75,7 +78,7 @@ function PreorderContent() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      showToast(data.error ?? "Xatolik yuz berdi, qayta urinib ko'ring");
+      showToast(data.error ?? t("toastError"));
       return;
     }
 
@@ -87,21 +90,20 @@ function PreorderContent() {
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-9 pb-12">
       <div className="rounded-block bg-accent-soft p-[clamp(28px,4vw,44px)]">
-        <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">Oldindan buyurtma tizimi</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{t("kicker")}</span>
         <h1 className="mt-2 font-heading text-[clamp(28px,3.5vw,38px)] font-medium text-ink">
-          Kutayotgan modelingizni oldindan buyurtma qiling
+          {t("title")}
         </h1>
         <p className="mt-2 max-w-2xl text-[15px] text-muted">
-          Omborda mavjud bo&apos;lmagan, hali ishlab chiqarilmagan yoki katta miqdordagi (3+ juft) buyurtmalar uchun.
-          Oldindan buyurtma bering — biz ishlab chiqarib, sizga yetkazamiz.
+          {t("description")}
         </p>
         <StepStrip />
       </div>
 
       {!product ? (
         <div className="mt-8">
-          <h2 className="text-2xl font-medium text-ink">Oldindan buyurtmaga tayyor modellar</h2>
-          <p className="mt-1 text-sm text-muted">Hozircha omborda yo&apos;q — bosing va oldindan buyurtma bering.</p>
+          <h2 className="text-2xl font-medium text-ink">{t("candidatesTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("candidatesDesc")}</p>
           <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
             {preorderCandidates.map((p) => (
               <ProductCard key={p.id} product={p} />
@@ -109,7 +111,7 @@ function PreorderContent() {
           </div>
           <div className="mt-6 text-center">
             <Link href="/katalog" className="inline-block rounded-btn bg-ink px-5 py-3 text-sm font-semibold text-bg">
-              Butun katalogni ko&apos;rish
+              {t("viewFullCatalog")}
             </Link>
           </div>
         </div>
@@ -121,15 +123,15 @@ function PreorderContent() {
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{product.brand}</span>
                 <p className="font-heading text-xl text-ink">{product.name}</p>
-                <p className="text-sm text-muted">{formatSom(product.price)} / juft</p>
+                <p className="text-sm text-muted">{formatSom(product.price)} {t("perPair")}</p>
                 {getTotalStock(product.id) <= 0 && (
-                  <p className="mt-1 text-sm font-semibold text-danger">Hozircha omborda yo&apos;q</p>
+                  <p className="mt-1 text-sm font-semibold text-danger">{t("outOfStock")}</p>
                 )}
               </div>
             </div>
 
-            <Card title="Mahsulot tafsilotlari">
-              <p className="mb-2 text-sm text-ink">O&apos;lcham</p>
+            <Card title={t("detailsTitle")}>
+              <p className="mb-2 text-sm text-ink">{t("sizeLabel")}</p>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => (
                   <button
@@ -144,7 +146,7 @@ function PreorderContent() {
                   </button>
                 ))}
               </div>
-              <p className="mb-2 mt-4 text-sm text-ink">Rang</p>
+              <p className="mb-2 mt-4 text-sm text-ink">{t("colorLabel")}</p>
               <div className="flex flex-wrap gap-2.5">
                 {product.colors.map((hex) => (
                   <button
@@ -155,7 +157,7 @@ function PreorderContent() {
                   />
                 ))}
               </div>
-              <p className="mb-2 mt-4 text-sm text-ink">Miqdor</p>
+              <p className="mb-2 mt-4 text-sm text-ink">{t("quantityLabel")}</p>
               <div className="inline-flex items-center gap-3 rounded-pill border border-line px-2 py-1.5">
                 <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex h-10 w-10 items-center justify-center rounded-full">
                   <Minus size={15} />
@@ -167,21 +169,21 @@ function PreorderContent() {
               </div>
             </Card>
 
-            <Card title="Buyurtmachi ma'lumotlari">
+            <Card title={t("customerInfoTitle")}>
               <div className="grid grid-cols-2 gap-3.5 max-sm:grid-cols-1">
-                <Field label="Ism" value={ism} onChange={setIsm} placeholder="Ismingiz" />
-                <Field label="Familiya" value={familiya} onChange={setFamiliya} placeholder="Familiyangiz" />
+                <Field label={t("firstName")} value={ism} onChange={setIsm} placeholder={t("firstNamePlaceholder")} />
+                <Field label={t("lastName")} value={familiya} onChange={setFamiliya} placeholder={t("lastNamePlaceholder")} />
               </div>
-              <Field label="Telefon raqami" value={phone} onChange={setPhone} placeholder="+998 90 123 45 67" className="mt-3.5" />
-              <Field label="Yetkazib berish manzili" value={manzil} onChange={setManzil} placeholder="Viloyat, tuman, ko'cha, uy" className="mt-3.5" />
+              <Field label={t("phone")} value={phone} onChange={setPhone} placeholder={t("phonePlaceholder")} className="mt-3.5" />
+              <Field label={t("address")} value={manzil} onChange={setManzil} placeholder={t("addressPlaceholder")} className="mt-3.5" />
             </Card>
 
-            <Card title="To'lov turi">
+            <Card title={t("paymentTypeTitle")}>
               <div className="grid grid-cols-2 gap-2.5 max-sm:grid-cols-1">
                 {(
                   [
-                    { id: "full", label: "To'liq to'lov" },
-                    { id: "deposit", label: "Oldindan to'lov (30%)" },
+                    { id: "full", label: t("payFull") },
+                    { id: "deposit", label: t("payDeposit") },
                   ] as const
                 ).map((o) => (
                   <button
@@ -200,18 +202,18 @@ function PreorderContent() {
           </div>
 
           <aside className="sticky top-[150px] h-fit flex-[1_1_300px] rounded-block border border-line bg-surface p-6">
-            <h2 className="mb-4 font-bold text-ink">Oldindan buyurtma xulosasi</h2>
+            <h2 className="mb-4 font-bold text-ink">{t("summaryTitle")}</h2>
             <div className="flex flex-col gap-2 text-sm text-ink">
-              <Row label="Ishlab chiqarish" value="14–21 kun" />
-              <Row label="Taxminiy yetkazish" value={formatDateRangeUz(18, 25)} />
-              <Row label="Navbatdagi o'rin" value="#14" />
-              <Row label="Boshlang'ich holat" value="Kutilmoqda" color="var(--star)" />
+              <Row label={t("production")} value={t("productionRange")} />
+              <Row label={t("estimatedDelivery")} value={formatDateRangeUz(18, 25)} />
+              <Row label={t("queuePosition")} value="#14" />
+              <Row label={t("initialStatus")} value={t("statusPending")} color="var(--star)" />
             </div>
             <div className="my-4 border-t border-line" />
-            <Row label="Umumiy summa" value={formatSom(product.price * qty)} bold />
+            <Row label={t("totalAmount")} value={formatSom(product.price * qty)} bold />
             <div className="mt-3 rounded-card bg-accent-soft p-3.5">
               <Row
-                label={payType === "full" ? "Hozir to'lanadi" : "Oldindan to'lov (30%)"}
+                label={payType === "full" ? t("payNowFull") : t("payNowDeposit")}
                 value={formatSom(payType === "full" ? product.price * qty : Math.round(product.price * qty * 0.3))}
                 bold
               />
@@ -221,9 +223,9 @@ function PreorderContent() {
               disabled={submitting}
               className="mt-4 w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-60"
             >
-              {submitting ? "Yuborilmoqda…" : "Oldindan buyurtmani tasdiqlash"}
+              {submitting ? t("submitting") : t("confirmButton")}
             </button>
-            <p className="mt-3 text-xs text-muted">Tasdiqlangach SMS va Telegram orqali xabar yuboriladi.</p>
+            <p className="mt-3 text-xs text-muted">{t("smsNotice")}</p>
           </aside>
         </div>
       )}

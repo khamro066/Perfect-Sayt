@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { X, Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useProductsData } from "@/lib/products-data";
@@ -10,6 +11,7 @@ import { formatSom } from "@/lib/format";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function MiniCart({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("miniCart");
   const { lines, removeLine, setQty, subtotal } = useCart();
   const { products } = useProductsData();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -35,13 +37,13 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
         onMouseLeave={startTimer}
         className="animate-mini-cart-pop absolute right-0 top-[52px] z-50 flex max-h-[520px] w-[340px] max-w-[88vw] flex-col rounded-block border border-line bg-surface shadow-[0_20px_48px_rgba(10,20,40,0.22),0_2px_8px_rgba(10,20,40,0.1)]">
         <div className="flex items-center justify-between border-b border-line p-4">
-          <span className="text-sm font-bold text-ink">Savatcha · {lines.reduce((s, l) => s + l.qty, 0)} ta</span>
-          <button onClick={onClose} aria-label="Yopish">
+          <span className="text-sm font-bold text-ink">{t("title", { count: lines.reduce((s, l) => s + l.qty, 0) })}</span>
+          <button onClick={onClose} aria-label={t("close")}>
             <X size={18} className="text-muted" />
           </button>
         </div>
         {lines.length === 0 ? (
-          <p className="p-6 text-center text-sm text-muted">Savatchangiz bo&apos;sh</p>
+          <p className="p-6 text-center text-sm text-muted">{t("empty")}</p>
         ) : (
           <>
             <div className="flex max-h-[340px] flex-col gap-3 overflow-y-auto p-4">
@@ -54,7 +56,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-heading text-sm font-semibold text-ink">{product.name}</p>
                       <p className="text-xs text-muted">
-                        O&apos;lcham {line.size} · {colorName(line.colorHex)}
+                        {t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <button
@@ -87,7 +89,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
             </div>
             <div className="border-t border-line p-4">
               <div className="mb-3 flex items-center justify-between text-sm font-bold text-ink">
-                <span>Jami</span>
+                <span>{t("total")}</span>
                 <span>{formatSom(subtotal)}</span>
               </div>
               <div className="flex gap-2">
@@ -96,14 +98,14 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
                   onClick={onClose}
                   className="flex-1 rounded-btn border border-line py-2.5 text-center text-sm font-semibold text-ink"
                 >
-                  Savatchani ko&apos;rish
+                  {t("viewCart")}
                 </Link>
                 <Link
                   href="/checkout"
                   onClick={onClose}
                   className="flex-1 rounded-btn bg-accent py-2.5 text-center text-sm font-semibold text-accent-ink"
                 >
-                  Rasmiylashtirish
+                  {t("checkout")}
                 </Link>
               </div>
             </div>

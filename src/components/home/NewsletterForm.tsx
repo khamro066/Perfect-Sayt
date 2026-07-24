@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/lib/toast-context";
 
 export function NewsletterForm() {
+  const t = useTranslations("newsletter");
   const [email, setEmail] = useState("");
   const { showToast } = useToast();
 
@@ -12,7 +14,7 @@ export function NewsletterForm() {
       className="mx-auto mt-5 flex max-w-md flex-wrap justify-center gap-2.5"
       onSubmit={(e) => {
         e.preventDefault();
-        showToast("Obuna uchun rahmat!");
+        showToast(t("toastThanks"));
         setEmail("");
       }}
     >
@@ -21,11 +23,11 @@ export function NewsletterForm() {
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email manzilingiz"
+        placeholder={t("placeholder")}
         className="min-w-[220px] flex-1 rounded-btn border border-line bg-surface px-4 py-3 text-sm outline-none"
       />
       <button type="submit" className="rounded-btn bg-accent px-5 py-3 text-sm font-semibold text-accent-ink">
-        Obuna bo&apos;lish
+        {t("subscribe")}
       </button>
     </form>
   );

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
@@ -7,11 +8,12 @@ import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 export const dynamic = "force-dynamic";
 
 export default async function KategoriyalarPage() {
+  const t = await getTranslations("menu");
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
 
   return (
     <div className="mx-auto max-w-[1280px] px-6 py-9 pb-14">
-      <h1 className="mb-6 text-2xl font-medium text-ink">Kategoriyalar</h1>
+      <h1 className="mb-6 text-2xl font-medium text-ink">{t("categories")}</h1>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-5">
         {categories.map((cat) => (
           <Link key={cat.id} href={`/katalog?category=${cat.name}`} className="flex flex-col items-center gap-2.5">

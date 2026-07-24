@@ -3,12 +3,14 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Search as SearchIcon } from "lucide-react";
 import { useProductsData } from "@/lib/products-data";
 import { formatSom } from "@/lib/format";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function SearchPanel({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("search");
   const { products } = useProductsData();
   const [query, setQuery] = useState("");
 
@@ -29,16 +31,16 @@ export function SearchPanel({ onClose }: { onClose: () => void }) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Mahsulot qidirish..."
+              placeholder={t("placeholder")}
               className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted"
             />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
           {query.trim() === "" ? (
-            <p className="p-4 text-center text-sm text-muted">Mahsulot nomini yozing</p>
+            <p className="p-4 text-center text-sm text-muted">{t("typeToSearch")}</p>
           ) : results.length === 0 ? (
-            <p className="p-4 text-center text-sm text-muted">Hech narsa topilmadi</p>
+            <p className="p-4 text-center text-sm text-muted">{t("noResults")}</p>
           ) : (
             results.map((p) => (
               <Link

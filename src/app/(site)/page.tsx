@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck, PackageCheck, Sparkles } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
@@ -12,26 +13,20 @@ import { Product } from "@/lib/types";
 // changes) — render this per-request rather than freezing it at build time.
 export const dynamic = "force-dynamic";
 
-const TRUST_ITEMS = [
-  { icon: ShieldCheck, title: "Sifat kafolati", desc: "Barcha mahsulotlar yuqori sifatli materiallardan" },
-  { icon: PackageCheck, title: "Tez yetkazib berish", desc: "O'zbekiston bo'ylab 1-2 kun ichida" },
-  { icon: Sparkles, title: "Xavfsiz to'lov", desc: "Online to'lov tizimi 100% himoyalangan" },
+const REVIEWERS = [
+  { name: "Dilnoza Karimova", city: "Toshkent", rating: 5 },
+  { name: "Sardor Aliyev", city: "Samarqand", rating: 5 },
+  { name: "Malika Yusupova", city: "Farg'ona", rating: 4 },
 ];
 
-const REVIEWS = [
-  { name: "Dilnoza Karimova", city: "Toshkent", rating: 5, text: "Krossovka juda sifatli chiqdi, o'lchami aniq keldi. Yetkazib berish ertasiga bo'ldi — juda mamnunman!" },
-  { name: "Sardor Aliyev", city: "Samarqand", rating: 5, text: "Original mahsulot, charm etiklar zo'r. Viloyatga ham tez yetib keldi. Yana buyurtma beraman." },
-  { name: "Malika Yusupova", city: "Farg'ona", rating: 4, text: "Sayt qulay, qidiruv tez ishlaydi. Chegirmalar ajoyib. Faqat rangi rasmga nisbatan biroz och." },
-];
-
-function ProductRow({ title, href, products }: { title: string; href: string; products: Product[] }) {
+function ProductRow({ title, href, viewAllLabel, products }: { title: string; href: string; viewAllLabel: string; products: Product[] }) {
   if (products.length === 0) return null;
   return (
     <section className="mx-auto max-w-[1280px] px-6 py-8">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-2xl font-medium text-ink">{title}</h2>
         <Link href={href} className="text-sm font-semibold text-accent hover:text-ink">
-          Barchasini ko&apos;rish →
+          {viewAllLabel}
         </Link>
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,260px))] gap-5">
@@ -44,6 +39,19 @@ function ProductRow({ title, href, products }: { title: string; href: string; pr
 }
 
 export default async function HomePage() {
+  const t = await getTranslations("home");
+
+  const TRUST_ITEMS = [
+    { icon: ShieldCheck, title: t("trust1Title"), desc: t("trust1Desc") },
+    { icon: PackageCheck, title: t("trust2Title"), desc: t("trust2Desc") },
+    { icon: Sparkles, title: t("trust3Title"), desc: t("trust3Desc") },
+  ];
+
+  const REVIEWS = REVIEWERS.map((r, i) => ({
+    ...r,
+    text: t(`review${i + 1}Text` as "review1Text" | "review2Text" | "review3Text"),
+  }));
+
   const [dbProducts, dbCategories] = await Promise.all([
     prisma.product.findMany({
       where: { deletedAt: null },
@@ -85,13 +93,13 @@ export default async function HomePage() {
           </div>
           <div className="relative max-w-[640px]">
             <span className="inline-block rounded-pill border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink">
-              Perfect Shoes
+              {t("badge")}
             </span>
             <h1 className="mt-4 font-heading text-[clamp(34px,5vw,58px)] font-medium leading-[1.07] text-ink">
-              Har qadamingiz uchun mukammal tanlov
+              {t("heroTitle")}
             </h1>
             <p className="mt-4 max-w-[460px] text-[17px] text-muted">
-              O&apos;zbekistondagi eng qulay oyoq kiyimlar kolleksiyasi. Sifatli mahsulotlar, tez yetkazib berish va qulay to&apos;lov.
+              {t("heroSubtitle")}
             </p>
           </div>
         </div>
@@ -111,9 +119,9 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-2xl font-medium text-ink">Kategoriyalar</h2>
+          <h2 className="text-2xl font-medium text-ink">{t("categoriesTitle")}</h2>
           <Link href="/katalog" className="text-sm font-semibold text-accent hover:text-ink">
-            Katalog →
+            {t("catalogLink")}
           </Link>
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
@@ -132,22 +140,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <ProductRow title="Yangi mahsulotlar" href="/katalog?sort=new" products={newArrivals} />
-      <ProductRow title="Eng ko'p sotilganlar" href="/katalog?sort=popular" products={bestSellers} />
+      <ProductRow title={t("newArrivalsTitle")} href="/katalog?sort=new" viewAllLabel={t("viewAll")} products={newArrivals} />
+      <ProductRow title={t("bestSellersTitle")} href="/katalog?sort=popular" viewAllLabel={t("viewAll")} products={bestSellers} />
 
       <section className="mx-auto max-w-[1280px] px-6 py-5">
         <div className="relative grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] overflow-hidden rounded-[22px] border border-line bg-accent-soft">
           <div className="flex flex-col justify-center gap-3.5 p-[clamp(28px,4vw,52px)]">
-            <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-accent">Tanlangan kolleksiya</span>
-            <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-medium text-ink">Klassika, qayta kashf etilgan</h2>
+            <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-accent">{t("collectionKicker")}</span>
+            <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-medium text-ink">{t("collectionTitle")}</h2>
             <p className="max-w-[340px] text-[15px] leading-[1.6] text-muted">
-              Har mavsumda tanlab olingan eng sifatli modellar — charm, zamsh va zamonaviy dizayn uyg&apos;unligi.
+              {t("collectionDesc")}
             </p>
             <Link
               href="/katalog"
               className="mt-1.5 w-fit rounded-btn bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
             >
-              Kolleksiyani ko&apos;rish
+              {t("collectionCta")}
             </Link>
           </div>
           <div className="relative min-h-[320px] w-full bg-surface-2">
@@ -164,10 +172,10 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
         <div className="mb-5 flex items-center gap-3">
-          <h2 className="text-2xl font-medium text-ink">Chegirmadagi mahsulotlar</h2>
+          <h2 className="text-2xl font-medium text-ink">{t("discountedTitle")}</h2>
           <span className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">SALE</span>
           <Link href="/katalog?sale=1" className="ml-auto text-sm font-semibold text-accent hover:text-ink">
-            Barchasini ko&apos;rish →
+            {t("viewAll")}
           </Link>
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,260px))] gap-5">
@@ -178,7 +186,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
-        <h2 className="mb-5 text-2xl font-medium text-ink">Mijozlar fikri</h2>
+        <h2 className="mb-5 text-2xl font-medium text-ink">{t("reviewsTitle")}</h2>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
           {REVIEWS.map((r) => (
             <div key={r.name} className="flex flex-col gap-3 rounded-card border border-line bg-surface p-6">
@@ -200,10 +208,10 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
         <div className="rounded-block bg-accent-soft p-[clamp(28px,5vw,44px)] text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">Yangiliklar</span>
-          <h2 className="mt-2 font-heading text-2xl font-medium text-ink">Yangiliklardan xabardor bo&apos;ling</h2>
+          <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{t("newsletterKicker")}</span>
+          <h2 className="mt-2 font-heading text-2xl font-medium text-ink">{t("newsletterTitle")}</h2>
           <p className="mx-auto mt-2 max-w-md text-[15px] text-muted">
-            Yangi kolleksiyalar va maxsus chegirmalar haqida birinchilardan bo&apos;lib bilib oling.
+            {t("newsletterDesc")}
           </p>
           <NewsletterForm />
         </div>

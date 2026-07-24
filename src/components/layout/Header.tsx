@@ -4,15 +4,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Menu, Search as SearchIcon, Moon, Sun, ShoppingBag } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
 import { useCart } from "@/lib/cart-context";
 import { MiniCart } from "./MiniCart";
 import { SlideMenu } from "./SlideMenu";
 import { SearchPanel } from "./SearchPanel";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
   const router = useRouter();
+  const t = useTranslations("header");
   const { theme, toggleTheme } = useTheme();
   const { count } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,7 +36,7 @@ export function Header() {
         <div className="relative mx-auto flex max-w-[1280px] items-center justify-between px-6 py-3.5">
           <button
             onClick={() => setMenuOpen(true)}
-            aria-label="Menyu"
+            aria-label={t("menu")}
             className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
           >
             <Menu size={19} />
@@ -53,7 +56,7 @@ export function Header() {
           <div className="relative flex shrink-0 items-center gap-1.5">
             <button
               onClick={() => setSearchOpen((v) => !v)}
-              aria-label="Qidiruv"
+              aria-label={t("search")}
               className="flex h-[42px] w-[42px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
             >
               <SearchIcon size={17} />
@@ -61,15 +64,16 @@ export function Header() {
             {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}
             <button
               onClick={toggleTheme}
-              aria-label="Mavzuni almashtirish"
+              aria-label={t("themeToggle")}
               className="hidden h-[42px] w-[42px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 sm:flex"
             >
               {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
             </button>
+            <LanguageSwitcher />
             <div className="relative">
               <button
                 onClick={handleCartClick}
-                aria-label="Savatcha"
+                aria-label={t("cart")}
                 className="relative flex h-[42px] w-[42px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
               >
                 <ShoppingBag size={17} />

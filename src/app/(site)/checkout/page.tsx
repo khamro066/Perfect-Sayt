@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Send, Phone } from "lucide-react";
 import clsx from "clsx";
 import { useCart } from "@/lib/cart-context";
@@ -15,11 +16,18 @@ import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const t = useTranslations("checkout");
   const { lines, subtotal, clear } = useCart();
   const { products } = useProductsData();
   const { showToast } = useToast();
   const { customer, setCustomer } = useCustomer();
   const [submitting, setSubmitting] = useState(false);
+
+  const DELIVERY_METHODS_UI: Record<string, { label: string; eta: string }> = {
+    kuryer: { label: t("deliveryKuryerLabel"), eta: t("deliveryKuryerEta") },
+    express: { label: t("deliveryExpressLabel"), eta: t("deliveryExpressEta") },
+    pickup: { label: t("deliveryPickupLabel"), eta: t("deliveryPickupEta") },
+  };
 
   const [ism, setIsm] = useState(customer?.ism ?? "");
   const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
@@ -34,10 +42,10 @@ export default function CheckoutPage() {
   const total = subtotal + deliveryFee;
 
   async function placeOrder() {
-    if (!ism.trim()) return showToast("Ismingizni kiriting");
-    if (!phone.trim()) return showToast("Telefon raqamini kiriting");
-    if (!manzil.trim()) return showToast("Yetkazib berish manzilini kiriting");
-    if (!payment) return showToast("To'lov usulini tanlang");
+    if (!ism.trim()) return showToast(t("toastEnterName"));
+    if (!phone.trim()) return showToast(t("toastEnterPhone"));
+    if (!manzil.trim()) return showToast(t("toastEnterAddress"));
+    if (!payment) return showToast(t("toastSelectPayment"));
 
     setSubmitting(true);
     const res = await fetch("/api/orders", {
@@ -53,14 +61,14 @@ export default function CheckoutPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      showToast(data.error ?? "Xatolik yuz berdi, qayta urinib ko'ring");
+      showToast(data.error ?? t("toastError"));
       return;
     }
 
     const { orderNumber, isPreorder } = await res.json();
     setCustomer({ ism, familiya, phone, viloyat, manzil });
     if (isPreorder) {
-      showToast("Omborda yetarli emas — bu buyurtma OLDINDAN BUYURTMA sifatida qabul qilindi");
+      showToast(t("toastBecamePreorder"));
     }
     clear();
     if (payment === "card") {
@@ -73,26 +81,26 @@ export default function CheckoutPage() {
   if (lines.length === 0) {
     return (
       <div className="mx-auto max-w-[1100px] px-6 py-16 text-center">
-        <p className="text-lg text-ink">Savatchangiz bo&apos;sh</p>
-        <p className="mt-1 text-sm text-muted">Buyurtma berish uchun avval mahsulot tanlang.</p>
+        <p className="text-lg text-ink">{t("emptyCartTitle")}</p>
+        <p className="mt-1 text-sm text-muted">{t("emptyCartDesc")}</p>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-9 pb-12">
-      <h1 className="mb-6 text-2xl font-medium text-ink">Buyurtmani rasmiylashtirish</h1>
+      <h1 className="mb-6 text-2xl font-medium text-ink">{t("title")}</h1>
       <div className="flex flex-wrap gap-7">
         <div className="flex min-w-0 flex-[2_1_440px] flex-col gap-4">
-          <Card title="Aloqa ma'lumotlari">
+          <Card title={t("contactInfoTitle")}>
             <div className="grid grid-cols-2 gap-3.5 max-sm:grid-cols-1">
-              <Field label="Ism" required value={ism} onChange={setIsm} placeholder="Ismingiz" />
-              <Field label="Familiya (ixtiyoriy)" value={familiya} onChange={setFamiliya} placeholder="Familiyangiz" />
+              <Field label={t("firstName")} required value={ism} onChange={setIsm} placeholder={t("firstNamePlaceholder")} />
+              <Field label={t("lastName")} value={familiya} onChange={setFamiliya} placeholder={t("lastNamePlaceholder")} />
             </div>
-            <Field label="Telefon raqami" required value={phone} onChange={setPhone} placeholder="+998 90 123 45 67" className="mt-3.5" />
+            <Field label={t("phone")} required value={phone} onChange={setPhone} placeholder={t("phonePlaceholder")} className="mt-3.5" />
             <div className="mt-4 rounded-[12px] bg-accent-soft p-4 text-sm text-ink">
-              <p className="font-semibold">Savolingiz bormi?</p>
-              <p className="mt-0.5">Buyurtmadan oldin sotuvchi bilan bog&apos;laning.</p>
+              <p className="font-semibold">{t("questionTitle")}</p>
+              <p className="mt-0.5">{t("questionDesc")}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a
                   href={SELLER_CONTACT.telegramUrl}
@@ -100,7 +108,7 @@ export default function CheckoutPage() {
                   rel="noreferrer"
                   className="flex items-center gap-2 rounded-pill bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
                 >
-                  <Send size={14} /> Telegram orqali yozish
+                  <Send size={14} /> {t("telegramContact")}
                 </a>
                 <a
                   href={SELLER_CONTACT.phoneHref}
@@ -112,10 +120,10 @@ export default function CheckoutPage() {
             </div>
           </Card>
 
-          <Card title="Yetkazib berish manzili">
+          <Card title={t("deliveryAddressTitle")}>
             <div className="grid grid-cols-2 gap-3.5 max-sm:grid-cols-1">
               <label className="flex flex-col gap-1.5 text-sm text-ink">
-                Viloyat
+                {t("province")}
                 <select
                   value={viloyat}
                   onChange={(e) => setViloyat(e.target.value)}
@@ -126,12 +134,12 @@ export default function CheckoutPage() {
                   ))}
                 </select>
               </label>
-              <Field label="Tuman" value={tuman} onChange={setTuman} placeholder="Tuman" />
+              <Field label={t("district")} value={tuman} onChange={setTuman} placeholder={t("districtPlaceholder")} />
             </div>
-            <Field label="Manzil" value={manzil} onChange={setManzil} placeholder="Ko'cha, uy, kvartira" className="mt-3.5" />
+            <Field label={t("address")} value={manzil} onChange={setManzil} placeholder={t("addressPlaceholder")} className="mt-3.5" />
           </Card>
 
-          <Card title="Yetkazib berish usuli">
+          <Card title={t("deliveryMethodTitle")}>
             <div className="flex flex-col gap-2.5">
               {DELIVERY_METHODS.map((d) => (
                 <button
@@ -143,16 +151,16 @@ export default function CheckoutPage() {
                   )}
                 >
                   <div>
-                    <p className="text-sm font-semibold text-ink">{d.label}</p>
-                    <p className="text-xs text-muted">{d.eta}</p>
+                    <p className="text-sm font-semibold text-ink">{DELIVERY_METHODS_UI[d.id].label}</p>
+                    <p className="text-xs text-muted">{DELIVERY_METHODS_UI[d.id].eta}</p>
                   </div>
-                  <span className="text-sm font-bold text-ink">{d.fee === 0 ? "Bepul" : formatSom(d.fee)}</span>
+                  <span className="text-sm font-bold text-ink">{d.fee === 0 ? t("free") : formatSom(d.fee)}</span>
                 </button>
               ))}
             </div>
           </Card>
 
-          <Card title="To'lov usuli">
+          <Card title={t("paymentMethodTitle")}>
             <div className="flex gap-2">
               {(["cash", "card"] as const).map((p) => (
                 <button
@@ -163,16 +171,16 @@ export default function CheckoutPage() {
                     payment === p ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface text-ink"
                   )}
                 >
-                  {p === "cash" ? "Naqd pul" : "Karta orqali"}
+                  {p === "cash" ? t("paymentCash") : t("paymentCard")}
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted">To&apos;lov xavfsiz shifrlangan ulanish orqali amalga oshiriladi.</p>
+            <p className="mt-3 text-xs text-muted">{t("paymentSecureNote")}</p>
           </Card>
         </div>
 
         <aside className="sticky top-[150px] h-fit flex-[1_1_300px] rounded-block border border-line bg-surface p-6">
-          <h2 className="mb-4 font-bold text-ink">Buyurtma</h2>
+          <h2 className="mb-4 font-bold text-ink">{t("orderTitle")}</h2>
           <div className="flex max-h-[230px] flex-col gap-3 overflow-y-auto">
             {lines.map((line) => {
               const product = products.find((p) => p.id === line.productId);
@@ -182,7 +190,7 @@ export default function CheckoutPage() {
                   <PlaceholderImage label={product.name} className="h-[52px] w-[52px] shrink-0 rounded-card" />
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="truncate font-semibold text-ink">{product.name}</p>
-                    <p className="text-xs text-muted">{line.size} · {line.qty} dona</p>
+                    <p className="text-xs text-muted">{t("lineQty", { size: line.size, qty: line.qty })}</p>
                   </div>
                   <span className="text-sm font-bold text-ink">{formatSom(product.price * line.qty)}</span>
                 </div>
@@ -191,16 +199,16 @@ export default function CheckoutPage() {
           </div>
           <div className="my-4 border-t border-line" />
           <div className="flex justify-between text-sm text-ink">
-            <span>Mahsulotlar</span>
+            <span>{t("products")}</span>
             <span>{formatSom(subtotal)}</span>
           </div>
           <div className="mt-2 flex justify-between text-sm text-ink">
-            <span>Yetkazib berish</span>
-            <span>{deliveryFee === 0 ? "Bepul" : formatSom(deliveryFee)}</span>
+            <span>{t("delivery")}</span>
+            <span>{deliveryFee === 0 ? t("free") : formatSom(deliveryFee)}</span>
           </div>
           <div className="my-4 border-t border-line" />
           <div className="mb-4 flex justify-between text-[21px] font-bold text-ink">
-            <span>Jami</span>
+            <span>{t("total")}</span>
             <span>{formatSom(total)}</span>
           </div>
           <button
@@ -208,7 +216,7 @@ export default function CheckoutPage() {
             disabled={submitting}
             className="w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-60"
           >
-            {submitting ? "Yuborilmoqda…" : "Buyurtmani tasdiqlash"}
+            {submitting ? t("submitting") : t("confirmButton")}
           </button>
         </aside>
       </div>

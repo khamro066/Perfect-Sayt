@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -15,23 +16,24 @@ const RATINGS = [4.5, 4.0, 3.5];
 const BRANDS = ["Qadam", "Zamin", "Uzstep", "Terra", "Volna", "Silk Road", "Atlas"];
 const MATERIALS = ["Charm", "Zamsh", "Mesh", "Tekstil", "Rezina"];
 
-const SORT_OPTIONS = [
-  { value: "new", label: "Eng yangi" },
-  { value: "popular", label: "Eng mashhur" },
-  { value: "rating", label: "Eng yuqori baholangan" },
-  { value: "priceAsc", label: "Narxi: arzon" },
-  { value: "priceDesc", label: "Narxi: qimmat" },
-  { value: "discount", label: "Eng katta chegirma" },
-];
-
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
 function CatalogContent() {
   const searchParams = useSearchParams();
+  const t = useTranslations("catalog");
   const { products, getTotalStock } = useProductsData();
   const [allCategories, setAllCategories] = useState<string[]>([]);
+
+  const SORT_OPTIONS = [
+    { value: "new", label: t("sortNewest") },
+    { value: "popular", label: t("sortPopular") },
+    { value: "rating", label: t("sortRating") },
+    { value: "priceAsc", label: t("sortPriceAsc") },
+    { value: "priceDesc", label: t("sortPriceDesc") },
+    { value: "discount", label: t("sortDiscount") },
+  ];
 
   useEffect(() => {
     fetch("/api/categories")
@@ -117,18 +119,18 @@ function CatalogContent() {
     <div className="mx-auto max-w-[1280px] px-6 py-7 pb-10">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-medium text-ink">Katalog</h1>
-          <p className="mt-1 text-sm text-muted">{results.length} ta mahsulot topildi</p>
+          <h1 className="text-2xl font-medium text-ink">{t("title")}</h1>
+          <p className="mt-1 text-sm text-muted">{t("resultsCount", { count: results.length })}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileFiltersOpen(true)}
             className="flex items-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink lg:hidden"
           >
-            <SlidersHorizontal size={15} /> Filtrlar
+            <SlidersHorizontal size={15} /> {t("filtersButton")}
           </button>
           <label className="flex items-center gap-2 text-sm">
-            <span className="text-ink">Saralash:</span>
+            <span className="text-ink">{t("sortLabel")}</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
@@ -151,7 +153,7 @@ function CatalogContent() {
             <button
               onClick={() => setMobileFiltersOpen(false)}
               className="mb-3 flex h-9 w-9 items-center justify-center self-end rounded-full border border-line"
-              aria-label="Yopish"
+              aria-label={t("close")}
             >
               <X size={16} />
             </button>
@@ -184,8 +186,8 @@ function CatalogContent() {
         <div className="min-w-0 flex-[3_1_520px]">
           {results.length === 0 ? (
             <div className="py-20 text-center">
-              <p className="font-semibold text-ink">Hech narsa topilmadi</p>
-              <p className="mt-1 text-sm text-muted">Filtrlarni o&apos;zgartirib ko&apos;ring yoki tozalang.</p>
+              <p className="font-semibold text-ink">{t("noResultsTitle")}</p>
+              <p className="mt-1 text-sm text-muted">{t("noResultsDesc")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
@@ -233,16 +235,17 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 function FilterSidebar(p: FilterProps) {
+  const t = useTranslations("catalog");
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <span className="font-bold text-ink">Filtrlar</span>
+        <span className="font-bold text-ink">{t("filtersTitle")}</span>
         <button onClick={p.clearFilters} className="text-sm font-semibold text-accent">
-          Tozalash
+          {t("clearFilters")}
         </button>
       </div>
 
-      <FilterSection label="Oyoq o'lchami">
+      <FilterSection label={t("sizeLabel")}>
         <div className="flex flex-wrap gap-1.5">
           {SIZES.map((s) => (
             <button
@@ -259,7 +262,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Jinsi">
+      <FilterSection label={t("genderLabel")}>
         <div className="flex flex-wrap gap-1.5">
           {GENDERS.map((g) => (
             <Pill key={g} active={p.genders.includes(g)} onClick={() => p.setGenders(toggle(p.genders, g))}>
@@ -269,7 +272,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Kategoriya">
+      <FilterSection label={t("categoryLabel")}>
         <div className="flex flex-wrap gap-1.5">
           {p.allCategories.map((c) => (
             <Pill key={c} active={p.categories.includes(c)} onClick={() => p.setCategories(toggle(p.categories, c))}>
@@ -279,7 +282,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Brend">
+      <FilterSection label={t("brandLabel")}>
         <div className="flex flex-wrap gap-1.5">
           {BRANDS.map((b) => (
             <Pill key={b} active={p.brands.includes(b)} onClick={() => p.setBrands(toggle(p.brands, b))}>
@@ -289,7 +292,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Rang">
+      <FilterSection label={t("colorLabel")}>
         <div className="flex flex-wrap gap-2">
           {COLORS.map((hex) => (
             <button
@@ -305,7 +308,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Material">
+      <FilterSection label={t("materialLabel")}>
         <div className="flex flex-wrap gap-1.5">
           {MATERIALS.map((m) => (
             <Pill key={m} active={p.materials.includes(m)} onClick={() => p.setMaterials(toggle(p.materials, m))}>
@@ -315,7 +318,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Narx oralig'i">
+      <FilterSection label={t("priceRangeLabel")}>
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-xs text-muted">
             <span>{formatSom(p.priceMin)}</span>
@@ -336,7 +339,7 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label="Reyting">
+      <FilterSection label={t("ratingLabel")}>
         <div className="flex flex-wrap gap-1.5">
           {RATINGS.map((r) => (
             <Pill
@@ -352,10 +355,10 @@ function FilterSidebar(p: FilterProps) {
 
       <div className="flex flex-col gap-2.5 border-t border-line pt-4">
         {[
-          { label: "Chegirmadagi mahsulotlar", value: p.onSale, set: p.setOnSale },
-          { label: "Omborda mavjud", value: p.inStock, set: p.setInStock },
-          { label: "Yangi mahsulotlar", value: p.onlyNew, set: p.setOnlyNew },
-          { label: "Mashhur mahsulotlar", value: p.popular, set: p.setPopular },
+          { label: t("onSaleCheckbox"), value: p.onSale, set: p.setOnSale },
+          { label: t("inStockCheckbox"), value: p.inStock, set: p.setInStock },
+          { label: t("onlyNewCheckbox"), value: p.onlyNew, set: p.setOnlyNew },
+          { label: t("popularCheckbox"), value: p.popular, set: p.setPopular },
         ].map((c) => (
           <label key={c.label} className="flex items-center gap-2.5 text-sm text-ink">
             <input

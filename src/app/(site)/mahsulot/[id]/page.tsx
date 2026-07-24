@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Star, Minus, Plus } from "lucide-react";
 import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
@@ -22,6 +23,7 @@ const PREORDER_MIN_QTY = 3;
 export default function ProductPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const t = useTranslations("product");
   const { products, getStock, getTotalStock } = useProductsData();
   const product = products.find((p) => p.id === params.id);
 
@@ -60,9 +62,9 @@ export default function ProductPage() {
   if (!product) {
     return (
       <div className="mx-auto max-w-[1280px] px-6 py-24 text-center">
-        <p className="font-semibold text-ink">Mahsulot topilmadi</p>
+        <p className="font-semibold text-ink">{t("notFound")}</p>
         <Link href="/katalog" className="mt-3 inline-block text-sm font-semibold text-accent">
-          Katalogga qaytish →
+          {t("backToCatalog")}
         </Link>
       </div>
     );
@@ -85,14 +87,14 @@ export default function ProductPage() {
 
   function handleAddToCart(goToCheckout: boolean) {
     if (size === null) {
-      showToast("Avval o'lchamni tanlang");
+      showToast(t("toastSelectSize"));
       return;
     }
     addLine({ productId: product!.id, colorHex: selectedColor, size, qty });
     if (goToCheckout) {
       router.push("/checkout");
     } else {
-      showToast("Savatga qo'shildi");
+      showToast(t("toastAddedToCart"));
     }
   }
 
@@ -105,7 +107,7 @@ export default function ProductPage() {
   return (
     <div className="mx-auto max-w-[1280px] px-6 py-5 pb-10">
       <p className="mb-4 text-[13px] text-muted">
-        <Link href="/">Bosh sahifa</Link> / <Link href="/katalog">Katalog</Link> / <span className="text-ink">{product.name}</span>
+        <Link href="/">{t("home")}</Link> / <Link href="/katalog">{t("catalog")}</Link> / <span className="text-ink">{product.name}</span>
       </p>
 
       <div className="flex flex-wrap gap-10">
@@ -144,7 +146,7 @@ export default function ProductPage() {
           <div className="mt-2 flex items-center gap-1.5 text-sm">
             <Star size={15} className="fill-star text-star" />
             <span className="font-bold text-ink">{product.rating.toFixed(1)}</span>
-            <span className="text-muted">· {product.ratingCount} ta sharh</span>
+            <span className="text-muted">· {t("reviewsCount", { count: product.ratingCount })}</span>
           </div>
 
           <div className="mt-3 flex items-baseline gap-2.5">
@@ -164,15 +166,15 @@ export default function ProductPage() {
             />
             <span style={{ color: totalStock <= 0 ? "var(--danger)" : totalStock <= 5 ? "var(--warning)" : "var(--success)" }}>
               {totalStock <= 0
-                ? "Omborda yo'q"
+                ? t("outOfStock")
                 : totalStock <= 5
-                ? `Kam qoldi — ${totalStock} juft`
-                : `Omborda mavjud — ${totalStock} juft`}
+                ? t("lowStock", { count: totalStock })
+                : t("inStock", { count: totalStock })}
             </span>
           </div>
 
           <div className="mt-5">
-            <p className="mb-2 text-sm text-ink">Rang: {colorName(selectedColor)}</p>
+            <p className="mb-2 text-sm text-ink">{t("colorLabel", { color: colorName(selectedColor) })}</p>
             <div className="flex flex-wrap gap-2.5">
               {product.colors.map((hex, i) => (
                 <button
@@ -193,9 +195,9 @@ export default function ProductPage() {
 
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm text-ink">O&apos;lchamni tanlang</p>
+              <p className="text-sm text-ink">{t("chooseSize")}</p>
               <button onClick={() => setSizeChartOpen(true)} className="text-sm font-semibold text-accent">
-                O&apos;lcham jadvali
+                {t("sizeChart")}
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -222,12 +224,12 @@ export default function ProductPage() {
               })}
             </div>
             {size !== null && selectedSizeStock > 0 && selectedSizeStock < 3 && (
-              <p className="mt-2 text-sm font-semibold text-warning">⚠ Faqat {selectedSizeStock} dona qoldi!</p>
+              <p className="mt-2 text-sm font-semibold text-warning">{t("lowStockWarning", { count: selectedSizeStock })}</p>
             )}
           </div>
 
           <div className="mt-5">
-            <p className="mb-2 text-sm text-ink">Miqdor</p>
+            <p className="mb-2 text-sm text-ink">{t("quantity")}</p>
             <div className="inline-flex items-center gap-3 rounded-pill border border-line px-2 py-1.5">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -252,20 +254,20 @@ export default function ProductPage() {
                   onClick={() => handleAddToCart(false)}
                   className="flex-1 rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink"
                 >
-                  Savatchaga qo&apos;shish
+                  {t("addToCart")}
                 </button>
                 <button
                   onClick={() => handleAddToCart(true)}
                   className="flex-1 rounded-btn bg-ink py-3.5 text-sm font-semibold text-bg"
                 >
-                  Hozir sotib olish
+                  {t("buyNow")}
                 </button>
               </div>
               <button
                 onClick={() => toggleFavorite(product.id)}
                 className="w-full rounded-btn border border-accent py-3 text-sm font-semibold text-accent"
               >
-                {favorited ? "♥ Sevimlilarda" : "♡ Sevimlilarga"}
+                {favorited ? t("favorited") : t("addToFavorites")}
               </button>
             </div>
           )}
@@ -273,48 +275,48 @@ export default function ProductPage() {
           {canPre && (
             <div className="mt-5 rounded-card border-[1.5px] border-accent bg-accent-soft p-5">
               <span className="rounded-pill bg-accent px-2.5 py-1 text-[11px] font-bold text-accent-ink">
-                OLDINDAN BUYURTMA
+                {t("preorderBadge")}
               </span>
               <p className="mt-3 text-sm text-ink">
                 {cpOut
-                  ? "Bu mahsulot hozircha omborda yo'q. Oldindan buyurtma bering — ishlab chiqarilgach, sizga birinchi bo'lib yetkaziladi."
-                  : `${PREORDER_MIN_QTY} juft va undan ko'p buyurtma uchun oldindan buyurtma tavsiya etiladi — yetkazish muddati kafolatlanadi.`}
+                  ? t("preorderOutOfStockDesc")
+                  : t("preorderQtyDesc", { minQty: PREORDER_MIN_QTY })}
               </p>
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink">
-                <span>Ishlab chiqarish: 14–21 kun</span>
-                <span>Taxminiy yetkazish: {formatDateRangeUz(14, 21)}</span>
+                <span>{t("productionTime")}</span>
+                <span>{t("estimatedDelivery", { range: formatDateRangeUz(14, 21) })}</span>
               </div>
               <button
                 onClick={handlePreorder}
                 className="mt-4 w-full rounded-btn bg-accent py-3 text-sm font-semibold text-accent-ink"
               >
-                Oldindan buyurtma berish
+                {t("preorderButton")}
               </button>
             </div>
           )}
 
           <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 border-t border-line pt-5 text-sm">
             <div>
-              <p className="font-semibold text-ink">Yetkazib berish</p>
-              <p className="text-muted">1–4 ish kuni · butun O&apos;zbekiston</p>
+              <p className="font-semibold text-ink">{t("deliveryTitle")}</p>
+              <p className="text-muted">{t("deliveryDesc")}</p>
             </div>
             <div>
-              <p className="font-semibold text-ink">Material</p>
+              <p className="font-semibold text-ink">{t("materialTitle")}</p>
               <p className="text-muted">{product.material}</p>
             </div>
           </div>
 
           <div className="mt-5 border-t border-line pt-5">
-            <h2 className="mb-2 font-semibold text-ink">Tavsif</h2>
+            <h2 className="mb-2 font-semibold text-ink">{t("descriptionTitle")}</h2>
             <p className="text-sm leading-relaxed text-muted">{product.description}</p>
           </div>
         </div>
       </div>
 
       <section className="mt-10 max-w-[760px]">
-        <h2 className="mb-4 text-2xl font-medium text-ink">Mijoz sharhlari</h2>
+        <h2 className="mb-4 text-2xl font-medium text-ink">{t("reviewsTitle")}</h2>
         {approvedReviews.length === 0 ? (
-          <p className="text-sm text-muted">Hozircha tasdiqlangan sharh yo&apos;q — birinchi bo&apos;lib fikr bildiring.</p>
+          <p className="text-sm text-muted">{t("noReviews")}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {approvedReviews.map((r) => (
@@ -332,10 +334,10 @@ export default function ProductPage() {
       </section>
 
       {recentProducts.length > 0 && (
-        <ProductSection title="Yaqinda ko'rilgan" products={recentProducts} />
+        <ProductSection title={t("recentlyViewed")} products={recentProducts} />
       )}
-      <ProductSection title="Tavsiya etamiz" products={recommended} />
-      <ProductSection title="O'xshash mahsulotlar" products={similar} />
+      <ProductSection title={t("recommended")} products={recommended} />
+      <ProductSection title={t("similar")} products={similar} />
 
       {sizeChartOpen && <SizeChartModal onClose={() => setSizeChartOpen(false)} />}
     </div>
