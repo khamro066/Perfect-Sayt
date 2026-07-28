@@ -20,6 +20,7 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
     { label: t("adminLogin"), href: "/admin/login" },
     { label: t("preorder"), href: "/oldindan-buyurtma" },
     { label: t("trackOrder"), href: "/profil" },
+    { label: t("favorites"), href: "/profil?tab=favs" },
   ];
 
   useEffect(() => {

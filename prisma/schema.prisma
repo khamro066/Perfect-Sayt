@@ -91,6 +91,7 @@ model Product {
   stock      Stock[]
   orderLines OrderLine[]
   reviews    Review[]
+  favorites  Favorite[]
 
   @@index([categoryId])
   @@index([deletedAt])
@@ -144,10 +145,27 @@ model Customer {
   manzil    String?
   createdAt DateTime @default(now()) @map("created_at")
 
-  orders  Order[]
-  reviews Review[]
+  orders    Order[]
+  reviews   Review[]
+  favorites Favorite[]
 
   @@map("customers")
+}
+
+// Local (localStorage) favorites are the source of truth while a
+// customer is anonymous. Once their phone becomes known (first order
+// placed), local favorites are merged into this table so they follow
+// the customer across devices from then on — see FavoritesProvider.
+model Favorite {
+  id         String   @id @default(cuid())
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String   @map("product_id")
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([customerId, productId])
+  @@map("favorites")
 }
 
 model Order {
