@@ -12,7 +12,6 @@ interface CheckoutLine {
 
 interface CheckoutBody {
   ism: string;
-  familiya?: string;
   phone: string;
   viloyat: string;
   tuman?: string;
@@ -68,11 +67,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Rule 3.4: dedupe customers by phone in the same transaction as order creation.
+    // familiya is intentionally omitted here — checkout no longer collects it,
+    // and leaving it out of `update` (rather than setting null) preserves
+    // whatever a returning customer already has on file from another flow.
     const customer = await tx.customer.upsert({
       where: { phone: body.phone!.trim() },
-      update: { ism: body.ism!.trim(), familiya: body.familiya?.trim() || null, viloyat: body.viloyat, manzil: body.manzil },
+      update: { ism: body.ism!.trim(), viloyat: body.viloyat, manzil: body.manzil },
       create: {
-        ism: body.ism!.trim(), familiya: body.familiya?.trim() || null, phone: body.phone!.trim(),
+        ism: body.ism!.trim(), phone: body.phone!.trim(),
         viloyat: body.viloyat, manzil: body.manzil,
       },
     });

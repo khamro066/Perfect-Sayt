@@ -27,7 +27,7 @@ export default function AdminCustomersPage() {
           ) : (
             customers.map((c) => (
               <div key={c.phone} className="grid grid-cols-[1.2fr_1.2fr_1.6fr_0.9fr_0.9fr] items-center gap-3 border-b border-line py-3 text-[13px] text-ink">
-                <span className="font-bold">{c.ism} {c.familiya}</span>
+                <span className="font-bold">{c.ism}{c.familiya ? ` ${c.familiya}` : ""}</span>
                 <span className="text-muted">{c.phone}</span>
                 <span className="truncate text-muted">{c.manzil ?? "—"}</span>
                 <span className="font-bold">{formatSom(c.totalSpent)}</span>

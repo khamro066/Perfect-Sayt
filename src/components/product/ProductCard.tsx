@@ -9,16 +9,12 @@ import { Product } from "@/lib/types";
 import { formatSom } from "@/lib/format";
 import { useProductsData } from "@/lib/products-data";
 import { useFavorites } from "@/lib/favorites-context";
-import { useCart } from "@/lib/cart-context";
-import { useToast } from "@/lib/toast-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
   const t = useTranslations("productCard");
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { addLine } = useCart();
-  const { showToast } = useToast();
   const { getTotalStock } = useProductsData();
 
   const stock = getTotalStock(product.id);
@@ -28,14 +24,12 @@ export function ProductCard({ product }: { product: Product }) {
     : 0;
   const favorited = isFavorite(product.id);
 
+  // Cards no longer add to cart directly (no size/color chosen yet) —
+  // both states just take the shopper to the product page to pick options.
   function handleFooterClick(e: React.MouseEvent) {
+    e.preventDefault();
     e.stopPropagation();
-    if (soldOut) {
-      router.push(`/mahsulot/${product.id}`);
-      return;
-    }
-    addLine({ productId: product.id, colorHex: product.colors[0], size: product.sizes[0], qty: 1 });
-    showToast(t("toastAddedToCart"));
+    router.push(`/mahsulot/${product.id}`);
   }
 
   return (
@@ -114,7 +108,7 @@ export function ProductCard({ product }: { product: Product }) {
           onClick={handleFooterClick}
           className="mt-auto rounded-btn border border-accent px-2 py-2 text-[11px] font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-ink sm:px-2.5 sm:py-2.5 sm:text-[13px]"
         >
-          {soldOut ? t("preorder") : t("addToCart")}
+          {soldOut ? t("preorder") : t("viewProduct")}
         </button>
       </div>
     </Link>

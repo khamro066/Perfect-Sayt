@@ -30,7 +30,6 @@ export default function CheckoutPage() {
   };
 
   const [ism, setIsm] = useState(customer?.ism ?? "");
-  const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
   const [phone, setPhone] = useState(customer?.phone ?? "");
   const [viloyat, setViloyat] = useState(customer?.viloyat ?? "Toshkent shahri");
   const [tuman, setTuman] = useState("");
@@ -52,7 +51,7 @@ export default function CheckoutPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ism, familiya, phone, viloyat, tuman, manzil,
+        ism, phone, viloyat, tuman, manzil,
         deliveryMethod: delivery, payment,
         lines: lines.map((l) => ({ productId: l.productId, colorHex: l.colorHex, size: l.size, qty: l.qty })),
       }),
@@ -66,7 +65,10 @@ export default function CheckoutPage() {
     }
 
     const { orderNumber, isPreorder } = await res.json();
-    setCustomer({ ism, familiya, phone, viloyat, manzil });
+    // Spread the previous profile first so an existing familiya (set via
+    // the preorder flow or profile edit) isn't dropped from local state —
+    // checkout itself no longer collects or overwrites it.
+    setCustomer({ ...customer, ism, phone, viloyat, manzil });
     if (isPreorder) {
       showToast(t("toastBecamePreorder"));
     }
@@ -93,10 +95,7 @@ export default function CheckoutPage() {
       <div className="flex flex-wrap gap-7">
         <div className="flex min-w-0 flex-[2_1_440px] flex-col gap-4">
           <Card title={t("contactInfoTitle")}>
-            <div className="grid grid-cols-2 gap-3.5 max-sm:grid-cols-1">
-              <Field label={t("firstName")} required value={ism} onChange={setIsm} placeholder={t("firstNamePlaceholder")} />
-              <Field label={t("lastName")} value={familiya} onChange={setFamiliya} placeholder={t("lastNamePlaceholder")} />
-            </div>
+            <Field label={t("firstName")} required value={ism} onChange={setIsm} placeholder={t("firstNamePlaceholder")} />
             <Field label={t("phone")} required value={phone} onChange={setPhone} placeholder={t("phonePlaceholder")} className="mt-3.5" />
             <div className="mt-4 rounded-[12px] bg-accent-soft p-4 text-sm text-ink">
               <p className="font-semibold">{t("questionTitle")}</p>

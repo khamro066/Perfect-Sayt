@@ -165,8 +165,6 @@
     "contactInfoTitle": "Контактная информация",
     "firstName": "Имя",
     "firstNamePlaceholder": "Ваше имя",
-    "lastName": "Фамилия (необязательно)",
-    "lastNamePlaceholder": "Ваша фамилия",
     "phone": "Номер телефона",
     "phonePlaceholder": "+998 90 123 45 67",
     "questionTitle": "Есть вопросы?",
@@ -332,8 +330,7 @@
     "soldOutBadge": "Распродано",
     "addToFavorites": "Добавить в избранное",
     "preorder": "Предзаказ",
-    "addToCart": "В корзину",
-    "toastAddedToCart": "Добавлено в корзину"
+    "viewProduct": "Смотреть"
   },
   "miniCart": {
     "title": "Корзина · {count}",

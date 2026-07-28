@@ -165,8 +165,6 @@
     "contactInfoTitle": "Aloqa ma'lumotlari",
     "firstName": "Ism",
     "firstNamePlaceholder": "Ismingiz",
-    "lastName": "Familiya (ixtiyoriy)",
-    "lastNamePlaceholder": "Familiyangiz",
     "phone": "Telefon raqami",
     "phonePlaceholder": "+998 90 123 45 67",
     "questionTitle": "Savolingiz bormi?",
@@ -332,8 +330,7 @@
     "soldOutBadge": "Tugagan",
     "addToFavorites": "Sevimlilarga qo'shish",
     "preorder": "Oldindan buyurtma",
-    "addToCart": "Savatga qo'shish",
-    "toastAddedToCart": "Savatga qo'shildi"
+    "viewProduct": "Ko'rish"
   },
   "miniCart": {
     "title": "Savatcha · {count} ta",

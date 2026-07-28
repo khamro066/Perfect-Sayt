@@ -85,7 +85,7 @@ function ProfileContent() {
                 {customer.ism[0]}
               </span>
               <div>
-                <p className="text-sm font-semibold text-ink">{customer.ism} {customer.familiya}</p>
+                <p className="text-sm font-semibold text-ink">{customer.ism}{customer.familiya ? ` ${customer.familiya}` : ""}</p>
                 <p className="text-xs text-muted">{customer.phone}</p>
               </div>
             </div>

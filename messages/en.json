@@ -165,8 +165,6 @@
     "contactInfoTitle": "Contact information",
     "firstName": "First name",
     "firstNamePlaceholder": "Your first name",
-    "lastName": "Last name (optional)",
-    "lastNamePlaceholder": "Your last name",
     "phone": "Phone number",
     "phonePlaceholder": "+998 90 123 45 67",
     "questionTitle": "Have a question?",
@@ -332,8 +330,7 @@
     "soldOutBadge": "Sold out",
     "addToFavorites": "Add to favorites",
     "preorder": "Preorder",
-    "addToCart": "Add to cart",
-    "toastAddedToCart": "Added to cart"
+    "viewProduct": "View"
   },
   "miniCart": {
     "title": "Cart · {count}",
