@@ -107,6 +107,8 @@
     "lowStock": "Low stock — {count} pairs",
     "inStock": "In stock — {count} pairs",
     "colorLabel": "Color: {color}",
+    "colorAvailable": "{color} ({count} available)",
+    "colorSoldOut": "{color} (sold out)",
     "chooseSize": "Choose a size",
     "sizeChart": "Size chart",
     "lowStockWarning": "⚠ Only {count} left!",

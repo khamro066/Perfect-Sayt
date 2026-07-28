@@ -107,6 +107,8 @@
     "lowStock": "Осталось мало — {count} пар",
     "inStock": "В наличии — {count} пар",
     "colorLabel": "Цвет: {color}",
+    "colorAvailable": "{color} (в наличии: {count})",
+    "colorSoldOut": "{color} (нет в наличии)",
     "chooseSize": "Выберите размер",
     "sizeChart": "Таблица размеров",
     "lowStockWarning": "⚠ Осталось всего {count} шт.!",

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import clsx from "clsx";
 import { Star, Minus, Plus } from "lucide-react";
 import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
@@ -24,7 +25,7 @@ export default function ProductPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const t = useTranslations("product");
-  const { products, getStock, getTotalStock } = useProductsData();
+  const { products, getStock, getTotalStock, getColorStock } = useProductsData();
   const product = products.find((p) => p.id === params.id);
 
   const { addLine } = useCart();
@@ -175,21 +176,38 @@ export default function ProductPage() {
 
           <div className="mt-5">
             <p className="mb-2 text-sm text-ink">{t("colorLabel", { color: colorName(selectedColor) })}</p>
-            <div className="flex flex-wrap gap-2.5">
-              {product.colors.map((hex, i) => (
-                <button
-                  key={hex}
-                  onClick={() => {
-                    setColorIndex(i);
-                    setSize(null);
-                  }}
-                  className="h-[30px] w-[30px] rounded-full border border-line"
-                  style={{
-                    background: hex,
-                    boxShadow: i === colorIndex ? "0 0 0 2px var(--surface), 0 0 0 4px var(--accent)" : undefined,
-                  }}
-                />
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {product.colors.map((hex, i) => {
+                const colorStock = getColorStock(product.id, hex);
+                const colorSoldOut = colorStock <= 0;
+                const active = i === colorIndex;
+                return (
+                  <button
+                    key={hex}
+                    onClick={() => {
+                      setColorIndex(i);
+                      setSize(null);
+                    }}
+                    className={clsx(
+                      "flex items-center gap-2 rounded-pill border px-3 py-1.5 text-sm font-semibold transition-colors",
+                      active ? "border-accent bg-accent-soft" : "border-line bg-surface",
+                      colorSoldOut ? "text-muted" : "text-ink"
+                    )}
+                  >
+                    <span
+                      className="h-[18px] w-[18px] shrink-0 rounded-full border border-line"
+                      style={{
+                        background: hex,
+                        boxShadow: active ? "0 0 0 2px var(--surface), 0 0 0 4px var(--accent)" : undefined,
+                        opacity: colorSoldOut ? 0.5 : 1,
+                      }}
+                    />
+                    {colorSoldOut
+                      ? t("colorSoldOut", { color: colorName(hex) })
+                      : t("colorAvailable", { color: colorName(hex), count: colorStock })}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -203,22 +221,27 @@ export default function ProductPage() {
             <div className="flex flex-wrap gap-2">
               {product.sizes.map((s) => {
                 const stockForSize = getStock(product.id, selectedColor, s);
-                const disabled = stockForSize <= 0;
+                const outOfStock = stockForSize <= 0;
                 return (
                   <button
                     key={s}
-                    disabled={disabled}
                     onClick={() => setSize(s)}
-                    className="min-w-[46px] rounded-[10px] border px-2 py-2.5 text-sm font-semibold transition-colors"
-                    style={
-                      disabled
-                        ? { background: "var(--surface-2)", color: "var(--muted)", textDecoration: "line-through", opacity: 0.6, cursor: "not-allowed", borderColor: "var(--line)" }
+                    className={clsx(
+                      "relative min-w-[46px] overflow-hidden rounded-[10px] border px-2 py-2.5 text-sm transition-colors",
+                      outOfStock
+                        ? clsx(
+                            "bg-surface-2 font-normal text-muted opacity-70",
+                            size === s ? "border-[1.5px] border-accent" : "border-line"
+                          )
                         : size === s
-                        ? { background: "var(--accent)", color: "var(--accent-ink)", borderColor: "var(--accent)" }
-                        : { background: "var(--surface)", color: "var(--ink)", borderColor: "var(--line)" }
-                    }
+                        ? "border-accent bg-accent font-bold text-accent-ink"
+                        : "border-line bg-surface font-bold text-ink"
+                    )}
                   >
                     {s}
+                    {outOfStock && (
+                      <span className="pointer-events-none absolute left-[-15%] top-1/2 h-[1.5px] w-[130%] -translate-y-1/2 rotate-[-22deg] bg-muted" />
+                    )}
                   </button>
                 );
               })}

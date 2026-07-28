@@ -9,6 +9,7 @@ interface ProductsDataValue {
   loading: boolean;
   getStock: (productId: string, colorHex: string, size: number) => number;
   getTotalStock: (productId: string) => number;
+  getColorStock: (productId: string, colorHex: string) => number;
   refetch: () => Promise<void>;
 }
 
@@ -40,8 +41,13 @@ export function ProductsDataProvider({ children }: { children: React.ReactNode }
   const getTotalStock = (productId: string) =>
     stock.filter((s) => s.productId === productId).reduce((sum, s) => sum + s.quantity, 0);
 
+  const getColorStock = (productId: string, colorHex: string) =>
+    stock
+      .filter((s) => s.productId === productId && s.colorHex === colorHex)
+      .reduce((sum, s) => sum + s.quantity, 0);
+
   return (
-    <ProductsDataContext.Provider value={{ products, stock, loading, getStock, getTotalStock, refetch }}>
+    <ProductsDataContext.Provider value={{ products, stock, loading, getStock, getTotalStock, getColorStock, refetch }}>
       {children}
     </ProductsDataContext.Provider>
   );

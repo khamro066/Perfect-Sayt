@@ -107,6 +107,8 @@
     "lowStock": "Kam qoldi — {count} juft",
     "inStock": "Omborda mavjud — {count} juft",
     "colorLabel": "Rang: {color}",
+    "colorAvailable": "{color} ({count} ta mavjud)",
+    "colorSoldOut": "{color} (tugagan)",
     "chooseSize": "O'lchamni tanlang",
     "sizeChart": "O'lcham jadvali",
     "lowStockWarning": "⚠ Faqat {count} dona qoldi!",
