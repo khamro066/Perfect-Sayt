@@ -77,8 +77,8 @@ function ProfileContent() {
   return (
     <div className="mx-auto max-w-[1180px] px-6 py-9 pb-12">
       <h1 className="mb-6 text-2xl font-medium text-ink">{t("title")}</h1>
-      <div className="flex flex-wrap gap-7">
-        <aside className="h-fit w-full max-w-[280px] shrink-0 rounded-block border border-line bg-surface p-4">
+      <div className="flex flex-col gap-7 sm:flex-row sm:flex-wrap">
+        <aside className="h-fit w-full shrink-0 rounded-block border border-line bg-surface p-4 sm:max-w-[280px]">
           {customer && (
             <div className="mb-3 flex items-center gap-3 px-2 py-2">
               <span className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-accent-soft font-semibold text-accent">
