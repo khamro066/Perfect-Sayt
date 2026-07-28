@@ -247,8 +247,6 @@
     "customerInfoTitle": "Buyurtmachi ma'lumotlari",
     "firstName": "Ism",
     "firstNamePlaceholder": "Ismingiz",
-    "lastName": "Familiya",
-    "lastNamePlaceholder": "Familiyangiz",
     "phone": "Telefon raqami",
     "phonePlaceholder": "+998 90 123 45 67",
     "address": "Yetkazib berish manzili",
@@ -291,7 +289,6 @@
     "noFavorites": "Sevimlilar bo'sh",
     "noFavoritesDesc": "Yoqtirgan mahsulotlarni ♡ tugmasi orqali qo'shing.",
     "infoFirstName": "Ism",
-    "infoLastName": "Familiya",
     "infoPhone": "Telefon",
     "save": "Saqlash"
   },

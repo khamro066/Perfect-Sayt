@@ -60,7 +60,6 @@ function ProfileContent() {
   const [reviewTarget, setReviewTarget] = useState<{ orderNumber: string; productId: string; productName: string } | null>(null);
 
   const [ism, setIsm] = useState(customer?.ism ?? "");
-  const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
   const [phone, setPhone] = useState(customer?.phone ?? "");
 
   useEffect(() => {
@@ -201,22 +200,16 @@ function ProfileContent() {
           {tab === "info" && (
             !customer ? <GuestNotice /> : (
               <div className="max-w-[520px] rounded-block border border-line bg-surface p-6">
-                <div className="grid grid-cols-2 gap-3.5 max-sm:grid-cols-1">
-                  <label className="flex flex-col gap-1.5 text-sm text-ink">
-                    {t("infoFirstName")}
-                    <input value={ism} onChange={(e) => setIsm(e.target.value)} className="rounded-btn border border-line bg-bg px-3.5 py-2.5 outline-none" />
-                  </label>
-                  <label className="flex flex-col gap-1.5 text-sm text-ink">
-                    {t("infoLastName")}
-                    <input value={familiya} onChange={(e) => setFamiliya(e.target.value)} className="rounded-btn border border-line bg-bg px-3.5 py-2.5 outline-none" />
-                  </label>
-                </div>
+                <label className="flex flex-col gap-1.5 text-sm text-ink">
+                  {t("infoFirstName")}
+                  <input value={ism} onChange={(e) => setIsm(e.target.value)} className="rounded-btn border border-line bg-bg px-3.5 py-2.5 outline-none" />
+                </label>
                 <label className="mt-3.5 flex flex-col gap-1.5 text-sm text-ink">
                   {t("infoPhone")}
                   <input value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-btn border border-line bg-bg px-3.5 py-2.5 outline-none" />
                 </label>
                 <button
-                  onClick={() => setCustomer({ ...customer, ism, familiya, phone })}
+                  onClick={() => setCustomer({ ...customer, ism, phone })}
                   className="mt-4 rounded-btn bg-accent px-5 py-3 text-sm font-semibold text-accent-ink"
                 >
                   {t("save")}

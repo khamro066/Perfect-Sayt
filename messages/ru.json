@@ -247,8 +247,6 @@
     "customerInfoTitle": "Данные покупателя",
     "firstName": "Имя",
     "firstNamePlaceholder": "Ваше имя",
-    "lastName": "Фамилия",
-    "lastNamePlaceholder": "Ваша фамилия",
     "phone": "Номер телефона",
     "phonePlaceholder": "+998 90 123 45 67",
     "address": "Адрес доставки",
@@ -291,7 +289,6 @@
     "noFavorites": "Избранное пусто",
     "noFavoritesDesc": "Добавляйте понравившиеся товары кнопкой ♡.",
     "infoFirstName": "Имя",
-    "infoLastName": "Фамилия",
     "infoPhone": "Телефон",
     "save": "Сохранить"
   },

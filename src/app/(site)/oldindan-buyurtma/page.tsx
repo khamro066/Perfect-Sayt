@@ -55,7 +55,6 @@ function PreorderContent() {
   );
   const [qty, setQty] = useState(Number(searchParams.get("qty") ?? 3));
   const [ism, setIsm] = useState(customer?.ism ?? "");
-  const [familiya, setFamiliya] = useState(customer?.familiya ?? "");
   const [phone, setPhone] = useState(customer?.phone ?? "");
   const [manzil, setManzil] = useState("");
   const [payType, setPayType] = useState<"full" | "deposit">("deposit");
@@ -72,7 +71,7 @@ function PreorderContent() {
     const res = await fetch("/api/preorders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId: product.id, colorHex, size, qty, ism, familiya, phone, manzil, payType }),
+      body: JSON.stringify({ productId: product.id, colorHex, size, qty, ism, phone, manzil, payType }),
     });
     setSubmitting(false);
 
@@ -83,7 +82,9 @@ function PreorderContent() {
     }
 
     const { orderNumber } = await res.json();
-    setCustomer({ ism, familiya, phone, manzil });
+    // Spread the previous profile first so an existing familiya (set via
+    // checkout's earlier behavior or the profile edit tab) isn't dropped.
+    setCustomer({ ...customer, ism, phone, manzil });
     router.push(`/tasdiqlash/${orderNumber}?kind=preorder`);
   }
 
@@ -170,10 +171,7 @@ function PreorderContent() {
             </Card>
 
             <Card title={t("customerInfoTitle")}>
-              <div className="grid grid-cols-2 gap-3.5 max-sm:grid-cols-1">
-                <Field label={t("firstName")} value={ism} onChange={setIsm} placeholder={t("firstNamePlaceholder")} />
-                <Field label={t("lastName")} value={familiya} onChange={setFamiliya} placeholder={t("lastNamePlaceholder")} />
-              </div>
+              <Field label={t("firstName")} value={ism} onChange={setIsm} placeholder={t("firstNamePlaceholder")} />
               <Field label={t("phone")} value={phone} onChange={setPhone} placeholder={t("phonePlaceholder")} className="mt-3.5" />
               <Field label={t("address")} value={manzil} onChange={setManzil} placeholder={t("addressPlaceholder")} className="mt-3.5" />
             </Card>

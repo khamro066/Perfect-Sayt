@@ -7,7 +7,6 @@ interface PreorderBody {
   size: number;
   qty: number;
   ism: string;
-  familiya?: string;
   phone: string;
   manzil: string;
   payType: "full" | "deposit";
@@ -39,10 +38,13 @@ export async function POST(req: NextRequest) {
   const paymentLabel = body.payType === "full" ? "To'liq to'lov" : "Oldindan to'lov (30%)";
 
   const result = await prisma.$transaction(async (tx) => {
+    // familiya intentionally omitted — see orders/route.ts for why: no
+    // longer collected here, and omitting it from `update` (rather than
+    // writing null) preserves an existing value from another flow.
     const customer = await tx.customer.upsert({
       where: { phone: body.phone!.trim() },
-      update: { ism: body.ism!.trim(), familiya: body.familiya?.trim() || null, manzil: body.manzil },
-      create: { ism: body.ism!.trim(), familiya: body.familiya?.trim() || null, phone: body.phone!.trim(), manzil: body.manzil },
+      update: { ism: body.ism!.trim(), manzil: body.manzil },
+      create: { ism: body.ism!.trim(), phone: body.phone!.trim(), manzil: body.manzil },
     });
 
     let order;

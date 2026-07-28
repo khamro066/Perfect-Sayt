@@ -247,8 +247,6 @@
     "customerInfoTitle": "Customer information",
     "firstName": "First name",
     "firstNamePlaceholder": "Your first name",
-    "lastName": "Last name",
-    "lastNamePlaceholder": "Your last name",
     "phone": "Phone number",
     "phonePlaceholder": "+998 90 123 45 67",
     "address": "Delivery address",
@@ -291,7 +289,6 @@
     "noFavorites": "No favorites yet",
     "noFavoritesDesc": "Add products you like with the ♡ button.",
     "infoFirstName": "First name",
-    "infoLastName": "Last name",
     "infoPhone": "Phone",
     "save": "Save"
   },
