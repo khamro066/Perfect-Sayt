@@ -37,7 +37,7 @@ export function Header() {
           <button
             onClick={() => setMenuOpen(true)}
             aria-label={t("menu")}
-            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
+            className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 sm:h-[42px] sm:w-[42px]"
           >
             <Menu size={19} />
           </button>
@@ -48,16 +48,16 @@ export function Header() {
               alt="Perfect Shoes"
               width={140}
               height={40}
-              className="h-8 w-auto brightness-0 invert sm:h-9"
+              className="h-7 w-auto brightness-0 invert sm:h-9"
               priority
             />
           </Link>
 
-          <div className="relative flex shrink-0 items-center gap-1.5">
+          <div className="relative flex shrink-0 items-center gap-1 sm:gap-1.5">
             <button
               onClick={() => setSearchOpen((v) => !v)}
               aria-label={t("search")}
-              className="flex h-[42px] w-[42px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
+              className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 sm:h-[42px] sm:w-[42px]"
             >
               <SearchIcon size={17} />
             </button>
@@ -74,7 +74,7 @@ export function Header() {
               <button
                 onClick={handleCartClick}
                 aria-label={t("cart")}
-                className="relative flex h-[42px] w-[42px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10"
+                className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 sm:h-[42px] sm:w-[42px]"
               >
                 <ShoppingBag size={17} />
                 {count > 0 && (

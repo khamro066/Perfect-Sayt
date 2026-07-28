@@ -35,10 +35,10 @@ export function LanguageSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-label={t("label")}
         disabled={isPending}
-        className="flex h-[42px] items-center gap-1.5 rounded-full border border-deep-line px-3 text-deep-ink transition-colors hover:bg-white/10 disabled:opacity-60"
+        className="flex h-[38px] w-[38px] items-center justify-center gap-1.5 rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 disabled:opacity-60 sm:h-[42px] sm:w-auto sm:px-3"
       >
         <Globe size={16} />
-        <span className="text-xs font-semibold uppercase">{locale}</span>
+        <span className="hidden text-xs font-semibold uppercase sm:inline">{locale}</span>
       </button>
       {open && (
         <>

@@ -81,14 +81,14 @@ export default async function HomePage() {
         >
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden pl-[44%]"
+            className="pointer-events-none absolute inset-0 flex items-end justify-end overflow-hidden p-5 sm:items-center sm:justify-center sm:p-0 sm:pl-[44%]"
           >
             <Image
               src="/brand/perfect-logo-white.png"
               alt=""
               width={340}
               height={162}
-              className="h-auto w-[340px] max-w-full opacity-[0.12]"
+              className="h-auto w-[140px] max-w-[45%] opacity-[0.12] sm:w-[340px] sm:max-w-full"
             />
           </div>
           <div className="relative max-w-[640px]">
