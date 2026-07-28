@@ -104,7 +104,7 @@ function PreorderContent() {
         <div className="mt-8">
           <h2 className="text-2xl font-medium text-ink">{t("candidatesTitle")}</h2>
           <p className="mt-1 text-sm text-muted">{t("candidatesDesc")}</p>
-          <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-5">
             {preorderCandidates.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

@@ -29,7 +29,7 @@ function ProductRow({ title, href, viewAllLabel, products }: { title: string; hr
           {viewAllLabel}
         </Link>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,260px))] gap-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(230px,260px))] sm:gap-5">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
@@ -178,7 +178,7 @@ export default async function HomePage() {
             {t("viewAll")}
           </Link>
         </div>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,260px))] gap-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(230px,260px))] sm:gap-5">
           {discounted.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

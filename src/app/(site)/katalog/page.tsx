@@ -190,7 +190,7 @@ function CatalogContent() {
               <p className="mt-1 text-sm text-muted">{t("noResultsDesc")}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-5">
               {results.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
