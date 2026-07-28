@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Heart, Star } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatSom } from "@/lib/format";
 import { useProductsData } from "@/lib/products-data";
@@ -95,11 +95,6 @@ export function ProductCard({ product }: { product: Product }) {
         <h3 className="line-clamp-2 font-heading text-[13px] font-bold leading-tight text-ink sm:line-clamp-none sm:text-[19px]">
           {product.name}
         </h3>
-        <div className="flex items-center gap-1 text-[10px] text-muted sm:text-[12.5px]">
-          <Star size={13} className="fill-star text-star" />
-          <span>{product.rating.toFixed(1)}</span>
-          <span>({product.ratingCount})</span>
-        </div>
         <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
           <span className="whitespace-nowrap text-[13px] font-bold text-accent sm:text-base">{formatSom(product.price)}</span>
           {product.oldPrice && (

@@ -9,6 +9,7 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
   const t = useTranslations("menu");
 
   const PRIMARY_LINKS = [
+    { label: t("home"), href: "/" },
     { label: t("newArrivals"), href: "/katalog?sort=new" },
     { label: t("sale"), href: "/katalog?sale=1" },
     { label: t("catalog"), href: "/katalog" },
