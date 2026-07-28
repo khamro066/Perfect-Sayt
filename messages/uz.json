@@ -98,7 +98,8 @@
     "onSaleCheckbox": "Chegirmadagi mahsulotlar",
     "inStockCheckbox": "Omborda mavjud",
     "onlyNewCheckbox": "Yangi mahsulotlar",
-    "popularCheckbox": "Mashhur mahsulotlar"
+    "popularCheckbox": "Mashhur mahsulotlar",
+    "applyButton": "Qidirish"
   },
   "product": {
     "home": "Bosh sahifa",

@@ -98,7 +98,8 @@
     "onSaleCheckbox": "Товары со скидкой",
     "inStockCheckbox": "В наличии",
     "onlyNewCheckbox": "Только новинки",
-    "popularCheckbox": "Популярные товары"
+    "popularCheckbox": "Популярные товары",
+    "applyButton": "Найти"
   },
   "product": {
     "home": "Главная",

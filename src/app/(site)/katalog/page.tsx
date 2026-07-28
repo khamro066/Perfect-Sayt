@@ -8,6 +8,8 @@ import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useProductsData } from "@/lib/products-data";
 import { formatSom } from "@/lib/format";
+import { colorName } from "@/lib/colors";
+import { Product } from "@/lib/types";
 
 const GENDERS = ["Erkaklar", "Ayollar", "Bolalar", "Uniseks"];
 const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
@@ -19,6 +21,51 @@ const MATERIALS = ["Charm", "Zamsh", "Mesh", "Tekstil", "Rezina"];
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
+
+interface FilterValues {
+  sizes: number[];
+  genders: string[];
+  categories: string[];
+  brands: string[];
+  colors: string[];
+  materials: string[];
+  priceMin: number;
+  priceMax: number;
+  minRating: number;
+  onSale: boolean;
+  inStock: boolean;
+  onlyNew: boolean;
+  popular: boolean;
+}
+
+type FacetKey = keyof Omit<FilterValues, "priceMin" | "priceMax">;
+
+function matchesFilters(
+  p: Product,
+  f: FilterValues,
+  getTotalStock: (id: string) => number,
+  except?: FacetKey
+): boolean {
+  if (except !== "sizes" && f.sizes.length && !f.sizes.some((s) => p.sizes.includes(s))) return false;
+  if (except !== "genders" && f.genders.length && !f.genders.includes(p.gender)) return false;
+  if (except !== "categories" && f.categories.length && !f.categories.includes(p.category)) return false;
+  if (except !== "brands" && f.brands.length && !f.brands.includes(p.brand)) return false;
+  if (except !== "colors" && f.colors.length && !f.colors.some((c) => p.colors.includes(c))) return false;
+  if (except !== "materials" && f.materials.length && !f.materials.includes(p.material)) return false;
+  if (p.price < f.priceMin || p.price > f.priceMax) return false;
+  if (except !== "minRating" && f.minRating && p.rating < f.minRating) return false;
+  if (except !== "onSale" && f.onSale && !p.oldPrice) return false;
+  if (except !== "inStock" && f.inStock && getTotalStock(p.id) <= 0) return false;
+  if (except !== "onlyNew" && f.onlyNew && !p.isNew) return false;
+  if (except !== "popular" && f.popular && p.sold < 50) return false;
+  return true;
+}
+
+const EMPTY_FILTERS: FilterValues = {
+  sizes: [], genders: [], categories: [], brands: [], colors: [], materials: [],
+  priceMin: 0, priceMax: 2000000, minRating: 0,
+  onSale: false, inStock: false, onlyNew: false, popular: false,
+};
 
 function CatalogContent() {
   const searchParams = useSearchParams();
@@ -41,56 +88,61 @@ function CatalogContent() {
       .then(setAllCategories);
   }, []);
 
-  const [sizes, setSizes] = useState<number[]>([]);
-  const [genders, setGenders] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>(
-    searchParams.get("category") ? [searchParams.get("category")!] : []
-  );
-  const [brands, setBrands] = useState<string[]>([]);
-  const [colors, setColors] = useState<string[]>([]);
-  const [materials, setMaterials] = useState<string[]>([]);
-  const [priceMin, setPriceMin] = useState(0);
-  const [priceMax, setPriceMax] = useState(2000000);
-  const [minRating, setMinRating] = useState(0);
-  const [onSale, setOnSale] = useState(searchParams.get("sale") === "1");
-  const [inStock, setInStock] = useState(false);
-  const [onlyNew, setOnlyNew] = useState(false);
-  const [popular, setPopular] = useState(false);
+  const initialFilters: FilterValues = {
+    ...EMPTY_FILTERS,
+    categories: searchParams.get("category") ? [searchParams.get("category")!] : [],
+    onSale: searchParams.get("sale") === "1",
+  };
+
+  const [sizes, setSizes] = useState<number[]>(initialFilters.sizes);
+  const [genders, setGenders] = useState<string[]>(initialFilters.genders);
+  const [categories, setCategories] = useState<string[]>(initialFilters.categories);
+  const [brands, setBrands] = useState<string[]>(initialFilters.brands);
+  const [colors, setColors] = useState<string[]>(initialFilters.colors);
+  const [materials, setMaterials] = useState<string[]>(initialFilters.materials);
+  const [priceMin, setPriceMin] = useState(initialFilters.priceMin);
+  const [priceMax, setPriceMax] = useState(initialFilters.priceMax);
+  const [minRating, setMinRating] = useState(initialFilters.minRating);
+  const [onSale, setOnSale] = useState(initialFilters.onSale);
+  const [inStock, setInStock] = useState(initialFilters.inStock);
+  const [onlyNew, setOnlyNew] = useState(initialFilters.onlyNew);
+  const [popular, setPopular] = useState(initialFilters.popular);
   const [sort, setSort] = useState(searchParams.get("sort") ?? "new");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Filters only take effect once "Qidirish" is pressed — this snapshot,
+  // not the live draft state above, drives the product grid.
+  const [appliedFilters, setAppliedFilters] = useState<FilterValues>(initialFilters);
+
+  const draftFilters: FilterValues = {
+    sizes, genders, categories, brands, colors, materials,
+    priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular,
+  };
+
+  function applyFilters() {
+    setAppliedFilters(draftFilters);
+    setMobileFiltersOpen(false);
+  }
+
   function clearFilters() {
-    setSizes([]);
-    setGenders([]);
-    setCategories([]);
-    setBrands([]);
-    setColors([]);
-    setMaterials([]);
-    setPriceMin(0);
-    setPriceMax(2000000);
-    setMinRating(0);
-    setOnSale(false);
-    setInStock(false);
-    setOnlyNew(false);
-    setPopular(false);
+    setSizes(EMPTY_FILTERS.sizes);
+    setGenders(EMPTY_FILTERS.genders);
+    setCategories(EMPTY_FILTERS.categories);
+    setBrands(EMPTY_FILTERS.brands);
+    setColors(EMPTY_FILTERS.colors);
+    setMaterials(EMPTY_FILTERS.materials);
+    setPriceMin(EMPTY_FILTERS.priceMin);
+    setPriceMax(EMPTY_FILTERS.priceMax);
+    setMinRating(EMPTY_FILTERS.minRating);
+    setOnSale(EMPTY_FILTERS.onSale);
+    setInStock(EMPTY_FILTERS.inStock);
+    setOnlyNew(EMPTY_FILTERS.onlyNew);
+    setPopular(EMPTY_FILTERS.popular);
+    setAppliedFilters(EMPTY_FILTERS);
   }
 
   const results = useMemo(() => {
-    let list = products.filter((p) => {
-      if (sizes.length && !sizes.some((s) => p.sizes.includes(s))) return false;
-      if (genders.length && !genders.includes(p.gender)) return false;
-      if (categories.length && !categories.includes(p.category)) return false;
-      if (brands.length && !brands.includes(p.brand)) return false;
-      if (colors.length && !colors.some((c) => p.colors.includes(c))) return false;
-      if (materials.length && !materials.includes(p.material)) return false;
-      if (p.price < priceMin || p.price > priceMax) return false;
-      if (minRating && p.rating < minRating) return false;
-      if (onSale && !p.oldPrice) return false;
-      if (inStock && getTotalStock(p.id) <= 0) return false;
-      if (onlyNew && !p.isNew) return false;
-      if (popular && p.sold < 50) return false;
-      return true;
-    });
+    let list = products.filter((p) => matchesFilters(p, appliedFilters, getTotalStock));
 
     list = [...list].sort((a, b) => {
       switch (sort) {
@@ -113,7 +165,7 @@ function CatalogContent() {
     });
 
     return list;
-  }, [products, sizes, genders, categories, brands, colors, materials, priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular, sort, getTotalStock]);
+  }, [products, appliedFilters, sort, getTotalStock]);
 
   return (
     <div className="mx-auto max-w-[1280px] px-6 py-7 pb-10">
@@ -163,7 +215,8 @@ function CatalogContent() {
                 brands, setBrands, colors, setColors, materials, setMaterials,
                 priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
                 onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
-                clearFilters, allCategories,
+                clearFilters, allCategories, applyFilters,
+                products, getTotalStock, draftFilters,
               }}
             />
           </div>
@@ -178,7 +231,8 @@ function CatalogContent() {
               brands, setBrands, colors, setColors, materials, setMaterials,
               priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
               onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
-              clearFilters, allCategories,
+              clearFilters, allCategories, applyFilters,
+              products, getTotalStock, draftFilters,
             }}
           />
         </aside>
@@ -218,6 +272,10 @@ interface FilterProps {
   popular: boolean; setPopular: (v: boolean) => void;
   clearFilters: () => void;
   allCategories: string[];
+  applyFilters: () => void;
+  products: Product[];
+  getTotalStock: (id: string) => number;
+  draftFilters: FilterValues;
 }
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
@@ -236,6 +294,13 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 
 function FilterSidebar(p: FilterProps) {
   const t = useTranslations("catalog");
+
+  function countFor(except: FacetKey, predicate: (product: Product) => boolean) {
+    return p.products.filter(
+      (product) => matchesFilters(product, p.draftFilters, p.getTotalStock, except) && predicate(product)
+    ).length;
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
@@ -256,7 +321,7 @@ function FilterSidebar(p: FilterProps) {
                 p.sizes.includes(s) ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface text-ink"
               )}
             >
-              {s}
+              {s} ({countFor("sizes", (product) => product.sizes.includes(s))})
             </button>
           ))}
         </div>
@@ -266,7 +331,7 @@ function FilterSidebar(p: FilterProps) {
         <div className="flex flex-wrap gap-1.5">
           {GENDERS.map((g) => (
             <Pill key={g} active={p.genders.includes(g)} onClick={() => p.setGenders(toggle(p.genders, g))}>
-              {g}
+              {g} ({countFor("genders", (product) => product.gender === g)})
             </Pill>
           ))}
         </div>
@@ -276,7 +341,7 @@ function FilterSidebar(p: FilterProps) {
         <div className="flex flex-wrap gap-1.5">
           {p.allCategories.map((c) => (
             <Pill key={c} active={p.categories.includes(c)} onClick={() => p.setCategories(toggle(p.categories, c))}>
-              {c}
+              {c} ({countFor("categories", (product) => product.category === c)})
             </Pill>
           ))}
         </div>
@@ -286,24 +351,24 @@ function FilterSidebar(p: FilterProps) {
         <div className="flex flex-wrap gap-1.5">
           {BRANDS.map((b) => (
             <Pill key={b} active={p.brands.includes(b)} onClick={() => p.setBrands(toggle(p.brands, b))}>
-              {b}
+              {b} ({countFor("brands", (product) => product.brand === b)})
             </Pill>
           ))}
         </div>
       </FilterSection>
 
       <FilterSection label={t("colorLabel")}>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {COLORS.map((hex) => (
-            <button
-              key={hex}
-              onClick={() => p.setColors(toggle(p.colors, hex))}
-              className="h-[30px] w-[30px] rounded-full border border-line"
-              style={{
-                background: hex,
-                boxShadow: p.colors.includes(hex) ? `0 0 0 2px var(--surface), 0 0 0 4px var(--accent)` : undefined,
-              }}
-            />
+            <Pill key={hex} active={p.colors.includes(hex)} onClick={() => p.setColors(toggle(p.colors, hex))}>
+              <span className="inline-flex items-center gap-1.5">
+                <span
+                  className="h-3 w-3 shrink-0 rounded-full border border-line"
+                  style={{ background: hex }}
+                />
+                {colorName(hex)} ({countFor("colors", (product) => product.colors.includes(hex))})
+              </span>
+            </Pill>
           ))}
         </div>
       </FilterSection>
@@ -312,7 +377,7 @@ function FilterSidebar(p: FilterProps) {
         <div className="flex flex-wrap gap-1.5">
           {MATERIALS.map((m) => (
             <Pill key={m} active={p.materials.includes(m)} onClick={() => p.setMaterials(toggle(p.materials, m))}>
-              {m}
+              {m} ({countFor("materials", (product) => product.material === m)})
             </Pill>
           ))}
         </div>
@@ -347,30 +412,39 @@ function FilterSidebar(p: FilterProps) {
               active={p.minRating === r}
               onClick={() => p.setMinRating(p.minRating === r ? 0 : r)}
             >
-              ★ {r}+
+              ★ {r}+ ({countFor("minRating", (product) => product.rating >= r)})
             </Pill>
           ))}
         </div>
       </FilterSection>
 
       <div className="flex flex-col gap-2.5 border-t border-line pt-4">
-        {[
-          { label: t("onSaleCheckbox"), value: p.onSale, set: p.setOnSale },
-          { label: t("inStockCheckbox"), value: p.inStock, set: p.setInStock },
-          { label: t("onlyNewCheckbox"), value: p.onlyNew, set: p.setOnlyNew },
-          { label: t("popularCheckbox"), value: p.popular, set: p.setPopular },
-        ].map((c) => (
-          <label key={c.label} className="flex items-center gap-2.5 text-sm text-ink">
+        {(
+          [
+            { key: "onSale" as const, label: t("onSaleCheckbox"), value: p.onSale, set: p.setOnSale, predicate: (product: Product) => !!product.oldPrice },
+            { key: "inStock" as const, label: t("inStockCheckbox"), value: p.inStock, set: p.setInStock, predicate: (product: Product) => p.getTotalStock(product.id) > 0 },
+            { key: "onlyNew" as const, label: t("onlyNewCheckbox"), value: p.onlyNew, set: p.setOnlyNew, predicate: (product: Product) => !!product.isNew },
+            { key: "popular" as const, label: t("popularCheckbox"), value: p.popular, set: p.setPopular, predicate: (product: Product) => product.sold >= 50 },
+          ]
+        ).map((c) => (
+          <label key={c.key} className="flex items-center gap-2.5 text-sm text-ink">
             <input
               type="checkbox"
               checked={c.value}
               onChange={(e) => c.set(e.target.checked)}
               className="h-[17px] w-[17px] accent-accent"
             />
-            {c.label}
+            {c.label} ({countFor(c.key, c.predicate)})
           </label>
         ))}
       </div>
+
+      <button
+        onClick={p.applyFilters}
+        className="mt-1 w-full rounded-btn bg-accent py-3 text-sm font-semibold text-accent-ink transition-colors hover:opacity-90"
+      >
+        {t("applyButton")}
+      </button>
     </div>
   );
 }
