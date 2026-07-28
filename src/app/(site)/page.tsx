@@ -106,12 +106,13 @@ export default async function HomePage() {
       </div>
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] divide-x divide-line rounded-card border border-line bg-surface">
+        <div className="grid grid-cols-3 divide-x divide-line rounded-card border border-line bg-surface sm:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
           {TRUST_ITEMS.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="flex flex-col gap-2 p-6">
-              <Icon size={28} className="text-accent" />
-              <p className="font-semibold text-ink">{title}</p>
-              <p className="text-sm text-muted">{desc}</p>
+            <div key={title} className="flex flex-col items-center gap-1 p-2.5 text-center sm:items-start sm:gap-2 sm:p-6 sm:text-left">
+              <Icon size={18} className="text-accent sm:hidden" />
+              <Icon size={28} className="hidden text-accent sm:block" />
+              <p className="text-[10.5px] font-semibold leading-tight text-ink sm:text-base">{title}</p>
+              <p className="hidden text-sm text-muted sm:block">{desc}</p>
             </div>
           ))}
         </div>
