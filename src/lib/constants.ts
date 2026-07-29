@@ -15,3 +15,9 @@ export const PROVINCES = [
 
 export const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45] as const;
 
+// Reserved sentinel size for accessory products (no real size dimension) —
+// never collides with a real shoe size. See Product.kind in schema.prisma.
+export const ACCESSORY_SIZE = 0;
+
+export type ProductKind = "shoe" | "accessory";
+

@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   brand: string;
   gender: string;
+  kind: "shoe" | "accessory";
   category: string;
   material: string;
   price: number;

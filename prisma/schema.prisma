@@ -71,6 +71,14 @@ model Product {
   name           String
   brand          String
   gender         String
+  // "shoe" | "accessory" — accessories (e.g. Koshelyok) have no real size
+  // dimension. Rather than making Stock/ProductSize/OrderLine.size
+  // nullable (a much larger change touching cart/checkout/order history),
+  // accessory products use a single reserved sentinel size (see
+  // ACCESSORY_SIZE in src/lib/constants.ts) so the entire existing
+  // stock/cart/order pipeline works unchanged; UI just conditionally
+  // skips size selection/display for this kind.
+  kind           String    @default("shoe")
   categoryId     String?   @map("category_id")
   // Nullable + SetNull so a historical (soft-deleted, order-history-linked)
   // product can never block deleting the category it used to belong to —

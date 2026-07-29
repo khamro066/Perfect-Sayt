@@ -56,7 +56,9 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-heading text-sm font-semibold text-ink">{product.name}</p>
                       <p className="text-xs text-muted">
-                        {t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
+                        {product.kind === "accessory"
+                          ? t("colorOnly", { color: colorName(line.colorHex) })
+                          : t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <button

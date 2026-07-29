@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/lib/toast-context";
 import { ALL_COLORS, colorName } from "@/lib/colors";
-import { SIZES } from "@/lib/constants";
+import { ACCESSORY_SIZE, SIZES } from "@/lib/constants";
 import { formatSom } from "@/lib/format";
 import { Product } from "@/lib/types";
 
@@ -42,8 +42,12 @@ export default function AdminProductsPage() {
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [kind, setKind] = useState<"shoe" | "accessory">("shoe");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
+  // Accessories have no real size dimension — internally they always use
+  // the single reserved ACCESSORY_SIZE, never the shoe size picker below.
+  const effectiveSizes = kind === "accessory" ? [ACCESSORY_SIZE] : selectedSizes;
   const [quantities, setQuantities] = useState<Record<string, string>>({});
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [hasDiscount, setHasDiscount] = useState(false);
@@ -103,7 +107,7 @@ export default function AdminProductsPage() {
       showToast("Kamida bitta rangni tanlang");
       return;
     }
-    if (selectedSizes.length === 0) {
+    if (kind === "shoe" && selectedSizes.length === 0) {
       showToast("Kamida bitta o'lchamni tanlang");
       return;
     }
@@ -130,7 +134,7 @@ export default function AdminProductsPage() {
       const finalPrice = hasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
 
       const stockEntries = selectedColors.flatMap((hex) =>
-        selectedSizes.map((size) => ({
+        effectiveSizes.map((size) => ({
           colorHex: hex,
           size,
           quantity: Math.max(0, Math.floor(Number(quantities[`${hex}-${size}`]) || 0)),
@@ -144,6 +148,7 @@ export default function AdminProductsPage() {
           name: name.trim(),
           brand: brand.trim() || "Perfect",
           gender: "Erkaklar",
+          kind,
           category,
           material: "Charm",
           price: finalPrice,
@@ -151,7 +156,7 @@ export default function AdminProductsPage() {
           description: "",
           images: imageUrls,
           colors: selectedColors,
-          sizes: selectedSizes,
+          sizes: effectiveSizes,
           stockEntries,
         }),
       });
@@ -192,6 +197,34 @@ export default function AdminProductsPage() {
         </div>
 
         <div className="mt-4">
+          <p className="mb-2 text-[13px] font-semibold text-ink">Mahsulot turi</p>
+          <div className="flex gap-2">
+            {(
+              [
+                { value: "shoe" as const, label: "Oyoq kiyim" },
+                { value: "accessory" as const, label: "Aksessuar" },
+              ]
+            ).map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => {
+                  setKind(o.value);
+                  setSelectedSizes([]);
+                  setQuantities({});
+                }}
+                className={clsx(
+                  "rounded-pill border px-3.5 py-2 text-[13px] font-semibold",
+                  kind === o.value ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface text-ink"
+                )}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
           <p className="mb-2 text-[13px] font-semibold text-ink">Rang(lar)</p>
           <div className="flex flex-wrap gap-2.5">
             {ALL_COLORS.map((hex) => (
@@ -212,38 +245,49 @@ export default function AdminProductsPage() {
           </div>
         </div>
 
-        <div className="mt-4">
-          <p className="mb-2 text-[13px] font-semibold text-ink">O&apos;lchamlar</p>
-          <div className="flex flex-wrap gap-2">
-            {SIZES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setSelectedSizes(toggle(selectedSizes, s))}
-                className={clsx(
-                  "min-w-[46px] rounded-[10px] border px-2 py-2.5 text-sm font-semibold",
-                  selectedSizes.includes(s)
-                    ? "border-accent bg-accent text-accent-ink"
-                    : "border-line bg-surface text-ink"
-                )}
-              >
-                {s}
-              </button>
-            ))}
+        {kind === "shoe" && (
+          <div className="mt-4">
+            <p className="mb-2 text-[13px] font-semibold text-ink">O&apos;lchamlar</p>
+            <div className="flex flex-wrap gap-2">
+              {SIZES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSelectedSizes(toggle(selectedSizes, s))}
+                  className={clsx(
+                    "min-w-[46px] rounded-[10px] border px-2 py-2.5 text-sm font-semibold",
+                    selectedSizes.includes(s)
+                      ? "border-accent bg-accent text-accent-ink"
+                      : "border-line bg-surface text-ink"
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {selectedColors.length > 0 && selectedSizes.length > 0 && (
+        {selectedColors.length > 0 && effectiveSizes.length > 0 && (
           <div className="mt-4 rounded-[12px] bg-surface-2 p-4">
             <p className="mb-1 text-[13px] font-semibold text-ink">Boshlang&apos;ich qoldiqlar</p>
             <p className="mb-3 text-xs text-muted">
-              Har bir rang × o&apos;lcham birikmasi uchun aniq miqdorni kiriting.
+              {kind === "shoe"
+                ? "Har bir rang × o'lcham birikmasi uchun aniq miqdorni kiriting."
+                : "Har bir rang uchun aniq miqdorni kiriting."}
             </p>
-            <div className="grid grid-cols-[1.4fr_0.8fr_1fr_1fr] gap-3 border-b border-line pb-2 text-xs font-bold uppercase tracking-[0.05em] text-muted">
-              <span>Rang</span><span>O&apos;lcham</span><span>Qoldiq</span><span>Holat</span>
+            <div
+              className={clsx(
+                "grid gap-3 border-b border-line pb-2 text-xs font-bold uppercase tracking-[0.05em] text-muted",
+                kind === "shoe" ? "grid-cols-[1.4fr_0.8fr_1fr_1fr]" : "grid-cols-[1.4fr_1fr_1fr]"
+              )}
+            >
+              <span>Rang</span>
+              {kind === "shoe" && <span>O&apos;lcham</span>}
+              <span>Qoldiq</span><span>Holat</span>
             </div>
             {selectedColors.flatMap((hex) =>
-              selectedSizes
+              effectiveSizes
                 .slice()
                 .sort((a, b) => a - b)
                 .map((size) => {
@@ -253,13 +297,16 @@ export default function AdminProductsPage() {
                   return (
                     <div
                       key={key}
-                      className="grid grid-cols-[1.4fr_0.8fr_1fr_1fr] items-center gap-3 border-b border-line py-2.5 text-[13.5px] text-ink last:border-b-0"
+                      className={clsx(
+                        "grid items-center gap-3 border-b border-line py-2.5 text-[13.5px] text-ink last:border-b-0",
+                        kind === "shoe" ? "grid-cols-[1.4fr_0.8fr_1fr_1fr]" : "grid-cols-[1.4fr_1fr_1fr]"
+                      )}
                     >
                       <span className="flex items-center gap-1.5 text-muted">
                         <span className="h-3.5 w-3.5 rounded-full border border-line" style={{ background: hex }} />
                         {colorName(hex)}
                       </span>
-                      <span>{size}</span>
+                      {kind === "shoe" && <span>{size}</span>}
                       <input
                         type="number"
                         min={0}

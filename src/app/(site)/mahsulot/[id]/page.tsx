@@ -17,6 +17,7 @@ import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { SizeChartModal } from "@/components/product/SizeChartModal";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Product, Review } from "@/lib/types";
+import { ACCESSORY_SIZE } from "@/lib/constants";
 
 const RECENT_KEY = "perfect-shoes-recent";
 const PREORDER_MIN_QTY = 3;
@@ -50,7 +51,9 @@ export default function ProductPage() {
     ids = [product.id, ...ids.filter((id) => id !== product.id)].slice(0, 9);
     localStorage.setItem(RECENT_KEY, JSON.stringify(ids));
     setColorIndex(0);
-    setSize(null);
+    // Accessories have no real size step — implicitly "select" the
+    // reserved sentinel size so Add to Cart works without that UI.
+    setSize(product.kind === "accessory" ? ACCESSORY_SIZE : null);
     setQty(1);
     setGalleryIndex(0);
     window.scrollTo(0, 0);
@@ -71,6 +74,7 @@ export default function ProductPage() {
     );
   }
 
+  const isAccessory = product.kind === "accessory";
   const selectedColor = product.colors[colorIndex];
   const totalStock = getTotalStock(product.id);
   const selectedSizeStock = size !== null ? getStock(product.id, selectedColor, size) : 0;
@@ -83,8 +87,12 @@ export default function ProductPage() {
   const images = product.images ?? [];
 
   const recentProducts = recentIds.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
-  const recommended = products.filter((p) => p.id !== product.id && p.gender === product.gender).slice(0, 4);
-  const similar = products.filter((p) => p.id !== product.id && p.brand === product.brand).slice(0, 4);
+  const recommended = products
+    .filter((p) => p.id !== product.id && p.kind === product.kind && p.gender === product.gender)
+    .slice(0, 4);
+  const similar = products
+    .filter((p) => p.id !== product.id && p.kind === product.kind && p.brand === product.brand)
+    .slice(0, 4);
 
   function handleAddToCart(goToCheckout: boolean) {
     if (size === null) {
@@ -186,7 +194,7 @@ export default function ProductPage() {
                     key={hex}
                     onClick={() => {
                       setColorIndex(i);
-                      setSize(null);
+                      setSize(isAccessory ? ACCESSORY_SIZE : null);
                     }}
                     className={clsx(
                       "flex items-center gap-2 rounded-pill border px-3 py-1.5 text-sm font-semibold transition-colors",
@@ -211,45 +219,47 @@ export default function ProductPage() {
             </div>
           </div>
 
-          <div className="mt-5">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm text-ink">{t("chooseSize")}</p>
-              <button onClick={() => setSizeChartOpen(true)} className="text-sm font-semibold text-accent">
-                {t("sizeChart")}
-              </button>
+          {!isAccessory && (
+            <div className="mt-5">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm text-ink">{t("chooseSize")}</p>
+                <button onClick={() => setSizeChartOpen(true)} className="text-sm font-semibold text-accent">
+                  {t("sizeChart")}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((s) => {
+                  const stockForSize = getStock(product.id, selectedColor, s);
+                  const outOfStock = stockForSize <= 0;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={clsx(
+                        "relative min-w-[46px] overflow-hidden rounded-[10px] border px-2 py-2.5 text-sm transition-colors",
+                        outOfStock
+                          ? clsx(
+                              "bg-surface-2 font-normal text-muted opacity-70",
+                              size === s ? "border-[1.5px] border-accent" : "border-line"
+                            )
+                          : size === s
+                          ? "border-accent bg-accent font-bold text-accent-ink"
+                          : "border-line bg-surface font-bold text-ink"
+                      )}
+                    >
+                      {s}
+                      {outOfStock && (
+                        <span className="pointer-events-none absolute left-[-15%] top-1/2 h-[1.5px] w-[130%] -translate-y-1/2 rotate-[-22deg] bg-muted" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {size !== null && selectedSizeStock > 0 && selectedSizeStock < 3 && (
+                <p className="mt-2 text-sm font-semibold text-warning">{t("lowStockWarning", { count: selectedSizeStock })}</p>
+              )}
             </div>
-            <div className="flex flex-wrap gap-2">
-              {product.sizes.map((s) => {
-                const stockForSize = getStock(product.id, selectedColor, s);
-                const outOfStock = stockForSize <= 0;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    className={clsx(
-                      "relative min-w-[46px] overflow-hidden rounded-[10px] border px-2 py-2.5 text-sm transition-colors",
-                      outOfStock
-                        ? clsx(
-                            "bg-surface-2 font-normal text-muted opacity-70",
-                            size === s ? "border-[1.5px] border-accent" : "border-line"
-                          )
-                        : size === s
-                        ? "border-accent bg-accent font-bold text-accent-ink"
-                        : "border-line bg-surface font-bold text-ink"
-                    )}
-                  >
-                    {s}
-                    {outOfStock && (
-                      <span className="pointer-events-none absolute left-[-15%] top-1/2 h-[1.5px] w-[130%] -translate-y-1/2 rotate-[-22deg] bg-muted" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            {size !== null && selectedSizeStock > 0 && selectedSizeStock < 3 && (
-              <p className="mt-2 text-sm font-semibold text-warning">{t("lowStockWarning", { count: selectedSizeStock })}</p>
-            )}
-          </div>
+          )}
 
           <div className="mt-5">
             <p className="mb-2 text-sm text-ink">{t("quantity")}</p>

@@ -66,7 +66,9 @@ export default function CartPage() {
                   <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{product.brand}</span>
                   <p className="font-heading text-lg text-ink">{product.name}</p>
                   <p className="text-sm text-muted">
-                    {t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
+                    {product.kind === "accessory"
+                      ? t("colorOnly", { color: colorName(line.colorHex) })
+                      : t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
                   </p>
                   <button
                     onClick={() => removeLine(line.productId, line.colorHex, line.size)}

@@ -39,6 +39,7 @@ interface CreateProductBody {
   name: string;
   brand?: string;
   gender: string;
+  kind?: string;
   category: string;
   material?: string;
   price: number;
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
       name: body.name.trim(),
       brand: body.brand?.trim() || "Perfect",
       gender: body.gender || "Erkaklar",
+      kind: body.kind === "accessory" ? "accessory" : "shoe",
       categoryId: category.id,
       material: body.material || "Charm",
       price: body.price,

@@ -21,6 +21,7 @@ export function serializeProduct(p: ProductWithRelations) {
     name: p.name,
     brand: p.brand,
     gender: p.gender,
+    kind: (p.kind === "accessory" ? "accessory" : "shoe") as "shoe" | "accessory",
     // category can only be null for a soft-deleted product whose original
     // category was later deleted (onDelete: SetNull) — every current call
     // site filters deletedAt: null, so this fallback is just defensive.

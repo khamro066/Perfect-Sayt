@@ -6,11 +6,35 @@ import { ChevronDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
 
-const SUBCATEGORIES = ["Kundalik", "Klassik", "Lofer va mokasin", "Krossovka", "Botinka", "Yozgi poyabzal"];
+const SHOE_SUBCATEGORIES = ["Kundalik", "Klassik", "Lofer va mokasin", "Krossovka", "Botinka", "Yozgi poyabzal"];
+const ACCESSORY_SUBCATEGORIES = ["Koshelyok"];
+
+function AccordionNavItem({
+  label, open, onToggle, children,
+}: { label: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-[17px] font-semibold text-ink transition-colors hover:bg-accent-soft/40"
+      >
+        {label}
+        <ChevronDown size={18} className={clsx("transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="ml-3.5 mt-1 flex flex-col gap-0.5 border-l border-line pl-3.5">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTranslations("menu");
   const [katalogOpen, setKatalogOpen] = useState(false);
+  const [accessoriesOpen, setAccessoriesOpen] = useState(false);
 
   const TOP_LINKS = [
     { label: t("home"), href: "/" },
@@ -67,37 +91,42 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
             </Link>
           ))}
 
-          <div>
-            <button
-              onClick={() => setKatalogOpen((v) => !v)}
-              aria-expanded={katalogOpen}
-              className="flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-[17px] font-semibold text-ink transition-colors hover:bg-accent-soft/40"
+          <AccordionNavItem label={t("catalog")} open={katalogOpen} onToggle={() => setKatalogOpen((v) => !v)}>
+            {SHOE_SUBCATEGORIES.map((cat) => (
+              <Link
+                key={cat}
+                href={`/katalog?category=${encodeURIComponent(cat)}`}
+                onClick={onClose}
+                className="rounded-[8px] px-3 py-2.5 text-[15px] font-medium text-ink transition-colors hover:bg-accent-soft/40"
+              >
+                {cat}
+              </Link>
+            ))}
+            <Link
+              href="/katalog"
+              onClick={onClose}
+              className="rounded-[8px] px-3 py-2.5 text-[15px] font-semibold text-accent transition-colors hover:bg-accent-soft/40"
             >
-              {t("catalog")}
-              <ChevronDown size={18} className={clsx("transition-transform", katalogOpen && "rotate-180")} />
-            </button>
-            {katalogOpen && (
-              <div className="ml-3.5 mt-1 flex flex-col gap-0.5 border-l border-line pl-3.5">
-                {SUBCATEGORIES.map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/katalog?category=${encodeURIComponent(cat)}`}
-                    onClick={onClose}
-                    className="rounded-[8px] px-3 py-2.5 text-[15px] font-medium text-ink transition-colors hover:bg-accent-soft/40"
-                  >
-                    {cat}
-                  </Link>
-                ))}
-                <Link
-                  href="/katalog"
-                  onClick={onClose}
-                  className="rounded-[8px] px-3 py-2.5 text-[15px] font-semibold text-accent transition-colors hover:bg-accent-soft/40"
-                >
-                  {t("allModels")}
-                </Link>
-              </div>
-            )}
-          </div>
+              {t("allModels")}
+            </Link>
+          </AccordionNavItem>
+
+          <AccordionNavItem
+            label={t("accessories")}
+            open={accessoriesOpen}
+            onToggle={() => setAccessoriesOpen((v) => !v)}
+          >
+            {ACCESSORY_SUBCATEGORIES.map((cat) => (
+              <Link
+                key={cat}
+                href={`/katalog?category=${encodeURIComponent(cat)}`}
+                onClick={onClose}
+                className="rounded-[8px] px-3 py-2.5 text-[15px] font-medium text-ink transition-colors hover:bg-accent-soft/40"
+              >
+                {cat}
+              </Link>
+            ))}
+          </AccordionNavItem>
 
           {BOTTOM_LINKS.map((item) => (
             <Link

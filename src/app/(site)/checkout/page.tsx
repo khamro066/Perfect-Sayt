@@ -189,7 +189,11 @@ export default function CheckoutPage() {
                   <PlaceholderImage label={product.name} className="h-[52px] w-[52px] shrink-0 rounded-card" />
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="truncate font-semibold text-ink">{product.name}</p>
-                    <p className="text-xs text-muted">{t("lineQty", { size: line.size, qty: line.qty })}</p>
+                    <p className="text-xs text-muted">
+                      {product.kind === "accessory"
+                        ? t("qtyOnly", { qty: line.qty })
+                        : t("lineQty", { size: line.size, qty: line.qty })}
+                    </p>
                   </div>
                   <span className="text-sm font-bold text-ink">{formatSom(product.price * line.qty)}</span>
                 </div>
