@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import clsx from "clsx";
+
+const SUBCATEGORIES = ["Kundalik", "Klassik", "Lofer va mokasin", "Krossovka", "Botinka", "Yozgi poyabzal"];
 
 export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTranslations("menu");
+  const [katalogOpen, setKatalogOpen] = useState(false);
 
-  const PRIMARY_LINKS = [
+  const TOP_LINKS = [
     { label: t("home"), href: "/" },
     { label: t("newArrivals"), href: "/katalog?sort=new" },
-    { label: t("sale"), href: "/katalog?sale=1" },
-    { label: t("catalog"), href: "/katalog" },
+  ];
+
+  const BOTTOM_LINKS = [
     { label: t("categories"), href: "/kategoriyalar" },
+    { label: t("sale"), href: "/katalog?sale=1" },
   ];
 
   const SECONDARY_LINKS = [
@@ -50,7 +56,50 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
         </div>
 
         <nav className="flex flex-col gap-1 p-5">
-          {PRIMARY_LINKS.map((item) => (
+          {TOP_LINKS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onClose}
+              className="rounded-[10px] px-3.5 py-3 text-[17px] font-semibold text-ink transition-colors hover:bg-accent-soft/40"
+            >
+              {item.label}
+            </Link>
+          ))}
+
+          <div>
+            <button
+              onClick={() => setKatalogOpen((v) => !v)}
+              aria-expanded={katalogOpen}
+              className="flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-[17px] font-semibold text-ink transition-colors hover:bg-accent-soft/40"
+            >
+              {t("catalog")}
+              <ChevronDown size={18} className={clsx("transition-transform", katalogOpen && "rotate-180")} />
+            </button>
+            {katalogOpen && (
+              <div className="ml-3.5 mt-1 flex flex-col gap-0.5 border-l border-line pl-3.5">
+                {SUBCATEGORIES.map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/katalog?category=${encodeURIComponent(cat)}`}
+                    onClick={onClose}
+                    className="rounded-[8px] px-3 py-2.5 text-[15px] font-medium text-ink transition-colors hover:bg-accent-soft/40"
+                  >
+                    {cat}
+                  </Link>
+                ))}
+                <Link
+                  href="/katalog"
+                  onClick={onClose}
+                  className="rounded-[8px] px-3 py-2.5 text-[15px] font-semibold text-accent transition-colors hover:bg-accent-soft/40"
+                >
+                  {t("allModels")}
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {BOTTOM_LINKS.map((item) => (
             <Link
               key={item.href}
               href={item.href}

@@ -127,7 +127,7 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
           {homeCategories.map((cat) => (
-            <Link key={cat.name} href={`/katalog?category=${cat.name}`} className="flex flex-col items-center gap-2.5">
+            <Link key={cat.name} href={`/katalog?category=${encodeURIComponent(cat.name)}`} className="flex flex-col items-center gap-2.5">
               {cat.image ? (
                 <div className="relative aspect-square w-full overflow-hidden rounded-card">
                   <Image src={cat.image} alt={cat.name} fill sizes="150px" className="object-cover" />
