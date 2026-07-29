@@ -11,7 +11,6 @@ import { formatSom } from "@/lib/format";
 import { colorName } from "@/lib/colors";
 import { Product } from "@/lib/types";
 
-const GENDERS = ["Erkaklar", "Ayollar", "Bolalar", "Uniseks"];
 const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
 const COLORS = ["#1b1a16", "#f4f1ea", "#8a8880", "#6b4a2f", "#2c4a7a", "#0a5c3a", "#a83232", "#d8c7a8"];
 const RATINGS = [4.5, 4.0, 3.5];
@@ -24,7 +23,6 @@ function toggle<T>(list: T[], value: T): T[] {
 
 interface FilterValues {
   sizes: number[];
-  genders: string[];
   categories: string[];
   brands: string[];
   colors: string[];
@@ -47,7 +45,6 @@ function matchesFilters(
   except?: FacetKey
 ): boolean {
   if (except !== "sizes" && f.sizes.length && !f.sizes.some((s) => p.sizes.includes(s))) return false;
-  if (except !== "genders" && f.genders.length && !f.genders.includes(p.gender)) return false;
   if (except !== "categories" && f.categories.length && !f.categories.includes(p.category)) return false;
   if (except !== "brands" && f.brands.length && !f.brands.includes(p.brand)) return false;
   if (except !== "colors" && f.colors.length && !f.colors.some((c) => p.colors.includes(c))) return false;
@@ -62,7 +59,7 @@ function matchesFilters(
 }
 
 const EMPTY_FILTERS: FilterValues = {
-  sizes: [], genders: [], categories: [], brands: [], colors: [], materials: [],
+  sizes: [], categories: [], brands: [], colors: [], materials: [],
   priceMin: 0, priceMax: 2000000, minRating: 0,
   onSale: false, inStock: false, onlyNew: false, popular: false,
 };
@@ -95,7 +92,6 @@ function CatalogContent() {
   };
 
   const [sizes, setSizes] = useState<number[]>(initialFilters.sizes);
-  const [genders, setGenders] = useState<string[]>(initialFilters.genders);
   const [categories, setCategories] = useState<string[]>(initialFilters.categories);
   const [brands, setBrands] = useState<string[]>(initialFilters.brands);
   const [colors, setColors] = useState<string[]>(initialFilters.colors);
@@ -115,7 +111,7 @@ function CatalogContent() {
   const [appliedFilters, setAppliedFilters] = useState<FilterValues>(initialFilters);
 
   const draftFilters: FilterValues = {
-    sizes, genders, categories, brands, colors, materials,
+    sizes, categories, brands, colors, materials,
     priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular,
   };
 
@@ -126,7 +122,6 @@ function CatalogContent() {
 
   function clearFilters() {
     setSizes(EMPTY_FILTERS.sizes);
-    setGenders(EMPTY_FILTERS.genders);
     setCategories(EMPTY_FILTERS.categories);
     setBrands(EMPTY_FILTERS.brands);
     setColors(EMPTY_FILTERS.colors);
@@ -211,7 +206,7 @@ function CatalogContent() {
             </button>
             <FilterSidebar
               {...{
-                sizes, setSizes, genders, setGenders, categories, setCategories,
+                sizes, setSizes, categories, setCategories,
                 brands, setBrands, colors, setColors, materials, setMaterials,
                 priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
                 onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
@@ -227,7 +222,7 @@ function CatalogContent() {
         <aside className="sticky top-[150px] hidden h-fit w-[270px] shrink-0 rounded-block border border-line bg-surface p-5.5 lg:block">
           <FilterSidebar
             {...{
-              sizes, setSizes, genders, setGenders, categories, setCategories,
+              sizes, setSizes, categories, setCategories,
               brands, setBrands, colors, setColors, materials, setMaterials,
               priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
               onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
@@ -258,7 +253,6 @@ function CatalogContent() {
 
 interface FilterProps {
   sizes: number[]; setSizes: (v: number[]) => void;
-  genders: string[]; setGenders: (v: string[]) => void;
   categories: string[]; setCategories: (v: string[]) => void;
   brands: string[]; setBrands: (v: string[]) => void;
   colors: string[]; setColors: (v: string[]) => void;
@@ -323,16 +317,6 @@ function FilterSidebar(p: FilterProps) {
             >
               {s} ({countFor("sizes", (product) => product.sizes.includes(s))})
             </button>
-          ))}
-        </div>
-      </FilterSection>
-
-      <FilterSection label={t("genderLabel")}>
-        <div className="flex flex-wrap gap-1.5">
-          {GENDERS.map((g) => (
-            <Pill key={g} active={p.genders.includes(g)} onClick={() => p.setGenders(toggle(p.genders, g))}>
-              {g} ({countFor("genders", (product) => product.gender === g)})
-            </Pill>
           ))}
         </div>
       </FilterSection>

@@ -28,9 +28,6 @@
   "footer": {
     "tagline": "Premium footwear store in Uzbekistan. Original products, reliable service.",
     "shop": "Shop",
-    "men": "Men",
-    "women": "Women",
-    "kids": "Kids",
     "newArrivals": "New Arrivals",
     "sale": "Sale",
     "help": "Help",
@@ -90,7 +87,6 @@
     "filtersTitle": "Filters",
     "clearFilters": "Clear",
     "sizeLabel": "Shoe size",
-    "genderLabel": "Gender",
     "categoryLabel": "Category",
     "brandLabel": "Brand",
     "colorLabel": "Color",

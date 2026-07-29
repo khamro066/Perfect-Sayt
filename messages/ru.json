@@ -28,9 +28,6 @@
   "footer": {
     "tagline": "Магазин премиальной обуви в Узбекистане. Оригинальные товары, надёжный сервис.",
     "shop": "Магазин",
-    "men": "Мужчинам",
-    "women": "Женщинам",
-    "kids": "Детям",
     "newArrivals": "Новинки",
     "sale": "Скидки",
     "help": "Помощь",
@@ -90,7 +87,6 @@
     "filtersTitle": "Фильтры",
     "clearFilters": "Сбросить",
     "sizeLabel": "Размер обуви",
-    "genderLabel": "Пол",
     "categoryLabel": "Категория",
     "brandLabel": "Бренд",
     "colorLabel": "Цвет",

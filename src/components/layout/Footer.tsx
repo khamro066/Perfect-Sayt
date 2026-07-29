@@ -9,9 +9,6 @@ export async function Footer() {
   const t = await getTranslations("footer");
 
   const SHOP_LINKS = [
-    { label: t("men"), href: "/katalog?gender=Erkaklar" },
-    { label: t("women"), href: "/katalog?gender=Ayollar" },
-    { label: t("kids"), href: "/katalog?gender=Bolalar" },
     { label: t("newArrivals"), href: "/katalog?sort=new" },
     { label: t("sale"), href: "/katalog?sale=1" },
   ];

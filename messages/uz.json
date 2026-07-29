@@ -28,9 +28,6 @@
   "footer": {
     "tagline": "O'zbekistondagi premium oyoq kiyim do'koni. Original mahsulotlar, ishonchli xizmat.",
     "shop": "Do'kon",
-    "men": "Erkaklar",
-    "women": "Ayollar",
-    "kids": "Bolalar",
     "newArrivals": "Yangi mahsulotlar",
     "sale": "Chegirmalar",
     "help": "Yordam",
@@ -90,7 +87,6 @@
     "filtersTitle": "Filtrlar",
     "clearFilters": "Tozalash",
     "sizeLabel": "Oyoq o'lchami",
-    "genderLabel": "Jinsi",
     "categoryLabel": "Kategoriya",
     "brandLabel": "Brend",
     "colorLabel": "Rang",
