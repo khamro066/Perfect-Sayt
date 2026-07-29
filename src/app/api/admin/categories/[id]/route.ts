@@ -27,13 +27,45 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const productCount = await prisma.product.count({ where: { categoryId: id, deletedAt: null } });
-  if (productCount > 0) {
+
+  // Products reference categoryId with no cascade (RESTRICT), and that
+  // FK is enforced by Postgres regardless of a product's soft-delete
+  // status — so the guard has to count ALL products, not just active
+  // ones, or the delete below fails with a raw, unhandled DB error.
+  const [activeCount, totalCount] = await Promise.all([
+    prisma.product.count({ where: { categoryId: id, deletedAt: null } }),
+    prisma.product.count({ where: { categoryId: id } }),
+  ]);
+
+  if (activeCount > 0) {
     return NextResponse.json(
-      { error: "Bu kategoriyada mahsulotlar mavjud — avval ularni boshqa kategoriyaga o'tkazing" },
+      { error: `Bu kategoriyada ${activeCount} ta mahsulot bor — avval ularni boshqa kategoriyaga o'tkazing yoki o'chiring` },
       { status: 409 }
     );
   }
-  await prisma.category.delete({ where: { id } });
+  if (totalCount > 0) {
+    // Only soft-deleted products remain, referencing this category. They're
+    // kept (not hard-deleted) for order-history integrity and have no
+    // restore/reassign UI, so this can't be resolved from the admin panel
+    // today — surface that honestly instead of a generic message.
+    return NextResponse.json(
+      {
+        error: `Bu kategoriyada oldin o'chirilgan ${totalCount} ta mahsulot hali ham bog'langan (buyurtma tarixi saqlanishi uchun) — shu sababli hozircha o'chirib bo'lmaydi`,
+      },
+      { status: 409 }
+    );
+  }
+
+  try {
+    await prisma.category.delete({ where: { id } });
+  } catch {
+    // Defense in depth for any constraint we haven't accounted for above —
+    // never leak a raw 500 to the admin UI.
+    return NextResponse.json(
+      { error: "Kategoriyani o'chirib bo'lmadi — u hali biror joyda ishlatilmoqda" },
+      { status: 409 }
+    );
+  }
+
   return NextResponse.json({ ok: true });
 }
