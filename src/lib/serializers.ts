@@ -10,7 +10,7 @@ import type {
 } from "@/generated/prisma/client";
 
 type ProductWithRelations = DbProduct & {
-  category: Category;
+  category: Category | null;
   colors: ProductColor[];
   sizes: ProductSize[];
 };
@@ -21,7 +21,10 @@ export function serializeProduct(p: ProductWithRelations) {
     name: p.name,
     brand: p.brand,
     gender: p.gender,
-    category: p.category.name,
+    // category can only be null for a soft-deleted product whose original
+    // category was later deleted (onDelete: SetNull) — every current call
+    // site filters deletedAt: null, so this fallback is just defensive.
+    category: p.category?.name ?? "",
     material: p.material,
     price: Number(p.price),
     oldPrice: p.oldPrice ? Number(p.oldPrice) : undefined,
