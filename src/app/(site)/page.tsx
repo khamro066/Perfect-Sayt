@@ -58,12 +58,15 @@ export default async function HomePage() {
       include: { category: true, colors: true, sizes: true },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: { products: { where: { deletedAt: null }, select: { kind: true } } },
+    }),
   ]);
 
   const products = dbProducts.map(serializeProduct);
   const homeCategories = dbCategories
-    .filter((c) => c.name !== "Krossovka")
+    .filter((c) => c.name !== "Krossovka" && !c.products.some((p) => p.kind === "accessory"))
     .map((c) => ({ name: c.name, image: c.image }));
   const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
   const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 4);
