@@ -82,9 +82,31 @@ export default async function HomePage() {
               "radial-gradient(130% 130% at 100% 0%, var(--accent-soft) 0%, #cfdbee 32%, var(--surface) 58%, var(--bg) 100%)",
           }}
         >
+          {/* Mobile: full-bleed photo behind the text, with a top-heavy dark
+              scrim (matching the header's navy) so light text stays legible
+              regardless of what's behind it — sky, water, or shoe detail. */}
+          <div aria-hidden="true" className="absolute inset-0 sm:hidden">
+            <Image
+              src="/images/hero-loafers-coastal.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+              style={{ objectPosition: "62% 38%" }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(11,37,69,0.90) 0%, rgba(11,37,69,0.68) 40%, rgba(11,37,69,0.30) 68%, rgba(11,37,69,0.08) 100%)",
+              }}
+            />
+          </div>
           {/* Photo only on sm+ — at mobile width the card is too narrow for a
               busy photo to sit behind stacked text without looking like a
-              cluttered blur, so mobile keeps the plain gradient instead. */}
+              cluttered blur, so mobile gets the full-bleed + scrim treatment
+              above instead. */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-y-0 right-0 hidden w-[58%] overflow-hidden sm:block"
@@ -104,15 +126,15 @@ export default async function HomePage() {
             />
           </div>
           <div className="relative max-w-[640px]">
-            <span className="inline-block rounded-pill border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink">
+            <span className="inline-block rounded-pill border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm sm:border-line sm:bg-surface sm:text-ink sm:backdrop-blur-none">
               {t("badge")}
             </span>
-            <h1 className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-heading text-[clamp(28px,5vw,58px)] font-medium leading-[1.15] text-ink sm:gap-x-5">
+            <h1 className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-heading text-[clamp(28px,5vw,58px)] font-medium leading-[1.15] text-white sm:gap-x-5 sm:text-ink">
               <span>{t("heroTitle1")}</span>
               <span>{t("heroTitle2")}</span>
               <span>{t("heroTitle3")}</span>
             </h1>
-            <p className="mt-4 max-w-[460px] text-[17px] text-muted">
+            <p className="mt-4 max-w-[460px] text-[17px] text-white/85 sm:text-muted">
               {t("heroSubtitle")}
             </p>
           </div>
