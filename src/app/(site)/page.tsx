@@ -98,8 +98,10 @@ export default async function HomePage() {
             <span className="inline-block rounded-pill border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink">
               {t("badge")}
             </span>
-            <h1 className="mt-4 font-heading text-[clamp(34px,5vw,58px)] font-medium leading-[1.07] text-ink">
-              {t("heroTitle")}
+            <h1 className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-heading text-[clamp(28px,5vw,58px)] font-medium leading-[1.15] text-ink sm:gap-x-5">
+              <span>{t("heroTitle1")}</span>
+              <span>{t("heroTitle2")}</span>
+              <span>{t("heroTitle3")}</span>
             </h1>
             <p className="mt-4 max-w-[460px] text-[17px] text-muted">
               {t("heroSubtitle")}

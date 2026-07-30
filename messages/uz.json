@@ -45,8 +45,10 @@
   },
   "home": {
     "badge": "Perfect Shoes",
-    "heroTitle": "Har qadamingiz uchun mukammal tanlov",
-    "heroSubtitle": "O'zbekistondagi eng qulay oyoq kiyimlar kolleksiyasi. Sifatli mahsulotlar, tez yetkazib berish va qulay to'lov.",
+    "heroTitle1": "Sifat.",
+    "heroTitle2": "Qulaylik.",
+    "heroTitle3": "Ishonch.",
+    "heroSubtitle": "O'zbekiston brendi sifatida zamonaviy, sifatli va qulay erkaklar oyoq kiyimlarini ishlab chiqaramiz. Har bir qadamda ishonch va qulaylikni his eting.",
     "trust1Title": "Sifat kafolati",
     "trust1Desc": "Barcha mahsulotlar yuqori sifatli materiallardan",
     "trust2Title": "Tez yetkazib berish",

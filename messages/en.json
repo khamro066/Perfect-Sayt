@@ -45,8 +45,10 @@
   },
   "home": {
     "badge": "Perfect Shoes",
-    "heroTitle": "The perfect choice for every step",
-    "heroSubtitle": "Uzbekistan's most convenient footwear collection. Quality products, fast delivery and easy payment.",
+    "heroTitle1": "Quality.",
+    "heroTitle2": "Comfort.",
+    "heroTitle3": "Trust.",
+    "heroSubtitle": "As an Uzbek brand, we craft modern, high-quality, and comfortable footwear for men. Feel trust and comfort with every step.",
     "trust1Title": "Quality guarantee",
     "trust1Desc": "All products made from high-quality materials",
     "trust2Title": "Fast delivery",
