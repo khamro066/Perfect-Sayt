@@ -66,7 +66,7 @@ export default async function HomePage() {
 
   const products = dbProducts.map(serializeProduct);
   const homeCategories = dbCategories
-    .filter((c) => c.name !== "Krossovka" && !c.products.some((p) => p.kind === "accessory"))
+    .filter((c) => !c.products.some((p) => p.kind === "accessory"))
     .map((c) => ({ name: c.name, image: c.image }));
   const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
   const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 4);
