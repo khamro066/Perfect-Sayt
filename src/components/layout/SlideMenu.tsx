@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
+import { useProductsData } from "@/lib/products-data";
 
 const SHOE_SUBCATEGORIES = ["Kundalik", "Klassik", "Lofer va mokasin", "Krossovka", "Botinka", "Yozgi poyabzal"];
 const ACCESSORY_SUBCATEGORIES = ["Koshelyok"];
@@ -35,15 +36,24 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
   const t = useTranslations("menu");
   const [katalogOpen, setKatalogOpen] = useState(false);
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
+  // Already fetched once at the app root (ProductsDataProvider in layout.tsx)
+  // and reused everywhere else (Catalog filter counts, stock lookups) — no
+  // extra request is triggered by opening this menu.
+  const { products } = useProductsData();
+  const countFor = (cat: string) => products.filter((p) => p.category === cat).length;
+  // Same predicates as the Catalog page's own "Yangi mahsulotlar" /
+  // "Chegirmadagi mahsulotlar" filter counts, for consistency.
+  const newArrivalsCount = products.filter((p) => p.isNew).length;
+  const saleCount = products.filter((p) => p.oldPrice).length;
 
   const TOP_LINKS = [
-    { label: t("home"), href: "/" },
-    { label: t("newArrivals"), href: "/katalog?sort=new" },
+    { label: t("home"), href: "/", count: undefined as number | undefined },
+    { label: t("newArrivals"), href: "/katalog?sort=new", count: newArrivalsCount },
   ];
 
   const BOTTOM_LINKS = [
-    { label: t("categories"), href: "/kategoriyalar" },
-    { label: t("sale"), href: "/katalog?sale=1" },
+    { label: t("categories"), href: "/kategoriyalar", count: undefined as number | undefined },
+    { label: t("sale"), href: "/katalog?sale=1", count: saleCount },
   ];
 
   const SECONDARY_LINKS = [
@@ -88,6 +98,7 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
               className="rounded-[10px] px-3.5 py-3 text-[17px] font-semibold text-ink transition-colors hover:bg-accent-soft/40"
             >
               {item.label}
+              {item.count !== undefined && <span className="text-muted"> ({item.count})</span>}
             </Link>
           ))}
 
@@ -99,7 +110,7 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
                 onClick={onClose}
                 className="rounded-[8px] px-3 py-2.5 text-[15px] font-medium text-ink transition-colors hover:bg-accent-soft/40"
               >
-                {cat}
+                {cat} <span className="text-muted">({countFor(cat)})</span>
               </Link>
             ))}
             <Link
@@ -123,7 +134,7 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
                 onClick={onClose}
                 className="rounded-[8px] px-3 py-2.5 text-[15px] font-medium text-ink transition-colors hover:bg-accent-soft/40"
               >
-                {cat}
+                {cat} <span className="text-muted">({countFor(cat)})</span>
               </Link>
             ))}
           </AccordionNavItem>
@@ -136,6 +147,7 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
               className="rounded-[10px] px-3.5 py-3 text-[17px] font-semibold text-ink transition-colors hover:bg-accent-soft/40"
             >
               {item.label}
+              {item.count !== undefined && <span className="text-muted"> ({item.count})</span>}
             </Link>
           ))}
         </nav>
