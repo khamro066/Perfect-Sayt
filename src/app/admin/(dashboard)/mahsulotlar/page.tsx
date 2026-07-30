@@ -12,7 +12,9 @@ import { Product } from "@/lib/types";
 interface UploadedImage {
   id: string;
   url: string;
-  file: File;
+  // Absent for images a product already has (loaded from the server as a
+  // plain URL) — present only for newly picked local files awaiting upload.
+  file?: File;
   primary: boolean;
 }
 
@@ -55,6 +57,16 @@ export default function AdminProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<AdminProduct | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const [editTarget, setEditTarget] = useState<AdminProduct | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editBrand, setEditBrand] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editHasDiscount, setEditHasDiscount] = useState(false);
+  const [editDiscountPct, setEditDiscountPct] = useState("");
+  const [editImages, setEditImages] = useState<UploadedImage[]>([]);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
   function refetch() {
     fetch("/api/admin/products").then((res) => res.json()).then(setProducts);
   }
@@ -69,7 +81,7 @@ export default function AdminProductsPage() {
       });
   }, []);
 
-  function handleFiles(files: FileList | null) {
+  function handleFiles(files: FileList | null, setter: React.Dispatch<React.SetStateAction<UploadedImage[]>>) {
     if (!files) return;
     Array.from(files).forEach((file) => {
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -88,10 +100,34 @@ export default function AdminProductsPage() {
           URL.revokeObjectURL(url);
           return;
         }
-        setImages((prev) => [...prev, { id: `${Date.now()}-${file.name}`, url, file, primary: prev.length === 0 }]);
+        setter((prev) => [...prev, { id: `${Date.now()}-${file.name}`, url, file, primary: prev.length === 0 }]);
       };
       img.src = url;
     });
+  }
+
+  // Shared by create + edit: orders images (primary first), uploads any
+  // newly picked local files, and passes through URLs the product already
+  // had. Returns null (after toasting) if an upload fails.
+  async function resolveImageUrls(images: UploadedImage[]): Promise<string[] | null> {
+    const ordered = [...images].sort((a, b) => (a.primary === b.primary ? 0 : a.primary ? -1 : 1));
+    const imageUrls: string[] = [];
+    for (const img of ordered) {
+      if (!img.file) {
+        imageUrls.push(img.url);
+        continue;
+      }
+      const formData = new FormData();
+      formData.append("file", img.file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error ?? "Rasm yuklanmadi");
+        return null;
+      }
+      imageUrls.push(data.url);
+    }
+    return imageUrls;
   }
 
   async function submit() {
@@ -114,20 +150,8 @@ export default function AdminProductsPage() {
 
     setSubmitting(true);
     try {
-      const ordered = [...images].sort((a, b) => (a.primary === b.primary ? 0 : a.primary ? -1 : 1));
-      const imageUrls: string[] = [];
-      for (const img of ordered) {
-        const formData = new FormData();
-        formData.append("file", img.file);
-        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-        const data = await res.json();
-        if (!res.ok) {
-          showToast(data.error ?? "Rasm yuklanmadi");
-          setSubmitting(false);
-          return;
-        }
-        imageUrls.push(data.url);
-      }
+      const imageUrls = await resolveImageUrls(images);
+      if (imageUrls === null) return;
 
       const pct = Math.min(90, Math.max(0, Number(discountPct) || 0));
       const basePrice = Number(price);
@@ -183,6 +207,60 @@ export default function AdminProductsPage() {
     setDeleteTarget(null);
     showToast("Mahsulot o'chirildi");
     refetch();
+  }
+
+  function openEdit(p: AdminProduct) {
+    setEditTarget(p);
+    setEditName(p.name);
+    setEditBrand(p.brand);
+    setEditCategory(p.category);
+    setEditPrice(String(p.oldPrice ?? p.price));
+    setEditHasDiscount(!!p.oldPrice);
+    setEditDiscountPct(p.oldPrice ? String(Math.round((1 - p.price / p.oldPrice) * 100)) : "");
+    setEditImages((p.images ?? []).map((url, i) => ({ id: `${p.id}-${i}`, url, primary: i === 0 })));
+  }
+
+  async function submitEdit() {
+    if (!editTarget) return;
+    if (!editName.trim() || !editPrice) {
+      showToast("Nom va narxni kiriting");
+      return;
+    }
+
+    setEditSubmitting(true);
+    try {
+      const imageUrls = await resolveImageUrls(editImages);
+      if (imageUrls === null) return;
+
+      const pct = Math.min(90, Math.max(0, Number(editDiscountPct) || 0));
+      const basePrice = Number(editPrice);
+      const finalPrice = editHasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
+
+      const res = await fetch(`/api/admin/products/${editTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName.trim(),
+          brand: editBrand.trim() || "Perfect",
+          category: editCategory,
+          price: finalPrice,
+          oldPrice: editHasDiscount && pct > 0 ? basePrice : null,
+          images: imageUrls,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error ?? "Xatolik yuz berdi");
+        return;
+      }
+
+      setEditTarget(null);
+      showToast("Mahsulot yangilandi");
+      refetch();
+    } finally {
+      setEditSubmitting(false);
+    }
   }
 
   return (
@@ -323,52 +401,7 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        <div className="mt-4 flex flex-col gap-3 rounded-[12px] bg-surface-2 p-4">
-          <p className="text-[13px] font-semibold text-ink">Mahsulot rasmlari</p>
-          <p className="text-xs leading-relaxed text-muted">
-            Format: JPG, PNG yoki WebP · Nisbat: kvadrat (1:1) · Tavsiya etilgan o&apos;lcham: 800×800px · Minimal:
-            600×600px · Maksimal fayl hajmi: 5MB. Bir nechta rasm yuklash mumkin — birini asosiy (muqova) rasm
-            sifatida belgilang.
-          </p>
-          <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-btn border border-dashed border-line bg-surface px-4.5 py-3 text-[13px] font-semibold text-ink">
-            + Rasm yuklash
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
-          </label>
-          {images.length > 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
-              {images.map((img) => (
-                <div key={img.id} className="flex flex-col gap-1.5">
-                  <div
-                    className="relative aspect-square overflow-hidden rounded-[10px]"
-                    style={{ boxShadow: img.primary ? "0 0 0 2px var(--accent)" : "0 0 0 2px transparent" }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- transient blob: object URL from local file input, next/image can't optimize these */}
-                    <img src={img.url} alt="" className="h-full w-full object-cover" />
-                    <button
-                      onClick={() => setImages((prev) => prev.filter((i) => i.id !== img.id))}
-                      className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => setImages((prev) => prev.map((i) => ({ ...i, primary: i.id === img.id })))}
-                    className="text-[11.5px] font-semibold text-accent"
-                  >
-                    {img.primary ? "Asosiy" : "Asosiy qilish"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ImagePicker images={images} setImages={setImages} handleFiles={handleFiles} fileInputRef={fileInputRef} />
 
         <div className="mt-4 flex flex-col gap-3 rounded-[12px] bg-surface-2 p-4">
           <p className="text-[13px] font-semibold text-ink">Ushbu mahsulot chegirmada sotiladimi?</p>
@@ -414,7 +447,7 @@ export default function AdminProductsPage() {
         <h2 className="font-bold text-ink">Mahsulotlar ro&apos;yxati</h2>
         <div className="mt-3 overflow-x-auto">
           <div className="min-w-[640px]">
-            <div className="grid grid-cols-[1.8fr_1fr_1.1fr_1fr_1fr_0.7fr] gap-3 border-b border-line pb-2.5 text-xs font-bold uppercase tracking-[0.05em] text-muted">
+            <div className="grid grid-cols-[1.8fr_1fr_1.1fr_1fr_1fr_1.3fr] gap-3 border-b border-line pb-2.5 text-xs font-bold uppercase tracking-[0.05em] text-muted">
               <span>Nomi</span><span>Brend</span><span>Kategoriya</span><span>Narx</span><span>Ombor</span><span />
             </div>
             {products.map((p) => {
@@ -422,18 +455,26 @@ export default function AdminProductsPage() {
               const stockLabel = stock <= 0 ? "Tugagan" : stock <= 5 ? "Kam qoldi" : "Mavjud";
               const stockColor = stock <= 0 ? "var(--danger)" : stock <= 5 ? "var(--warning)" : "var(--success)";
               return (
-                <div key={p.id} className="grid grid-cols-[1.8fr_1fr_1.1fr_1fr_1fr_0.7fr] items-center gap-3 border-b border-line py-3 text-[13.5px] text-ink">
+                <div key={p.id} className="grid grid-cols-[1.8fr_1fr_1.1fr_1fr_1fr_1.3fr] items-center gap-3 border-b border-line py-3 text-[13.5px] text-ink">
                   <span className="font-bold">{p.name}</span>
                   <span className="text-muted">{p.brand}</span>
                   <span className="text-muted">{p.category}</span>
                   <span className="font-bold">{formatSom(p.price)}</span>
                   <span className="font-bold" style={{ color: stockColor }}>{stock} · {stockLabel}</span>
-                  <button
-                    onClick={() => setDeleteTarget(p)}
-                    className="justify-self-end whitespace-nowrap rounded-[8px] border border-danger px-3 py-1.5 text-[12.5px] font-semibold text-danger"
-                  >
-                    O&apos;chirish
-                  </button>
+                  <div className="flex justify-self-end gap-2">
+                    <button
+                      onClick={() => openEdit(p)}
+                      className="whitespace-nowrap rounded-[8px] border border-line px-3 py-1.5 text-[12.5px] font-semibold text-ink"
+                    >
+                      Tahrirlash
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(p)}
+                      className="whitespace-nowrap rounded-[8px] border border-danger px-3 py-1.5 text-[12.5px] font-semibold text-danger"
+                    >
+                      O&apos;chirish
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -465,6 +506,134 @@ export default function AdminProductsPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {editTarget && (
+        <div className="fixed inset-0 z-[270] flex items-center justify-center bg-black/40 p-5" onClick={() => setEditTarget(null)}>
+          <div
+            className="max-h-[90vh] w-full max-w-[560px] overflow-y-auto rounded-block bg-surface p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-bold text-ink">Mahsulotni tahrirlash</h3>
+              <button onClick={() => setEditTarget(null)}><X size={18} className="text-muted" /></button>
+            </div>
+
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5">
+              <LabeledInput label="Nomi" value={editName} onChange={setEditName} placeholder="Mahsulot nomi" />
+              <LabeledInput label="Brend" value={editBrand} onChange={setEditBrand} placeholder="Brend" />
+              <LabeledSelect label="Kategoriya" value={editCategory} onChange={setEditCategory} options={categories} />
+              <LabeledInput label="Narx (so'm)" value={editPrice} onChange={setEditPrice} placeholder="890000" type="number" />
+            </div>
+
+            <ImagePicker images={editImages} setImages={setEditImages} handleFiles={handleFiles} />
+
+            <div className="mt-4 flex flex-col gap-3 rounded-[12px] bg-surface-2 p-4">
+              <p className="text-[13px] font-semibold text-ink">Ushbu mahsulot chegirmada sotiladimi?</p>
+              <div className="flex gap-2">
+                {[true, false].map((v) => (
+                  <button
+                    key={String(v)}
+                    onClick={() => setEditHasDiscount(v)}
+                    className={`rounded-pill border px-3.5 py-2 text-[13px] font-semibold ${editHasDiscount === v ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface text-ink"}`}
+                  >
+                    {v ? "Ha" : "Yo'q"}
+                  </button>
+                ))}
+              </div>
+              {editHasDiscount && (
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    value={editDiscountPct}
+                    onChange={(e) => setEditDiscountPct(e.target.value)}
+                    placeholder="20"
+                    className="w-[220px] rounded-btn border border-line bg-surface px-3.5 py-2.5 text-sm outline-none"
+                  />
+                  {editPrice && editDiscountPct && (
+                    <span className="text-sm text-ink">
+                      Yakuniy narx:{" "}
+                      <b className="text-accent">
+                        {formatSom(Math.round(Number(editPrice) * (1 - Math.min(90, Number(editDiscountPct)) / 100)))}
+                      </b>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex gap-2.5">
+              <button onClick={() => setEditTarget(null)} className="flex-1 rounded-[12px] border border-line bg-surface py-3.5 text-sm font-semibold text-ink">
+                Bekor qilish
+              </button>
+              <button
+                onClick={submitEdit}
+                disabled={editSubmitting}
+                className="flex-1 rounded-[12px] bg-accent py-3.5 text-sm font-bold text-accent-ink disabled:opacity-60"
+              >
+                {editSubmitting ? "Saqlanmoqda…" : "Saqlash"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ImagePicker({
+  images, setImages, handleFiles, fileInputRef,
+}: {
+  images: UploadedImage[];
+  setImages: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
+  handleFiles: (files: FileList | null, setter: React.Dispatch<React.SetStateAction<UploadedImage[]>>) => void;
+  fileInputRef?: React.RefObject<HTMLInputElement | null>;
+}) {
+  return (
+    <div className="mt-4 flex flex-col gap-3 rounded-[12px] bg-surface-2 p-4">
+      <p className="text-[13px] font-semibold text-ink">Mahsulot rasmlari</p>
+      <p className="text-xs leading-relaxed text-muted">
+        Format: JPG, PNG yoki WebP · Nisbat: kvadrat (1:1) · Tavsiya etilgan o&apos;lcham: 800×800px · Minimal:
+        600×600px · Maksimal fayl hajmi: 5MB. Bir nechta rasm yuklash mumkin — birini asosiy (muqova) rasm sifatida
+        belgilang.
+      </p>
+      <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-btn border border-dashed border-line bg-surface px-4.5 py-3 text-[13px] font-semibold text-ink">
+        + Rasm yuklash
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files, setImages)}
+        />
+      </label>
+      {images.length > 0 && (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
+          {images.map((img) => (
+            <div key={img.id} className="flex flex-col gap-1.5">
+              <div
+                className="relative aspect-square overflow-hidden rounded-[10px]"
+                style={{ boxShadow: img.primary ? "0 0 0 2px var(--accent)" : "0 0 0 2px transparent" }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- transient blob: object URL from local file input, next/image can't optimize these */}
+                <img src={img.url} alt="" className="h-full w-full object-cover" />
+                <button
+                  onClick={() => setImages((prev) => prev.filter((i) => i.id !== img.id))}
+                  className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+              <button
+                onClick={() => setImages((prev) => prev.map((i) => ({ ...i, primary: i.id === img.id })))}
+                className="text-[11.5px] font-semibold text-accent"
+              >
+                {img.primary ? "Asosiy" : "Asosiy qilish"}
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
