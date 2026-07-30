@@ -82,16 +82,25 @@ export default async function HomePage() {
               "radial-gradient(130% 130% at 100% 0%, var(--accent-soft) 0%, #cfdbee 32%, var(--surface) 58%, var(--bg) 100%)",
           }}
         >
+          {/* Photo only on sm+ — at mobile width the card is too narrow for a
+              busy photo to sit behind stacked text without looking like a
+              cluttered blur, so mobile keeps the plain gradient instead. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 flex items-end justify-end overflow-hidden p-5 sm:items-center sm:justify-center sm:p-0 sm:pl-[44%]"
+            className="pointer-events-none absolute inset-y-0 right-0 hidden w-[58%] overflow-hidden sm:block"
+            style={{
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 38%)",
+              maskImage: "linear-gradient(to right, transparent 0%, black 38%)",
+            }}
           >
             <Image
-              src="/brand/perfect-logo-white.png"
+              src="/images/hero-loafers-coastal.jpg"
               alt=""
-              width={340}
-              height={162}
-              className="h-auto w-[140px] max-w-[45%] opacity-[0.12] sm:w-[340px] sm:max-w-full"
+              fill
+              priority
+              sizes="(min-width: 1280px) 742px, 58vw"
+              className="object-cover"
+              style={{ objectPosition: "70% 45%" }}
             />
           </div>
           <div className="relative max-w-[640px]">
