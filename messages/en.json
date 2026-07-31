@@ -77,6 +77,8 @@
     "title": "Catalog",
     "resultsCount": "{count} products found",
     "filtersButton": "Filters",
+    "gridCompact": "Two-column view",
+    "gridLarge": "One-column view",
     "sortLabel": "Sort:",
     "sortTitle": "Sort",
     "sortNewest": "Newest",

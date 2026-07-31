@@ -77,6 +77,8 @@
     "title": "Каталог",
     "resultsCount": "Найдено товаров: {count}",
     "filtersButton": "Фильтры",
+    "gridCompact": "Вид в два столбца",
+    "gridLarge": "Вид в один столбец",
     "sortLabel": "Сортировка:",
     "sortTitle": "Сортировка",
     "sortNewest": "Сначала новые",

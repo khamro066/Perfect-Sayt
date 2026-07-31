@@ -77,6 +77,8 @@
     "title": "Katalog",
     "resultsCount": "{count} ta mahsulot topildi",
     "filtersButton": "Filtrlar",
+    "gridCompact": "Ikki ustunli ko'rinish",
+    "gridLarge": "Bitta ustunli ko'rinish",
     "sortLabel": "Saralash:",
     "sortTitle": "Saralash",
     "sortNewest": "Eng yangi",

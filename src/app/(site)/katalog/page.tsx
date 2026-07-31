@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { SlidersHorizontal, X } from "lucide-react";
+import { Grid2x2, Rows2, SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useProductsData } from "@/lib/products-data";
@@ -108,6 +108,23 @@ function CatalogContent() {
   const [sortPageOpen, setSortPageOpen] = useState(false);
   const activeSortOption = SORT_OPTIONS.find((o) => o.value === sort) ?? SORT_OPTIONS[0];
 
+  // Persisted per browser tab (not indefinitely) — matches "for the session".
+  // Starts at the "compact" default on every render (server included) and
+  // only switches after mount, to avoid a hydration mismatch against
+  // sessionStorage (which the server can't see).
+  const [gridDensity, setGridDensity] = useState<"compact" | "large">("compact");
+
+  useEffect(() => {
+    // Reading sessionStorage (an external system) after mount, not deriving
+    // from props/state — this is the one-time sync, not a render loop.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (sessionStorage.getItem("katalog-grid-density") === "large") setGridDensity("large");
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem("katalog-grid-density", gridDensity);
+  }, [gridDensity]);
+
   // Filters only take effect once "Qidirish" is pressed — this snapshot,
   // not the live draft state above, drives the product grid.
   const [appliedFilters, setAppliedFilters] = useState<FilterValues>(initialFilters);
@@ -188,6 +205,30 @@ function CatalogContent() {
           >
             {t("sortLabel")} {activeSortOption.label}
           </button>
+          <div className="flex items-center gap-1 rounded-btn border border-line bg-surface p-1">
+            <button
+              onClick={() => setGridDensity("compact")}
+              aria-label={t("gridCompact")}
+              aria-pressed={gridDensity === "compact"}
+              className={clsx(
+                "flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors",
+                gridDensity === "compact" ? "bg-accent text-accent-ink" : "text-muted hover:text-ink"
+              )}
+            >
+              <Grid2x2 size={16} />
+            </button>
+            <button
+              onClick={() => setGridDensity("large")}
+              aria-label={t("gridLarge")}
+              aria-pressed={gridDensity === "large"}
+              className={clsx(
+                "flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors",
+                gridDensity === "large" ? "bg-accent text-accent-ink" : "text-muted hover:text-ink"
+              )}
+            >
+              <Rows2 size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -270,7 +311,14 @@ function CatalogContent() {
           <p className="mt-1 text-sm text-muted">{t("noResultsDesc")}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-5">
+        <div
+          className={clsx(
+            "grid gap-3 sm:gap-5",
+            gridDensity === "large"
+              ? "grid-cols-1 mx-auto max-w-[560px]"
+              : "grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]"
+          )}
+        >
           {results.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
