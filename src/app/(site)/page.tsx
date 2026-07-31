@@ -2,12 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck, PackageCheck, Sparkles } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
+import { ProductCarousel } from "@/components/home/ProductCarousel";
 import { prisma } from "@/lib/prisma";
 import { serializeProduct } from "@/lib/serializers";
-import { Product } from "@/lib/types";
 
 // Product/category data changes constantly (admin adds products, stock
 // changes) — render this per-request rather than freezing it at build time.
@@ -19,24 +18,6 @@ const REVIEWERS = [
   { name: "Malika Yusupova", city: "Farg'ona", rating: 4 },
 ];
 
-function ProductRow({ title, href, viewAllLabel, products }: { title: string; href: string; viewAllLabel: string; products: Product[] }) {
-  if (products.length === 0) return null;
-  return (
-    <section className="mx-auto max-w-[1280px] px-6 py-8">
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-ink">{title}</h2>
-        <Link href={href} className="text-sm font-semibold text-accent hover:text-ink">
-          {viewAllLabel}
-        </Link>
-      </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(230px,260px))] sm:gap-5">
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-    </section>
-  );
-}
 
 export default async function HomePage() {
   const t = await getTranslations("home");
@@ -68,9 +49,11 @@ export default async function HomePage() {
   const homeCategories = dbCategories
     .filter((c) => !c.products.some((p) => p.kind === "accessory"))
     .map((c) => ({ name: c.name, image: c.image }));
-  const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
-  const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 4);
-  const discounted = products.filter((p) => p.oldPrice).slice(0, 4);
+  // Capped higher than the old static grid's 4 — these are now horizontally
+  // scrollable carousels, so there's room to actually scroll through.
+  const newArrivals = products.filter((p) => p.isNew).slice(0, 8);
+  const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 8);
+  const discounted = products.filter((p) => p.oldPrice).slice(0, 8);
 
   return (
     <>
@@ -177,8 +160,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <ProductRow title={t("newArrivalsTitle")} href="/katalog?sort=new" viewAllLabel={t("viewAll")} products={newArrivals} />
-      <ProductRow title={t("bestSellersTitle")} href="/katalog?sort=popular" viewAllLabel={t("viewAll")} products={bestSellers} />
+      <ProductCarousel title={t("newArrivalsTitle")} href="/katalog?sort=new" viewAllLabel={t("viewAll")} products={newArrivals} />
+      <ProductCarousel title={t("bestSellersTitle")} href="/katalog?sort=popular" viewAllLabel={t("viewAll")} products={bestSellers} />
 
       <section className="mx-auto max-w-[1280px] px-6 py-5">
         <div className="relative grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] overflow-hidden rounded-[22px] border border-line bg-accent-soft">
@@ -207,20 +190,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1280px] px-6 py-8">
-        <div className="mb-5 flex items-center gap-3">
-          <h2 className="text-2xl font-medium text-ink">{t("discountedTitle")}</h2>
-          <span className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">SALE</span>
-          <Link href="/katalog?sale=1" className="ml-auto text-sm font-semibold text-accent hover:text-ink">
-            {t("viewAll")}
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(230px,260px))] sm:gap-5">
-          {discounted.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
+      <ProductCarousel
+        title={t("discountedTitle")}
+        href="/katalog?sale=1"
+        viewAllLabel={t("viewAll")}
+        products={discounted}
+        badge={<span className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">SALE</span>}
+      />
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
         <h2 className="mb-5 text-2xl font-medium text-ink">{t("reviewsTitle")}</h2>
