@@ -78,6 +78,7 @@
     "resultsCount": "Найдено товаров: {count}",
     "filtersButton": "Фильтры",
     "sortLabel": "Сортировка:",
+    "sortTitle": "Сортировка",
     "sortNewest": "Сначала новые",
     "sortPopular": "Популярные",
     "sortRating": "С высоким рейтингом",

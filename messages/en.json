@@ -78,6 +78,7 @@
     "resultsCount": "{count} products found",
     "filtersButton": "Filters",
     "sortLabel": "Sort:",
+    "sortTitle": "Sort",
     "sortNewest": "Newest",
     "sortPopular": "Most popular",
     "sortRating": "Highest rated",

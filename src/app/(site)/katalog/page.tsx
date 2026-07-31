@@ -104,7 +104,9 @@ function CatalogContent() {
   const [onlyNew, setOnlyNew] = useState(initialFilters.onlyNew);
   const [popular, setPopular] = useState(initialFilters.popular);
   const [sort, setSort] = useState(searchParams.get("sort") ?? "new");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [filterPageOpen, setFilterPageOpen] = useState(false);
+  const [sortPageOpen, setSortPageOpen] = useState(false);
+  const activeSortOption = SORT_OPTIONS.find((o) => o.value === sort) ?? SORT_OPTIONS[0];
 
   // Filters only take effect once "Qidirish" is pressed — this snapshot,
   // not the live draft state above, drives the product grid.
@@ -117,7 +119,7 @@ function CatalogContent() {
 
   function applyFilters() {
     setAppliedFilters(draftFilters);
-    setMobileFiltersOpen(false);
+    setFilterPageOpen(false);
   }
 
   function clearFilters() {
@@ -171,39 +173,33 @@ function CatalogContent() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setMobileFiltersOpen(true)}
-            className="flex items-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink lg:hidden"
+            onClick={() => setFilterPageOpen(true)}
+            className="flex items-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
           >
             <SlidersHorizontal size={15} /> {t("filtersButton")}
           </button>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="text-ink">{t("sortLabel")}</span>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="rounded-btn border border-line bg-surface px-3 py-2 text-sm outline-none"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <button
+            onClick={() => setSortPageOpen(true)}
+            className="rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
+          >
+            {t("sortLabel")} {activeSortOption.label}
+          </button>
         </div>
       </div>
 
-      {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileFiltersOpen(false)} />
-          <div className="relative ml-auto flex h-full w-[86vw] max-w-[340px] flex-col overflow-y-auto bg-surface p-5.5">
+      {filterPageOpen && (
+        <div className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-surface">
+          <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-5 py-4">
+            <span className="font-bold text-ink">{t("filtersTitle")}</span>
             <button
-              onClick={() => setMobileFiltersOpen(false)}
-              className="mb-3 flex h-9 w-9 items-center justify-center self-end rounded-full border border-line"
+              onClick={() => setFilterPageOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line"
               aria-label={t("close")}
             >
               <X size={16} />
             </button>
+          </div>
+          <div className="mx-auto w-full max-w-[640px] flex-1 p-5.5">
             <FilterSidebar
               {...{
                 sizes, setSizes, categories, setCategories,
@@ -218,35 +214,52 @@ function CatalogContent() {
         </div>
       )}
 
-      <div className="flex gap-7">
-        <aside className="sticky top-[150px] hidden h-fit w-[270px] shrink-0 rounded-block border border-line bg-surface p-5.5 lg:block">
-          <FilterSidebar
-            {...{
-              sizes, setSizes, categories, setCategories,
-              brands, setBrands, colors, setColors, materials, setMaterials,
-              priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
-              onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
-              clearFilters, allCategories, applyFilters,
-              products, getTotalStock, draftFilters,
-            }}
-          />
-        </aside>
-
-        <div className="min-w-0 flex-[3_1_520px]">
-          {results.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="font-semibold text-ink">{t("noResultsTitle")}</p>
-              <p className="mt-1 text-sm text-muted">{t("noResultsDesc")}</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-5">
-              {results.map((p) => (
-                <ProductCard key={p.id} product={p} />
+      {sortPageOpen && (
+        <div className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-surface">
+          <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-5 py-4">
+            <span className="font-bold text-ink">{t("sortTitle")}</span>
+            <button
+              onClick={() => setSortPageOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line"
+              aria-label={t("close")}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="mx-auto w-full max-w-[480px] flex-1 p-5.5">
+            <div className="flex flex-col gap-1">
+              {SORT_OPTIONS.map((o) => (
+                <button
+                  key={o.value}
+                  onClick={() => {
+                    setSort(o.value);
+                    setSortPageOpen(false);
+                  }}
+                  className={clsx(
+                    "rounded-[10px] px-4 py-3.5 text-left text-[15px] font-medium transition-colors",
+                    o.value === sort ? "bg-accent text-accent-ink" : "text-ink hover:bg-accent-soft/40"
+                  )}
+                >
+                  {o.label}
+                </button>
               ))}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {results.length === 0 ? (
+        <div className="py-20 text-center">
+          <p className="font-semibold text-ink">{t("noResultsTitle")}</p>
+          <p className="mt-1 text-sm text-muted">{t("noResultsDesc")}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-5">
+          {results.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
