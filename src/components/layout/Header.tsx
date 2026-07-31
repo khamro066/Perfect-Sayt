@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Menu, Search as SearchIcon, Moon, Sun, ShoppingBag } from "lucide-react";
+import { Menu, Search as SearchIcon, Moon, Sun, Heart, ShoppingBag } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
 import { useCart } from "@/lib/cart-context";
 import { MiniCart } from "./MiniCart";
@@ -70,6 +70,13 @@ export function Header() {
               {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
             </button>
             <LanguageSwitcher />
+            <Link
+              href="/profil?tab=favs"
+              aria-label={t("favorites")}
+              className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 sm:h-[42px] sm:w-[42px]"
+            >
+              <Heart size={17} />
+            </Link>
             <div className="relative">
               <button
                 onClick={handleCartClick}
