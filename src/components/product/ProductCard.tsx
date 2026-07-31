@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 import { Product } from "@/lib/types";
@@ -12,7 +11,6 @@ import { useFavorites } from "@/lib/favorites-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function ProductCard({ product }: { product: Product }) {
-  const router = useRouter();
   const t = useTranslations("productCard");
   const { isFavorite, toggleFavorite } = useFavorites();
   const { getTotalStock } = useProductsData();
@@ -24,18 +22,10 @@ export function ProductCard({ product }: { product: Product }) {
     : 0;
   const favorited = isFavorite(product.id);
 
-  // Cards no longer add to cart directly (no size/color chosen yet) —
-  // both states just take the shopper to the product page to pick options.
-  function handleFooterClick(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/mahsulot/${product.id}`);
-  }
-
   return (
     <Link
       href={`/mahsulot/${product.id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface transition-[box-shadow,transform] duration-200 hover:-translate-y-[3px] hover:shadow-[0_14px_34px_rgba(0,0,0,0.10)]"
+      className="group flex h-full flex-col overflow-hidden rounded-card bg-surface transition-[box-shadow,transform] duration-200 hover:-translate-y-[3px] hover:shadow-[0_14px_34px_rgba(0,0,0,0.10)]"
     >
       <div className="relative aspect-square w-full bg-surface-2">
         {product.images?.[0] ? (
@@ -104,12 +94,6 @@ export function ProductCard({ product }: { product: Product }) {
             />
           ))}
         </div>
-        <button
-          onClick={handleFooterClick}
-          className="mt-auto rounded-btn border border-accent px-2 py-2 text-[11px] font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-ink sm:px-2.5 sm:py-2.5 sm:text-[13px]"
-        >
-          {soldOut ? t("preorder") : t("viewProduct")}
-        </button>
       </div>
     </Link>
   );

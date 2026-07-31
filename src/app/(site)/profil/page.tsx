@@ -189,7 +189,7 @@ function ProfileContent() {
                 <p className="mt-1 text-sm text-muted">{t("noFavoritesDesc")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(210px,1fr))] sm:gap-4.5">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(210px,1fr))] sm:gap-3">
                 {favProducts.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
