@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ShieldCheck, PackageCheck, Sparkles } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 import { ProductCarousel } from "@/components/home/ProductCarousel";
+import { TrustBadges } from "@/components/home/TrustBadges";
 import { prisma } from "@/lib/prisma";
 import { serializeProduct } from "@/lib/serializers";
 
@@ -21,12 +21,6 @@ const REVIEWERS = [
 
 export default async function HomePage() {
   const t = await getTranslations("home");
-
-  const TRUST_ITEMS = [
-    { icon: ShieldCheck, title: t("trust1Title"), desc: t("trust1Desc") },
-    { icon: PackageCheck, title: t("trust2Title"), desc: t("trust2Desc") },
-    { icon: Sparkles, title: t("trust3Title"), desc: t("trust3Desc") },
-  ];
 
   const REVIEWS = REVIEWERS.map((r, i) => ({
     ...r,
@@ -124,18 +118,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <section className="mx-auto max-w-[1280px] px-6 py-8">
-        <div className="grid grid-cols-3 divide-x divide-line rounded-card border border-line bg-surface sm:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-          {TRUST_ITEMS.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="flex flex-col items-center gap-1 p-2.5 text-center sm:items-start sm:gap-2 sm:p-6 sm:text-left">
-              <Icon size={18} className="text-accent sm:hidden" />
-              <Icon size={28} className="hidden text-accent sm:block" />
-              <p className="text-[10.5px] font-semibold leading-tight text-ink sm:text-base">{title}</p>
-              <p className="hidden text-sm text-muted sm:block">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TrustBadges />
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
         <div className="mb-5 flex items-center justify-between">
