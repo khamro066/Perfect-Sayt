@@ -103,6 +103,13 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
           ))}
 
           <AccordionNavItem label={t("catalog")} open={katalogOpen} onToggle={() => setKatalogOpen((v) => !v)}>
+            <Link
+              href="/katalog"
+              onClick={onClose}
+              className="rounded-[8px] px-3 py-2.5 text-[15px] font-semibold text-accent transition-colors hover:bg-accent-soft/40"
+            >
+              {t("allModels")}
+            </Link>
             {SHOE_SUBCATEGORIES.map((cat) => (
               <Link
                 key={cat}
@@ -113,13 +120,6 @@ export function SlideMenu({ open, onClose }: { open: boolean; onClose: () => voi
                 {cat} <span className="text-muted">({countFor(cat)})</span>
               </Link>
             ))}
-            <Link
-              href="/katalog"
-              onClick={onClose}
-              className="rounded-[8px] px-3 py-2.5 text-[15px] font-semibold text-accent transition-colors hover:bg-accent-soft/40"
-            >
-              {t("allModels")}
-            </Link>
           </AccordionNavItem>
 
           <AccordionNavItem
