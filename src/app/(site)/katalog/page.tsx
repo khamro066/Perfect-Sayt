@@ -117,6 +117,10 @@ function CatalogContent() {
     priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular,
   };
 
+  // Live count for the sticky apply button — the full draft combination,
+  // not scoped to any single facet (unlike FilterSidebar's own countFor).
+  const matchingCount = products.filter((p) => matchesFilters(p, draftFilters, getTotalStock)).length;
+
   function applyFilters() {
     setAppliedFilters(draftFilters);
     setFilterPageOpen(false);
@@ -188,7 +192,7 @@ function CatalogContent() {
       </div>
 
       {filterPageOpen && (
-        <div className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-surface">
+        <div className="fixed inset-0 z-[200] flex flex-col bg-surface">
           <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-5 py-4">
             <span className="font-bold text-ink">{t("filtersTitle")}</span>
             <button
@@ -199,17 +203,29 @@ function CatalogContent() {
               <X size={16} />
             </button>
           </div>
-          <div className="mx-auto w-full max-w-[640px] flex-1 p-5.5">
-            <FilterSidebar
-              {...{
-                sizes, setSizes, categories, setCategories,
-                brands, setBrands, colors, setColors, materials, setMaterials,
-                priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
-                onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
-                clearFilters, allCategories, applyFilters,
-                products, getTotalStock, draftFilters,
-              }}
-            />
+          <div className="flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-[640px] p-5.5">
+              <FilterSidebar
+                {...{
+                  sizes, setSizes, categories, setCategories,
+                  brands, setBrands, colors, setColors, materials, setMaterials,
+                  priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
+                  onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
+                  clearFilters, allCategories,
+                  products, getTotalStock, draftFilters,
+                }}
+              />
+            </div>
+          </div>
+          <div className="border-t border-line bg-surface p-4">
+            <div className="mx-auto w-full max-w-[640px]">
+              <button
+                onClick={applyFilters}
+                className="w-full rounded-btn bg-accent py-3.5 text-sm font-semibold text-accent-ink transition-colors hover:opacity-90"
+              >
+                {t("applyButton", { count: matchingCount })}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -279,7 +295,6 @@ interface FilterProps {
   popular: boolean; setPopular: (v: boolean) => void;
   clearFilters: () => void;
   allCategories: string[];
-  applyFilters: () => void;
   products: Product[];
   getTotalStock: (id: string) => number;
   draftFilters: FilterValues;
@@ -435,13 +450,6 @@ function FilterSidebar(p: FilterProps) {
           </label>
         ))}
       </div>
-
-      <button
-        onClick={p.applyFilters}
-        className="mt-1 w-full rounded-btn bg-accent py-3 text-sm font-semibold text-accent-ink transition-colors hover:opacity-90"
-      >
-        {t("applyButton")}
-      </button>
     </div>
   );
 }

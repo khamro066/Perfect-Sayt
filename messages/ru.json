@@ -101,7 +101,7 @@
     "inStockCheckbox": "В наличии",
     "onlyNewCheckbox": "Только новинки",
     "popularCheckbox": "Популярные товары",
-    "applyButton": "Найти"
+    "applyButton": "Показать результаты ({count})"
   },
   "product": {
     "home": "Главная",

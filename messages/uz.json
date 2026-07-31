@@ -101,7 +101,7 @@
     "inStockCheckbox": "Omborda mavjud",
     "onlyNewCheckbox": "Yangi mahsulotlar",
     "popularCheckbox": "Mashhur mahsulotlar",
-    "applyButton": "Qidirish"
+    "applyButton": "Natijalarni ko'rish ({count})"
   },
   "product": {
     "home": "Bosh sahifa",

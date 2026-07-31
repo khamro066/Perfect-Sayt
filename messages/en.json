@@ -101,7 +101,7 @@
     "inStockCheckbox": "In stock",
     "onlyNewCheckbox": "New arrivals only",
     "popularCheckbox": "Popular products",
-    "applyButton": "Search"
+    "applyButton": "Show results ({count})"
   },
   "product": {
     "home": "Home",
