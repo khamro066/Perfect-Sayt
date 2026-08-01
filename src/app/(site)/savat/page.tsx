@@ -62,24 +62,26 @@ export default function CartPage() {
             const product = products.find((p) => p.id === line.productId);
             if (!product) return null;
             return (
-              <div key={`${line.productId}-${line.colorHex}-${line.size}`} className="flex flex-wrap items-center gap-4 rounded-card border border-line p-4">
-                <PlaceholderImage label={product.name} className="h-24 w-24 shrink-0 rounded-card" />
-                <div className="min-w-0 flex-1">
-                  <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{product.brand}</span>
-                  <p className="font-heading text-lg text-ink">{product.name}</p>
-                  <p className="text-sm text-muted">
-                    {product.kind === "accessory"
-                      ? t("colorOnly", { color: colorName(line.colorHex) })
-                      : t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
-                  </p>
-                  <button
-                    onClick={() => removeLine(line.productId, line.colorHex, line.size)}
-                    className="mt-1 text-sm font-semibold text-danger"
-                  >
-                    {t("remove")}
-                  </button>
+              <div key={`${line.productId}-${line.colorHex}-${line.size}`} className="flex flex-col gap-3 rounded-card border border-line p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                <div className="flex gap-4">
+                  <PlaceholderImage label={product.name} className="h-24 w-24 shrink-0 rounded-card" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{product.brand}</span>
+                    <p className="font-heading text-lg text-ink">{product.name}</p>
+                    <p className="text-sm text-muted">
+                      {product.kind === "accessory"
+                        ? t("colorOnly", { color: colorName(line.colorHex) })
+                        : t("sizeColor", { size: line.size, color: colorName(line.colorHex) })}
+                    </p>
+                    <button
+                      onClick={() => removeLine(line.productId, line.colorHex, line.size)}
+                      className="mt-1 text-sm font-semibold text-danger"
+                    >
+                      {t("remove")}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-start sm:gap-2">
                   <span className="text-base font-bold text-ink">{formatPrice(product.price * line.qty)}</span>
                   <div className="flex items-center gap-2">
                     <button
