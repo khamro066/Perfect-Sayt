@@ -49,7 +49,6 @@ export function Header() {
             >
               <Heart size={17} />
             </Link>
-            <LanguageSwitcher />
             <button
               onClick={toggleTheme}
               aria-label={t("themeToggle")}
@@ -65,12 +64,13 @@ export function Header() {
               alt="Perfect Shoes"
               width={140}
               height={40}
-              className="h-9 w-auto sm:h-11"
+              className="h-14 w-auto sm:h-16"
               priority
             />
           </Link>
 
           <div className="relative flex shrink-0 items-center gap-1 sm:gap-1.5">
+            <LanguageSwitcher />
             <button
               onClick={() => setSearchOpen((v) => !v)}
               aria-label={t("search")}
