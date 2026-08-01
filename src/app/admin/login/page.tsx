@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
       >
         <div className="flex justify-center">
           <Image
-            src="/brand/perfect-logo-white.png"
+            src="/brand/perfect-logo-blue.jpg"
             alt="Perfect"
             width={101}
             height={48}

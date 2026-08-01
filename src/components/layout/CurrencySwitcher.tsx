@@ -21,7 +21,7 @@ export function CurrencySwitcher() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={t("currency")}
-        className="flex h-[38px] w-[38px] items-center justify-center gap-1.5 rounded-full border border-deep-line text-deep-ink transition-colors hover:bg-white/10 sm:h-[42px] sm:w-auto sm:px-3"
+        className="flex h-[38px] w-[38px] items-center justify-center gap-1.5 rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-auto sm:px-3"
       >
         <Coins size={16} />
         <span className="hidden text-xs font-semibold uppercase sm:inline">{currency}</span>
