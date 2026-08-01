@@ -10,19 +10,26 @@ export function ProductCarousel({
   title, href, viewAllLabel, products, badge,
 }: { title: string; href: string; viewAllLabel: string; products: Product[]; badge?: React.ReactNode }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  // Only show the jump-to-end arrow when the row actually overflows — with
-  // few enough items to fit the viewport there's nothing to scroll to.
-  const [canScroll, setCanScroll] = useState(false);
+  // Tracks live scroll position, not just whether the row overflows at all —
+  // hides once scrolled to the end, reappears if the user scrolls back.
+  const [canScrollForward, setCanScrollForward] = useState(false);
 
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    function checkOverflow() {
-      if (el) setCanScroll(el.scrollWidth > el.clientWidth + 4);
+    function checkScroll() {
+      if (!el) return;
+      const hasOverflow = el.scrollWidth > el.clientWidth + 4;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setCanScrollForward(hasOverflow && !atEnd);
     }
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
   }, [products]);
 
   if (products.length === 0) return null;
@@ -51,13 +58,17 @@ export function ProductCarousel({
             </div>
           ))}
         </div>
-        {canScroll && (
+        {canScrollForward && (
+          // Button itself keeps a 40x40 touch target; the visible circle
+          // inside it is smaller so it covers less of the product image.
           <button
             onClick={scrollToEnd}
             aria-label={viewAllLabel}
-            className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface/65 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.14)] backdrop-blur-sm transition-colors hover:bg-surface/90"
+            className="absolute right-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center"
           >
-            <ChevronRight size={18} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface/65 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.14)] backdrop-blur-sm transition-colors hover:bg-surface/90">
+              <ChevronRight size={16} />
+            </span>
           </button>
         )}
       </div>
