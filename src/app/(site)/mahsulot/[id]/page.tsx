@@ -15,6 +15,7 @@ import { useFavorites } from "@/lib/favorites-context";
 import { useCurrency } from "@/lib/currency-context";
 import { useToast } from "@/lib/toast-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
 import { SizeChartModal } from "@/components/product/SizeChartModal";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Product, Review } from "@/lib/types";
@@ -160,7 +161,7 @@ export default function ProductPage() {
             <span className="text-muted">· {t("reviewsCount", { count: product.ratingCount })}</span>
           </div>
 
-          <div className="mt-3 flex items-baseline gap-2.5">
+          <div className="mt-3 flex flex-wrap items-baseline gap-2.5">
             <span className="text-[30px] font-bold text-accent">{formatPrice(product.price)}</span>
             {product.oldPrice && (
               <>
@@ -168,6 +169,7 @@ export default function ProductPage() {
                 <span className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">-{discount}%</span>
               </>
             )}
+            <CurrencySwitcher variant="inline" />
           </div>
 
           <div className="mt-3 flex items-center gap-2 text-sm">

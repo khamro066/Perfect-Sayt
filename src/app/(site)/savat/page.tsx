@@ -10,6 +10,7 @@ import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
 import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
 
 const COUPONS: Record<string, number> = { SALOM10: 0.1, PERFECT15: 0.15 };
 
@@ -131,8 +132,11 @@ export default function CartPage() {
             </div>
           </div>
           <div className="my-4 border-t border-line" />
-          <div className="mb-4 flex justify-between text-[22px] font-bold text-ink">
-            <span>{t("total")}</span>
+          <div className="mb-4 flex items-center justify-between text-[22px] font-bold text-ink">
+            <div className="flex items-center gap-2">
+              <span>{t("total")}</span>
+              <CurrencySwitcher variant="inline" />
+            </div>
             <span>{formatPrice(total)}</span>
           </div>
           <Link

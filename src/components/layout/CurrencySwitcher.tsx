@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Coins } from "lucide-react";
+import { Coins, ChevronDown } from "lucide-react";
+import clsx from "clsx";
 import { useCurrency } from "@/lib/currency-context";
 import { CURRENCIES, type Currency } from "@/lib/currency";
 
-export function CurrencySwitcher() {
+// "header" = icon-circle trigger for the global header icon row.
+// "inline" = small text pill for sitting right next to a price display
+// (PDP, cart, checkout) — always shows the code, no icon-only collapse.
+export function CurrencySwitcher({ variant = "header" }: { variant?: "header" | "inline" }) {
   const { currency, setCurrency } = useCurrency();
   const t = useTranslations("header");
   const [open, setOpen] = useState(false);
@@ -17,15 +21,27 @@ export function CurrencySwitcher() {
   }
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label={t("currency")}
-        className="flex h-[38px] w-[38px] items-center justify-center gap-1.5 rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-auto sm:px-3"
-      >
-        <Coins size={16} />
-        <span className="hidden text-xs font-semibold uppercase sm:inline">{currency}</span>
-      </button>
+    <div className="relative inline-block">
+      {variant === "inline" ? (
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label={t("currency")}
+          className="inline-flex items-center gap-1 rounded-pill border border-line bg-surface px-2.5 py-1 text-xs font-semibold text-muted transition-colors hover:bg-accent-soft/40 hover:text-ink"
+        >
+          <Coins size={12} />
+          {currency}
+          <ChevronDown size={12} className={clsx("transition-transform", open && "rotate-180")} />
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label={t("currency")}
+          className="flex h-[38px] w-[38px] items-center justify-center gap-1.5 rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-auto sm:px-3"
+        >
+          <Coins size={16} />
+          <span className="hidden text-xs font-semibold uppercase sm:inline">{currency}</span>
+        </button>
+      )}
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />

@@ -55,7 +55,7 @@ export function ProductCarousel({
           <button
             onClick={scrollToEnd}
             aria-label={viewAllLabel}
-            className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface text-ink shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition-opacity hover:opacity-90"
+            className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface/65 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.14)] backdrop-blur-sm transition-colors hover:bg-surface/90"
           >
             <ChevronRight size={18} />
           </button>

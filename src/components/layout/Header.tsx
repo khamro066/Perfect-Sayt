@@ -12,7 +12,6 @@ import { MiniCart } from "./MiniCart";
 import { SlideMenu } from "./SlideMenu";
 import { SearchPanel } from "./SearchPanel";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { CurrencySwitcher } from "./CurrencySwitcher";
 
 export function Header() {
   const router = useRouter();
@@ -35,13 +34,30 @@ export function Header() {
     <>
       <header className="sticky top-0 z-40 border-b border-line bg-surface">
         <div className="relative mx-auto flex max-w-[1280px] items-center justify-between px-6 py-3.5">
-          <button
-            onClick={() => setMenuOpen(true)}
-            aria-label={t("menu")}
-            className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-[42px]"
-          >
-            <Menu size={19} />
-          </button>
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label={t("menu")}
+              className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-[42px]"
+            >
+              <Menu size={19} />
+            </button>
+            <Link
+              href="/profil?tab=favs"
+              aria-label={t("favorites")}
+              className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-[42px]"
+            >
+              <Heart size={17} />
+            </Link>
+            <LanguageSwitcher />
+            <button
+              onClick={toggleTheme}
+              aria-label={t("themeToggle")}
+              className="hidden h-[42px] w-[42px] items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:flex"
+            >
+              {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
+            </button>
+          </div>
 
           <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <Image
@@ -49,7 +65,7 @@ export function Header() {
               alt="Perfect Shoes"
               width={140}
               height={40}
-              className="h-7 w-auto sm:h-9"
+              className="h-9 w-auto sm:h-11"
               priority
             />
           </Link>
@@ -63,22 +79,6 @@ export function Header() {
               <SearchIcon size={17} />
             </button>
             {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}
-            <button
-              onClick={toggleTheme}
-              aria-label={t("themeToggle")}
-              className="hidden h-[42px] w-[42px] items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:flex"
-            >
-              {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
-            </button>
-            <LanguageSwitcher />
-            <CurrencySwitcher />
-            <Link
-              href="/profil?tab=favs"
-              aria-label={t("favorites")}
-              className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-accent-soft/40 sm:h-[42px] sm:w-[42px]"
-            >
-              <Heart size={17} />
-            </Link>
             <div className="relative">
               <button
                 onClick={handleCartClick}

@@ -14,6 +14,7 @@ import { DELIVERY_METHODS, deliveryFeeFor } from "@/lib/delivery";
 import { formatSom } from "@/lib/format";
 import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
+import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -212,8 +213,11 @@ export default function CheckoutPage() {
             <span>{deliveryFee === 0 ? t("free") : formatPrice(deliveryFee)}</span>
           </div>
           <div className="my-4 border-t border-line" />
-          <div className="flex justify-between text-[21px] font-bold text-ink">
-            <span>{t("total")}</span>
+          <div className="flex items-center justify-between text-[21px] font-bold text-ink">
+            <div className="flex items-center gap-2">
+              <span>{t("total")}</span>
+              <CurrencySwitcher variant="inline" />
+            </div>
             <span>{formatPrice(total)}</span>
           </div>
           <p className="mb-4 mt-1 text-xs text-muted">
