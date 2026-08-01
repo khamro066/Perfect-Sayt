@@ -205,30 +205,13 @@ function CatalogContent() {
           >
             {t("sortLabel")} {activeSortOption.label}
           </button>
-          <div className="flex items-center gap-1 rounded-btn border border-line bg-surface p-1">
-            <button
-              onClick={() => setGridDensity("compact")}
-              aria-label={t("gridCompact")}
-              aria-pressed={gridDensity === "compact"}
-              className={clsx(
-                "flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors",
-                gridDensity === "compact" ? "bg-accent text-accent-ink" : "text-muted hover:text-ink"
-              )}
-            >
-              <Grid2x2 size={16} />
-            </button>
-            <button
-              onClick={() => setGridDensity("large")}
-              aria-label={t("gridLarge")}
-              aria-pressed={gridDensity === "large"}
-              className={clsx(
-                "flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors",
-                gridDensity === "large" ? "bg-accent text-accent-ink" : "text-muted hover:text-ink"
-              )}
-            >
-              <Rows2 size={16} />
-            </button>
-          </div>
+          <button
+            onClick={() => setGridDensity(gridDensity === "compact" ? "large" : "compact")}
+            aria-label={gridDensity === "compact" ? t("gridLarge") : t("gridCompact")}
+            className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-btn border border-line bg-surface text-ink transition-colors hover:bg-accent-soft/40"
+          >
+            {gridDensity === "compact" ? <Rows2 size={16} /> : <Grid2x2 size={16} />}
+          </button>
         </div>
       </div>
 
