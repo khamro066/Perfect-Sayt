@@ -12,6 +12,7 @@ import { MiniCart } from "./MiniCart";
 import { SlideMenu } from "./SlideMenu";
 import { SearchPanel } from "./SearchPanel";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { CurrencySwitcher } from "./CurrencySwitcher";
 
 export function Header() {
   const router = useRouter();
@@ -70,6 +71,7 @@ export function Header() {
               {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
             </button>
             <LanguageSwitcher />
+            <CurrencySwitcher />
             <Link
               href="/profil?tab=favs"
               aria-label={t("favorites")}

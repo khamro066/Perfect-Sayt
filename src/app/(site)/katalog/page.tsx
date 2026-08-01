@@ -7,7 +7,7 @@ import { Grid2x2, Rows2, SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useProductsData } from "@/lib/products-data";
-import { formatSom } from "@/lib/format";
+import { useCurrency } from "@/lib/currency-context";
 import { colorName } from "@/lib/colors";
 import { Product } from "@/lib/types";
 
@@ -364,6 +364,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 
 function FilterSidebar(p: FilterProps) {
   const t = useTranslations("catalog");
+  const { formatPrice } = useCurrency();
 
   function countFor(except: FacetKey, predicate: (product: Product) => boolean) {
     return p.products.filter(
@@ -446,8 +447,8 @@ function FilterSidebar(p: FilterProps) {
       <FilterSection label={t("priceRangeLabel")}>
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-xs text-muted">
-            <span>{formatSom(p.priceMin)}</span>
-            <span>{formatSom(p.priceMax)}</span>
+            <span>{formatPrice(p.priceMin, { wholeNumber: true })}</span>
+            <span>{formatPrice(p.priceMax, { wholeNumber: true })}</span>
           </div>
           <input
             type="range" min={0} max={2000000} step={50000}

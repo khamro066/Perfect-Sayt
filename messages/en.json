@@ -4,6 +4,7 @@
     "search": "Search",
     "themeToggle": "Toggle theme",
     "favorites": "Favorites",
+    "currency": "Currency",
     "cart": "Cart"
   },
   "menu": {
@@ -202,6 +203,7 @@
     "products": "Products",
     "delivery": "Delivery",
     "total": "Total",
+    "uzsChargeNote": "Final payment will be charged in so'm: {amount}",
     "confirmButton": "Confirm order",
     "submitting": "Submitting…",
     "toastEnterName": "Please enter your name",

@@ -4,6 +4,7 @@
     "search": "Поиск",
     "themeToggle": "Сменить тему",
     "favorites": "Избранное",
+    "currency": "Валюта",
     "cart": "Корзина"
   },
   "menu": {
@@ -202,6 +203,7 @@
     "products": "Товары",
     "delivery": "Доставка",
     "total": "Итого",
+    "uzsChargeNote": "Итоговый платёж будет списан в сумах: {amount}",
     "confirmButton": "Подтвердить заказ",
     "submitting": "Отправка…",
     "toastEnterName": "Введите ваше имя",

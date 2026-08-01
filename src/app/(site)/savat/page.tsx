@@ -8,7 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
-import { formatSom } from "@/lib/format";
+import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 const COUPONS: Record<string, number> = { SALOM10: 0.1, PERFECT15: 0.15 };
@@ -17,6 +17,7 @@ export default function CartPage() {
   const t = useTranslations("cart");
   const { lines, removeLine, setQty, subtotal } = useCart();
   const { products } = useProductsData();
+  const { formatPrice } = useCurrency();
   const { showToast } = useToast();
   const [couponInput, setCouponInput] = useState("");
   const [couponRate, setCouponRate] = useState(0);
@@ -78,7 +79,7 @@ export default function CartPage() {
                   </button>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <span className="text-base font-bold text-ink">{formatSom(product.price * line.qty)}</span>
+                  <span className="text-base font-bold text-ink">{formatPrice(product.price * line.qty)}</span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setQty(line.productId, line.colorHex, line.size, line.qty - 1)}
@@ -116,23 +117,23 @@ export default function CartPage() {
           <div className="flex flex-col gap-2 text-sm">
             <div className="flex justify-between text-ink">
               <span>{t("products")}</span>
-              <span>{formatSom(subtotal)}</span>
+              <span>{formatPrice(subtotal)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-accent">
                 <span>{t("discount")}</span>
-                <span>−{formatSom(discount)}</span>
+                <span>−{formatPrice(discount)}</span>
               </div>
             )}
             <div className="flex justify-between text-ink">
               <span>{t("delivery")}</span>
-              <span>{delivery === 0 ? t("free") : formatSom(delivery)}</span>
+              <span>{delivery === 0 ? t("free") : formatPrice(delivery)}</span>
             </div>
           </div>
           <div className="my-4 border-t border-line" />
           <div className="mb-4 flex justify-between text-[22px] font-bold text-ink">
             <span>{t("total")}</span>
-            <span>{formatSom(total)}</span>
+            <span>{formatPrice(total)}</span>
           </div>
           <Link
             href="/checkout"

@@ -9,7 +9,8 @@ import { Minus, Plus } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { useProductsData } from "@/lib/products-data";
-import { formatSom, formatDateRangeUz } from "@/lib/format";
+import { formatDateRangeUz } from "@/lib/format";
+import { useCurrency } from "@/lib/currency-context";
 import { useToast } from "@/lib/toast-context";
 import { useCustomer } from "@/lib/customer-context";
 
@@ -44,6 +45,7 @@ function PreorderContent() {
   const { showToast } = useToast();
   const { products, getTotalStock } = useProductsData();
   const { customer, setCustomer } = useCustomer();
+  const { formatPrice } = useCurrency();
   const [submitting, setSubmitting] = useState(false);
 
   const productId = searchParams.get("product");
@@ -124,7 +126,7 @@ function PreorderContent() {
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.09em] text-muted">{product.brand}</span>
                 <p className="font-heading text-xl text-ink">{product.name}</p>
-                <p className="text-sm text-muted">{formatSom(product.price)} {t("perPair")}</p>
+                <p className="text-sm text-muted">{formatPrice(product.price)} {t("perPair")}</p>
                 {getTotalStock(product.id) <= 0 && (
                   <p className="mt-1 text-sm font-semibold text-danger">{t("outOfStock")}</p>
                 )}
@@ -208,11 +210,11 @@ function PreorderContent() {
               <Row label={t("initialStatus")} value={t("statusPending")} color="var(--star)" />
             </div>
             <div className="my-4 border-t border-line" />
-            <Row label={t("totalAmount")} value={formatSom(product.price * qty)} bold />
+            <Row label={t("totalAmount")} value={formatPrice(product.price * qty)} bold />
             <div className="mt-3 rounded-card bg-accent-soft p-3.5">
               <Row
                 label={payType === "full" ? t("payNowFull") : t("payNowDeposit")}
-                value={formatSom(payType === "full" ? product.price * qty : Math.round(product.price * qty * 0.3))}
+                value={formatPrice(payType === "full" ? product.price * qty : Math.round(product.price * qty * 0.3))}
                 bold
               />
             </div>

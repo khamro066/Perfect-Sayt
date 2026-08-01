@@ -5,15 +5,16 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 import { Product } from "@/lib/types";
-import { formatSom } from "@/lib/format";
 import { useProductsData } from "@/lib/products-data";
 import { useFavorites } from "@/lib/favorites-context";
+import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function ProductCard({ product }: { product: Product }) {
   const t = useTranslations("productCard");
   const { isFavorite, toggleFavorite } = useFavorites();
   const { getTotalStock } = useProductsData();
+  const { formatPrice } = useCurrency();
 
   const stock = getTotalStock(product.id);
   const soldOut = stock <= 0;
@@ -80,9 +81,9 @@ export function ProductCard({ product }: { product: Product }) {
           {product.name}
         </h3>
         <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
-          <span className="whitespace-nowrap text-[13px] font-bold text-accent sm:text-base">{formatSom(product.price)}</span>
+          <span className="whitespace-nowrap text-[13px] font-bold text-accent sm:text-base">{formatPrice(product.price)}</span>
           {product.oldPrice && (
-            <span className="whitespace-nowrap text-[10px] text-muted line-through sm:text-[12.5px]">{formatSom(product.oldPrice)}</span>
+            <span className="whitespace-nowrap text-[10px] text-muted line-through sm:text-[12.5px]">{formatPrice(product.oldPrice)}</span>
           )}
         </div>
         <div className="flex gap-1 sm:gap-1.5">

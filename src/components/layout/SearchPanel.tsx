@@ -6,12 +6,13 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Search as SearchIcon } from "lucide-react";
 import { useProductsData } from "@/lib/products-data";
-import { formatSom } from "@/lib/format";
+import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function SearchPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("search");
   const { products } = useProductsData();
+  const { formatPrice } = useCurrency();
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
@@ -58,7 +59,7 @@ export function SearchPanel({ onClose }: { onClose: () => void }) {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink">{p.name}</p>
-                  <p className="text-xs text-muted">{formatSom(p.price)}</p>
+                  <p className="text-xs text-muted">{formatPrice(p.price)}</p>
                 </div>
               </Link>
             ))

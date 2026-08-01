@@ -9,9 +9,10 @@ import clsx from "clsx";
 import { Star, Minus, Plus } from "lucide-react";
 import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
-import { formatSom, formatDateRangeUz } from "@/lib/format";
+import { formatDateRangeUz } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { useFavorites } from "@/lib/favorites-context";
+import { useCurrency } from "@/lib/currency-context";
 import { useToast } from "@/lib/toast-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { SizeChartModal } from "@/components/product/SizeChartModal";
@@ -28,6 +29,7 @@ export default function ProductPage() {
   const t = useTranslations("product");
   const { products, getStock, getTotalStock, getColorStock } = useProductsData();
   const product = products.find((p) => p.id === params.id);
+  const { formatPrice } = useCurrency();
 
   const { addLine } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -159,10 +161,10 @@ export default function ProductPage() {
           </div>
 
           <div className="mt-3 flex items-baseline gap-2.5">
-            <span className="text-[30px] font-bold text-accent">{formatSom(product.price)}</span>
+            <span className="text-[30px] font-bold text-accent">{formatPrice(product.price)}</span>
             {product.oldPrice && (
               <>
-                <span className="text-[17px] text-muted line-through">{formatSom(product.oldPrice)}</span>
+                <span className="text-[17px] text-muted line-through">{formatPrice(product.oldPrice)}</span>
                 <span className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">-{discount}%</span>
               </>
             )}

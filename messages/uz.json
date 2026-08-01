@@ -4,6 +4,7 @@
     "search": "Qidiruv",
     "themeToggle": "Mavzuni almashtirish",
     "favorites": "Sevimlilar",
+    "currency": "Valyuta",
     "cart": "Savatcha"
   },
   "menu": {
@@ -202,6 +203,7 @@
     "products": "Mahsulotlar",
     "delivery": "Yetkazib berish",
     "total": "Jami",
+    "uzsChargeNote": "Yakuniy to'lov {amount} miqdorida so'mda amalga oshiriladi",
     "confirmButton": "Buyurtmani tasdiqlash",
     "submitting": "Yuborilmoqda…",
     "toastEnterName": "Ismingizni kiriting",

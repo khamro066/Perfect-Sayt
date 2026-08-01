@@ -12,6 +12,7 @@ import { useProductsData } from "@/lib/products-data";
 import { SELLER_CONTACT, PROVINCES } from "@/lib/constants";
 import { DELIVERY_METHODS, deliveryFeeFor } from "@/lib/delivery";
 import { formatSom } from "@/lib/format";
+import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export default function CheckoutPage() {
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const { lines, subtotal, clear } = useCart();
   const { products } = useProductsData();
+  const { currency, formatPrice } = useCurrency();
   const { showToast } = useToast();
   const { customer, setCustomer } = useCustomer();
   const [submitting, setSubmitting] = useState(false);
@@ -153,7 +155,7 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-ink">{DELIVERY_METHODS_UI[d.id].label}</p>
                     <p className="text-xs text-muted">{DELIVERY_METHODS_UI[d.id].eta}</p>
                   </div>
-                  <span className="text-sm font-bold text-ink">{d.fee === 0 ? t("free") : formatSom(d.fee)}</span>
+                  <span className="text-sm font-bold text-ink">{d.fee === 0 ? t("free") : formatPrice(d.fee)}</span>
                 </button>
               ))}
             </div>
@@ -195,7 +197,7 @@ export default function CheckoutPage() {
                         : t("lineQty", { size: line.size, qty: line.qty })}
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-ink">{formatSom(product.price * line.qty)}</span>
+                  <span className="text-sm font-bold text-ink">{formatPrice(product.price * line.qty)}</span>
                 </div>
               );
             })}
@@ -203,17 +205,20 @@ export default function CheckoutPage() {
           <div className="my-4 border-t border-line" />
           <div className="flex justify-between text-sm text-ink">
             <span>{t("products")}</span>
-            <span>{formatSom(subtotal)}</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
           <div className="mt-2 flex justify-between text-sm text-ink">
             <span>{t("delivery")}</span>
-            <span>{deliveryFee === 0 ? t("free") : formatSom(deliveryFee)}</span>
+            <span>{deliveryFee === 0 ? t("free") : formatPrice(deliveryFee)}</span>
           </div>
           <div className="my-4 border-t border-line" />
-          <div className="mb-4 flex justify-between text-[21px] font-bold text-ink">
+          <div className="flex justify-between text-[21px] font-bold text-ink">
             <span>{t("total")}</span>
-            <span>{formatSom(total)}</span>
+            <span>{formatPrice(total)}</span>
           </div>
+          <p className="mb-4 mt-1 text-xs text-muted">
+            {currency !== "UZS" ? t("uzsChargeNote", { amount: formatSom(total) }) : " "}
+          </p>
           <button
             onClick={placeOrder}
             disabled={submitting}

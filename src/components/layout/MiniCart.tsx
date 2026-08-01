@@ -7,13 +7,14 @@ import { X, Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useProductsData } from "@/lib/products-data";
 import { colorName } from "@/lib/colors";
-import { formatSom } from "@/lib/format";
+import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function MiniCart({ onClose }: { onClose: () => void }) {
   const t = useTranslations("miniCart");
   const { lines, removeLine, setQty, subtotal } = useCart();
   const { products } = useProductsData();
+  const { formatPrice } = useCurrency();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function startTimer() {
@@ -77,7 +78,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className="text-sm font-bold text-ink">{formatSom(product.price * line.qty)}</span>
+                      <span className="text-sm font-bold text-ink">{formatPrice(product.price * line.qty)}</span>
                       <button
                         onClick={() => removeLine(line.productId, line.colorHex, line.size)}
                         className="text-muted hover:text-danger"
@@ -92,7 +93,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
             <div className="border-t border-line p-4">
               <div className="mb-3 flex items-center justify-between text-sm font-bold text-ink">
                 <span>{t("total")}</span>
-                <span>{formatSom(subtotal)}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex gap-2">
                 <Link
