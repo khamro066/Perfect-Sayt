@@ -186,33 +186,36 @@ function CatalogContent() {
   }, [products, appliedFilters, sort, getTotalStock]);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 py-7 pb-10">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-medium text-ink">{t("title")}</h1>
-          <p className="mt-1 text-sm text-muted">{t("resultsCount", { count: results.length })}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setFilterPageOpen(true)}
-            className="flex items-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
-          >
-            <SlidersHorizontal size={15} /> {t("filtersButton")}
-          </button>
-          <button
-            onClick={() => setSortPageOpen(true)}
-            className="rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
-          >
-            {t("sortLabel")} {activeSortOption.label}
-          </button>
-          <button
-            onClick={() => setGridDensity(gridDensity === "compact" ? "large" : "compact")}
-            aria-label={gridDensity === "compact" ? t("gridLarge") : t("gridCompact")}
-            className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-btn border border-line bg-surface text-ink transition-colors hover:bg-accent-soft/40"
-          >
-            {gridDensity === "compact" ? <Rows2 size={16} /> : <Grid2x2 size={16} />}
-          </button>
-        </div>
+    <div className="mx-auto max-w-[1280px] px-2 py-7 pb-10 sm:px-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl font-medium text-ink">{t("title")}</h1>
+        <p className="mt-1 text-sm text-muted">{t("resultsCount", { count: results.length })}</p>
+      </div>
+
+      {/* Sticky on mobile only (top offset matches the site header's real
+          height) so filter/sort/grid controls stay reachable while
+          scrolling the grid, without needing to scroll back up. Desktop
+          keeps its original static, non-sticky placement. */}
+      <div className="sticky top-[67px] z-30 -mx-2 mb-6 flex items-center gap-2 bg-surface/90 px-2 py-2.5 backdrop-blur-sm sm:static sm:z-auto sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+        <button
+          onClick={() => setFilterPageOpen(true)}
+          className="flex items-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
+        >
+          <SlidersHorizontal size={15} /> {t("filtersButton")}
+        </button>
+        <button
+          onClick={() => setSortPageOpen(true)}
+          className="rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
+        >
+          {t("sortLabel")} {activeSortOption.label}
+        </button>
+        <button
+          onClick={() => setGridDensity(gridDensity === "compact" ? "large" : "compact")}
+          aria-label={gridDensity === "compact" ? t("gridLarge") : t("gridCompact")}
+          className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-btn border border-line bg-surface text-ink transition-colors hover:bg-accent-soft/40"
+        >
+          {gridDensity === "compact" ? <Rows2 size={16} /> : <Grid2x2 size={16} />}
+        </button>
       </div>
 
       {filterPageOpen && (
