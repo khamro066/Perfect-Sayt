@@ -337,6 +337,8 @@
     "newBadge": "Yangi",
     "soldOutBadge": "Tugagan",
     "addToFavorites": "Sevimlilarga qo'shish",
+    "prevImage": "Oldingi rasm",
+    "nextImage": "Keyingi rasm",
     "preorder": "Oldindan buyurtma",
     "viewProduct": "Ko'rish"
   },

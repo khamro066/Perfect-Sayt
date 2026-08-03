@@ -296,7 +296,7 @@ function CatalogContent() {
       ) : (
         <div
           className={clsx(
-            "grid gap-2 sm:gap-3",
+            "grid gap-1 sm:gap-2",
             gridDensity === "large"
               ? "grid-cols-1 mx-auto max-w-[560px]"
               : "grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]"

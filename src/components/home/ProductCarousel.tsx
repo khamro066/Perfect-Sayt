@@ -50,7 +50,7 @@ export function ProductCarousel({
       <div className="relative">
         <div
           ref={scrollerRef}
-          className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-1 sm:gap-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory gap-1 overflow-x-auto scroll-smooth pb-1 sm:gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {products.map((p) => (
             <div key={p.id} className="w-[45vw] shrink-0 snap-start sm:w-[260px]">

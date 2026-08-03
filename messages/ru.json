@@ -337,6 +337,8 @@
     "newBadge": "Новинка",
     "soldOutBadge": "Распродано",
     "addToFavorites": "Добавить в избранное",
+    "prevImage": "Предыдущее фото",
+    "nextImage": "Следующее фото",
     "preorder": "Предзаказ",
     "viewProduct": "Смотреть"
   },

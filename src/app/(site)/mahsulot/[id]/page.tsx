@@ -386,7 +386,7 @@ function ProductSection({ title, products }: { title: string; products: Product[
   return (
     <section className="mt-10">
       <h2 className="mb-4 text-2xl font-medium text-ink">{title}</h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(210px,1fr))] sm:gap-3">
+      <div className="grid grid-cols-2 gap-1 sm:grid-cols-[repeat(auto-fill,minmax(210px,1fr))] sm:gap-2">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}

@@ -337,6 +337,8 @@
     "newBadge": "New",
     "soldOutBadge": "Sold out",
     "addToFavorites": "Add to favorites",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
     "preorder": "Preorder",
     "viewProduct": "View"
   },
