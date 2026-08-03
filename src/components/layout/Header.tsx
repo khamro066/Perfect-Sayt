@@ -60,10 +60,10 @@ export function Header() {
 
           <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <Image
-              src="/brand/perfect-logo-blue.jpg"
+              src="/images/perfect-logo-navy-v2.png"
               alt="Perfect Shoes"
-              width={140}
-              height={40}
+              width={200}
+              height={100}
               className="h-14 w-auto sm:h-16"
               priority
             />

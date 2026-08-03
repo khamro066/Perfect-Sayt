@@ -27,7 +27,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
   const content = (
     <>
       <div className="flex items-center justify-between px-2 pb-4.5 pt-1.5">
-        <Image src="/brand/perfect-logo-blue.jpg" alt="Perfect Shoes" width={120} height={36} className="h-9 w-auto" />
+        <Image src="/images/perfect-logo-navy-v2.png" alt="Perfect Shoes" width={200} height={100} className="h-9 w-auto" />
         <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full border border-line lg:hidden" aria-label="Yopish">
           <X size={15} />
         </button>

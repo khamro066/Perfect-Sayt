@@ -34,10 +34,10 @@ export default function AdminLoginPage() {
       >
         <div className="flex justify-center">
           <Image
-            src="/brand/perfect-logo-blue.jpg"
+            src="/images/perfect-logo-navy-v2.png"
             alt="Perfect"
-            width={101}
-            height={48}
+            width={200}
+            height={100}
             className="h-12 w-auto"
           />
         </div>
