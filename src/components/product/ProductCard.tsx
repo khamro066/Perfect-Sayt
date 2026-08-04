@@ -10,6 +10,7 @@ import { Product } from "@/lib/types";
 import { useProductsData } from "@/lib/products-data";
 import { useFavorites } from "@/lib/favorites-context";
 import { useCurrency } from "@/lib/currency-context";
+import { useColorName } from "@/lib/colors";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -17,6 +18,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { getTotalStock } = useProductsData();
   const { formatPrice } = useCurrency();
+  const colorName = useColorName();
 
   const stock = getTotalStock(product.id);
   const soldOut = stock <= 0;
@@ -171,6 +173,7 @@ export function ProductCard({ product }: { product: Product }) {
           {product.colors.map((hex) => (
             <span
               key={hex}
+              title={colorName(hex)}
               className="h-2.5 w-2.5 rounded-full border border-line sm:h-3.5 sm:w-3.5"
               style={{ background: hex }}
             />

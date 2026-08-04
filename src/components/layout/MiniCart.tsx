@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { X, Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useProductsData } from "@/lib/products-data";
-import { colorName } from "@/lib/colors";
+import { useColorName } from "@/lib/colors";
 import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 
@@ -15,6 +15,7 @@ export function MiniCart({ onClose }: { onClose: () => void }) {
   const { lines, removeLine, setQty, subtotal } = useCart();
   const { products } = useProductsData();
   const { formatPrice } = useCurrency();
+  const colorName = useColorName();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function startTimer() {

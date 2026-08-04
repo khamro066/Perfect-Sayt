@@ -8,7 +8,8 @@ import { useTranslations } from "next-intl";
 import clsx from "clsx";
 import { Star, Minus, Plus } from "lucide-react";
 import { useProductsData } from "@/lib/products-data";
-import { colorName } from "@/lib/colors";
+import { useColorName } from "@/lib/colors";
+import { useMaterialName } from "@/lib/materials";
 import { formatDateRangeUz } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { useFavorites } from "@/lib/favorites-context";
@@ -31,6 +32,8 @@ export default function ProductPage() {
   const { products, getStock, getTotalStock, getColorStock } = useProductsData();
   const product = products.find((p) => p.id === params.id);
   const { formatPrice } = useCurrency();
+  const colorName = useColorName();
+  const materialName = useMaterialName();
 
   const { addLine } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -339,7 +342,7 @@ export default function ProductPage() {
             </div>
             <div>
               <p className="font-semibold text-ink">{t("materialTitle")}</p>
-              <p className="text-muted">{product.material}</p>
+              <p className="text-muted">{materialName(product.material)}</p>
             </div>
           </div>
 

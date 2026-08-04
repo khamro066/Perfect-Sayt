@@ -8,7 +8,8 @@ import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useProductsData } from "@/lib/products-data";
 import { useCurrency } from "@/lib/currency-context";
-import { colorName } from "@/lib/colors";
+import { useColorName } from "@/lib/colors";
+import { useMaterialName } from "@/lib/materials";
 import { Product } from "@/lib/types";
 
 const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
@@ -353,6 +354,8 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 function FilterSidebar(p: FilterProps) {
   const t = useTranslations("catalog");
   const { formatPrice } = useCurrency();
+  const colorName = useColorName();
+  const materialName = useMaterialName();
 
   function countFor(except: FacetKey, predicate: (product: Product) => boolean) {
     return p.products.filter(
@@ -426,7 +429,7 @@ function FilterSidebar(p: FilterProps) {
         <div className="flex flex-wrap gap-1.5">
           {MATERIALS.map((m) => (
             <Pill key={m} active={p.materials.includes(m)} onClick={() => p.setMaterials(toggle(p.materials, m))}>
-              {m} ({countFor("materials", (product) => product.material === m)})
+              {materialName(m)} ({countFor("materials", (product) => product.material === m)})
             </Pill>
           ))}
         </div>

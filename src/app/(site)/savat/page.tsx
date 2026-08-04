@@ -7,7 +7,7 @@ import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { useProductsData } from "@/lib/products-data";
-import { colorName } from "@/lib/colors";
+import { useColorName } from "@/lib/colors";
 import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
@@ -19,6 +19,7 @@ export default function CartPage() {
   const { lines, removeLine, setQty, subtotal } = useCart();
   const { products } = useProductsData();
   const { formatPrice } = useCurrency();
+  const colorName = useColorName();
   const { showToast } = useToast();
   const [couponInput, setCouponInput] = useState("");
   const [couponRate, setCouponRate] = useState(0);
