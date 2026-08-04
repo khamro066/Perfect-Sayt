@@ -3,8 +3,6 @@ import { Send } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { SELLER_CONTACT } from "@/lib/constants";
 
-const PAYMENT_METHODS = ["Payme", "Click", "Uzum Bank", "Humo", "UzCard", "Visa", "Mastercard"];
-
 export async function Footer() {
   const t = await getTranslations("footer");
 
@@ -73,31 +71,16 @@ export async function Footer() {
             ))}
           </ul>
         </div>
-
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.1em] text-accent">{t("paymentMethods")}</p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {[...PAYMENT_METHODS, t("cash")].map((m) => (
-              <span
-                key={m}
-                className="rounded-[8px] border border-line px-2.5 py-1 text-[11.5px] font-semibold text-muted"
-              >
-                {m}
-              </span>
-            ))}
-          </div>
-          <Link
-            href="/admin/login"
-            className="mt-3 inline-block text-[13px] font-semibold text-accent"
-          >
-            {t("adminLogin")}
-          </Link>
-        </div>
       </div>
       <div className="border-t border-line px-6 py-4.5">
-        <div className="mx-auto flex max-w-[1280px] flex-wrap justify-between gap-2 text-[12.5px] text-muted">
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-2 text-[12.5px] text-muted">
           <span>{t("copyright")}</span>
-          <span>{t("location")}</span>
+          <div className="flex items-center gap-4">
+            <span>{t("location")}</span>
+            <Link href="/admin/login" className="font-semibold text-accent">
+              {t("adminLogin")}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
