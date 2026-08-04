@@ -39,7 +39,7 @@ export function ProductCarousel({
   }
 
   return (
-    <section className="mx-auto max-w-[1280px] px-6 py-8">
+    <section className="mx-auto max-w-[1280px] px-2 py-8 sm:px-6">
       <div className="mb-5 flex items-center gap-3">
         <h2 className="text-2xl font-medium text-ink">{title}</h2>
         {badge}
@@ -47,7 +47,7 @@ export function ProductCarousel({
           {viewAllLabel}
         </Link>
       </div>
-      <div className="relative">
+      <div className="relative -mx-2 sm:mx-0">
         <div
           ref={scrollerRef}
           className="flex snap-x snap-mandatory gap-1 overflow-x-auto scroll-smooth pb-1 sm:gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

@@ -199,15 +199,15 @@ function CatalogContent() {
       <div className="sticky top-[67px] z-30 -mx-2 mb-6 flex items-center gap-2 bg-surface/90 px-2 py-2.5 backdrop-blur-sm sm:static sm:z-auto sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
         <button
           onClick={() => setFilterPageOpen(true)}
-          className="flex items-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
+          className="flex flex-1 items-center justify-center gap-2 rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink sm:flex-none"
         >
           <SlidersHorizontal size={15} /> {t("filtersButton")}
         </button>
         <button
           onClick={() => setSortPageOpen(true)}
-          className="rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink"
+          className="flex flex-1 items-center justify-center rounded-btn border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink sm:flex-none"
         >
-          {t("sortLabel")} {activeSortOption.label}
+          {activeSortOption.label}
         </button>
         <button
           onClick={() => setGridDensity(gridDensity === "compact" ? "large" : "compact")}
@@ -297,17 +297,19 @@ function CatalogContent() {
           <p className="mt-1 text-sm text-muted">{t("noResultsDesc")}</p>
         </div>
       ) : (
-        <div
-          className={clsx(
-            "grid gap-1 sm:gap-2",
-            gridDensity === "large"
-              ? "grid-cols-1 mx-auto max-w-[560px]"
-              : "grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]"
-          )}
-        >
-          {results.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
+        <div className="-mx-2 sm:mx-0">
+          <div
+            className={clsx(
+              "grid gap-1 sm:gap-2",
+              gridDensity === "large"
+                ? "mx-auto max-w-[560px] grid-cols-1 px-2 sm:px-0"
+                : "grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]"
+            )}
+          >
+            {results.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
         </div>
       )}
     </div>
