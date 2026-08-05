@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { href: "/admin/oldindan-buyurtmalar", label: "Oldindan buyurtmalar" },
   { href: "/admin/oldindan-buyurtma-mahsulotlari", label: "Oldindan buyurtma mahsulotlari" },
   { href: "/admin/mijozlar", label: "Mijozlar" },
-  { href: "/admin/hisobotlar", label: "Hisobotlar" },
+  { href: "/admin/analitika", label: "Analitika" },
 ];
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {

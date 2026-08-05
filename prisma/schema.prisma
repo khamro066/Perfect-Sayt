@@ -201,6 +201,8 @@ model Order {
 
   @@index([status])
   @@index([isPreorder])
+  @@index([createdAt])
+  @@index([customerId])
   @@map("orders")
 }
 
@@ -214,7 +216,18 @@ model OrderLine {
   size      Int
   qty       Int
   unitPrice Decimal @map("unit_price") @db.Decimal(12, 2)
+  // Snapshot of Product.oldPrice at the moment this line was purchased, so
+  // discount-revenue analytics reflect what was actually on sale at the
+  // time rather than the product's current (possibly since-changed) state.
+  // NULL means this line predates this column (written before analytics
+  // tracking existed) -- never write NULL for new lines; when a product
+  // has no oldPrice at purchase time, write unitPrice itself here as the
+  // "tracked, not discounted" sentinel, so NULL unambiguously means
+  // "unknown / pre-tracking" rather than "not discounted".
+  oldPriceAtPurchase Decimal? @map("old_price_at_purchase") @db.Decimal(12, 2)
 
+  @@index([productId])
+  @@index([orderId])
   @@map("order_lines")
 }
 

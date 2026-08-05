@@ -62,7 +62,14 @@ export async function POST(req: NextRequest) {
             address: body.manzil,
             payment: paymentLabel,
             lines: {
-              create: [{ productId: product.id, colorHex: body.colorHex!, size: body.size!, qty: body.qty!, unitPrice: product.price }],
+              create: [{
+                productId: product.id,
+                colorHex: body.colorHex!,
+                size: body.size!,
+                qty: body.qty!,
+                unitPrice: product.price,
+                oldPriceAtPurchase: product.oldPrice ?? product.price,
+              }],
             },
             statusHistory: { create: [{ status: "Yangi" }] },
           },

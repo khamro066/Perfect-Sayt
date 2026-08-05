@@ -94,13 +94,21 @@ export async function POST(req: NextRequest) {
             address,
             payment: paymentLabel,
             lines: {
-              create: body.lines!.map((l) => ({
-                productId: l.productId,
-                colorHex: l.colorHex,
-                size: l.size,
-                qty: l.qty,
-                unitPrice: productById.get(l.productId)!.price,
-              })),
+              create: body.lines!.map((l) => {
+                const product = productById.get(l.productId)!;
+                return {
+                  productId: l.productId,
+                  colorHex: l.colorHex,
+                  size: l.size,
+                  qty: l.qty,
+                  unitPrice: product.price,
+                  // Sentinel: always written (never left null) for lines created
+                  // from here on, so null unambiguously means "predates this
+                  // column" for analytics. Equal to unitPrice = tracked, not
+                  // discounted; greater than unitPrice = tracked, discounted.
+                  oldPriceAtPurchase: product.oldPrice ?? product.price,
+                };
+              }),
             },
             statusHistory: { create: [{ status: "Yangi" }] },
           },

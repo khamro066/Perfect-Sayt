@@ -20,7 +20,7 @@ const TITLES: Record<string, string> = {
   "/admin/oldindan-buyurtmalar": "Oldindan buyurtmalar",
   "/admin/oldindan-buyurtma-mahsulotlari": "Oldindan buyurtma mahsulotlari",
   "/admin/mijozlar": "Mijozlar",
-  "/admin/hisobotlar": "Hisobotlar",
+  "/admin/analitika": "Analitika",
 };
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
