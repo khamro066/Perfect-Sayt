@@ -64,13 +64,13 @@ export default async function HomePage() {
               regardless of what's behind it — sky, water, or shoe detail. */}
           <div aria-hidden="true" className="absolute inset-0 sm:hidden">
             <Image
-              src="/images/hero-loafers-coastal.jpg"
+              src="/images/hero-new.png"
               alt=""
               fill
               priority
               sizes="100vw"
               className="object-cover"
-              style={{ objectPosition: "62% 38%" }}
+              style={{ objectPosition: "center 58%" }}
             />
             <div
               className="absolute inset-0"
@@ -93,13 +93,13 @@ export default async function HomePage() {
             }}
           >
             <Image
-              src="/images/hero-loafers-coastal.jpg"
+              src="/images/hero-new.png"
               alt=""
               fill
               priority
               sizes="(min-width: 1280px) 742px, 58vw"
               className="object-cover"
-              style={{ objectPosition: "70% 45%" }}
+              style={{ objectPosition: "center 55%" }}
             />
           </div>
           <div className="relative max-w-[640px]">
