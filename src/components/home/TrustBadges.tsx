@@ -1,22 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { BadgeCheck, Truck, ShieldCheck, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
 
-const POPOVER_MAX_WIDTH = 280;
+const ICONS = [BadgeCheck, Truck, ShieldCheck, RefreshCw];
+const POPOVER_MAX_WIDTH = 300;
 const GAP = 10;
 const VIEWPORT_MARGIN = 12;
-
-function badgeBorderClasses(i: number) {
-  return clsx(
-    "border-line",
-    i === 0 && "border-b border-r sm:border-b-0",
-    i === 1 && "border-b sm:border-b-0 sm:border-r",
-    i === 2 && "border-r"
-  );
-}
 
 type PopoverPosition = {
   left: number;
@@ -87,15 +79,14 @@ export function TrustBadges() {
 
   const items = [1, 2, 3, 4].map((n) => ({
     title: t(`trust${n}Title` as "trust1Title" | "trust2Title" | "trust3Title" | "trust4Title"),
-    desc: t(`trust${n}Desc` as "trust1Desc" | "trust2Desc" | "trust3Desc" | "trust4Desc"),
     detail: t(`trust${n}Detail` as "trust1Detail" | "trust2Detail" | "trust3Detail" | "trust4Detail"),
   }));
 
   return (
     <section className="mx-auto max-w-[1280px] px-6 py-8">
-      <div className="grid grid-cols-2 rounded-card border border-line bg-surface sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-12 sm:gap-y-3">
         {items.map((item, i) => {
-          const isOpen = openIndex === i;
+          const Icon = ICONS[i];
           return (
             <button
               key={item.title}
@@ -103,20 +94,11 @@ export function TrustBadges() {
                 triggerRefs.current[i] = el;
               }}
               onClick={() => toggle(i)}
-              aria-expanded={isOpen}
-              className={clsx(
-                "flex flex-col items-start gap-1.5 p-4 text-left transition-colors hover:bg-accent-soft/30 sm:gap-2 sm:p-6",
-                badgeBorderClasses(i)
-              )}
+              aria-expanded={openIndex === i}
+              className="flex items-center justify-center gap-2 sm:justify-start"
             >
-              <div className="flex w-full items-center gap-2">
-                <p className="text-[12.5px] font-semibold leading-tight text-ink sm:text-base">{item.title}</p>
-                <ChevronDown
-                  size={14}
-                  className={clsx("ml-auto shrink-0 text-muted transition-transform", isOpen && "rotate-180")}
-                />
-              </div>
-              <p className="text-[11px] leading-snug text-muted sm:text-sm">{item.desc}</p>
+              <Icon size={18} className="shrink-0 text-accent" />
+              <span className="text-[12.5px] font-semibold leading-tight text-ink sm:text-sm">{item.title}</span>
             </button>
           );
         })}
