@@ -5,7 +5,7 @@
     "themeToggle": "Mavzuni almashtirish",
     "favorites": "Sevimlilar",
     "currency": "Valyuta",
-    "cart": "Savatcha"
+    "cart": "Savat"
   },
   "menu": {
     "title": "Menyu",
@@ -125,7 +125,7 @@
     "sizeChart": "O'lcham jadvali",
     "lowStockWarning": "⚠ Faqat {count} dona qoldi!",
     "quantity": "Miqdor",
-    "addToCart": "Savatchaga qo'shish",
+    "addToCart": "Savatga qo'shish",
     "buyNow": "Hozir sotib olish",
     "favorited": "♥ Sevimlilarda",
     "addToFavorites": "♡ Sevimlilarga",
@@ -151,23 +151,16 @@
     "toastAddedToCart": "Savatga qo'shildi"
   },
   "cart": {
-    "title": "Savatcha",
-    "emptyTitle": "Savatchangiz bo'sh",
-    "emptyDesc": "Yoqtirgan mahsulotlaringizni savatchaga qo'shing.",
+    "title": "Savat",
+    "emptyTitle": "Savatingiz bo'sh",
+    "emptyDesc": "Yoqtirgan mahsulotlaringizni savatga qo'shing.",
     "startShopping": "Xaridni boshlash",
     "sizeColor": "O'lcham: {size} · Rang: {color}",
     "colorOnly": "Rang: {color}",
     "remove": "O'chirish",
     "summaryTitle": "Buyurtma xulosasi",
-    "couponPlaceholder": "Kupon kodi",
-    "apply": "Qo'llash",
-    "toastCouponApplied": "{percent}% chegirma qo'llandi",
-    "toastCouponInvalid": "Kupon kodi noto'g'ri",
     "products": "Mahsulotlar",
-    "discount": "Chegirma",
-    "delivery": "Yetkazib berish",
-    "free": "Bepul",
-    "total": "Jami",
+    "deliveryCalculatedAtCheckout": "Yetkazib berish narxi keyingi bosqichda hisoblanadi",
     "proceedToCheckout": "Rasmiylashtirishga o'tish"
   },
   "checkout": {
@@ -213,7 +206,7 @@
     "toastSelectPayment": "To'lov usulini tanlang",
     "toastError": "Xatolik yuz berdi, qayta urinib ko'ring",
     "toastBecamePreorder": "Omborda yetarli emas — bu buyurtma OLDINDAN BUYURTMA sifatida qabul qilindi",
-    "emptyCartTitle": "Savatchangiz bo'sh",
+    "emptyCartTitle": "Savatingiz bo'sh",
     "emptyCartDesc": "Buyurtma berish uchun avval mahsulot tanlang."
   },
   "confirm": {
@@ -344,13 +337,13 @@
     "viewProduct": "Ko'rish"
   },
   "miniCart": {
-    "title": "Savatcha · {count} ta",
+    "title": "Savat · {count} ta",
     "close": "Yopish",
-    "empty": "Savatchangiz bo'sh",
+    "empty": "Savatingiz bo'sh",
     "sizeColor": "O'lcham {size} · {color}",
     "colorOnly": "{color}",
     "total": "Jami",
-    "viewCart": "Savatchani ko'rish",
+    "viewCart": "Savatni ko'rish",
     "checkout": "Rasmiylashtirish"
   },
   "sizeChart": {

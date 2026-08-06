@@ -1,18 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { useToast } from "@/lib/toast-context";
 import { useProductsData } from "@/lib/products-data";
 import { useColorName } from "@/lib/colors";
 import { useCurrency } from "@/lib/currency-context";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
-
-const COUPONS: Record<string, number> = { SALOM10: 0.1, PERFECT15: 0.15 };
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -20,24 +16,6 @@ export default function CartPage() {
   const { products } = useProductsData();
   const { formatPrice } = useCurrency();
   const colorName = useColorName();
-  const { showToast } = useToast();
-  const [couponInput, setCouponInput] = useState("");
-  const [couponRate, setCouponRate] = useState(0);
-
-  function applyCoupon() {
-    const rate = COUPONS[couponInput.trim().toUpperCase()];
-    if (rate) {
-      setCouponRate(rate);
-      showToast(t("toastCouponApplied", { percent: rate * 100 }));
-    } else {
-      setCouponRate(0);
-      showToast(t("toastCouponInvalid"));
-    }
-  }
-
-  const discount = subtotal * couponRate;
-  const delivery = subtotal - discount >= 500000 ? 0 : subtotal > 0 ? 25000 : 0;
-  const total = subtotal - discount + delivery;
 
   if (lines.length === 0) {
     return (
@@ -107,41 +85,14 @@ export default function CartPage() {
 
         <aside className="sticky top-[150px] h-fit flex-[1_1_300px] rounded-block border border-line bg-surface p-6">
           <h2 className="mb-4 font-bold text-ink">{t("summaryTitle")}</h2>
-          <div className="mb-3 flex gap-2">
-            <input
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value)}
-              placeholder={t("couponPlaceholder")}
-              className="min-w-0 flex-1 rounded-btn border border-line bg-bg px-3 py-2.5 text-sm outline-none"
-            />
-            <button onClick={applyCoupon} className="rounded-btn border border-line px-3.5 text-sm font-semibold text-ink">
-              {t("apply")}
-            </button>
-          </div>
-          <div className="flex flex-col gap-2 text-sm">
-            <div className="flex justify-between text-ink">
-              <span>{t("products")}</span>
-              <span>{formatPrice(subtotal)}</span>
-            </div>
-            {discount > 0 && (
-              <div className="flex justify-between text-accent">
-                <span>{t("discount")}</span>
-                <span>−{formatPrice(discount)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-ink">
-              <span>{t("delivery")}</span>
-              <span>{delivery === 0 ? t("free") : formatPrice(delivery)}</span>
-            </div>
-          </div>
-          <div className="my-4 border-t border-line" />
-          <div className="mb-4 flex items-center justify-between text-[22px] font-bold text-ink">
+          <div className="flex items-center justify-between text-[22px] font-bold text-ink">
             <div className="flex items-center gap-2">
-              <span>{t("total")}</span>
+              <span>{t("products")}</span>
               <CurrencySwitcher variant="inline" />
             </div>
-            <span>{formatPrice(total)}</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
+          <p className="mb-5 mt-2 text-xs text-muted">{t("deliveryCalculatedAtCheckout")}</p>
           <Link
             href="/checkout"
             className="block w-full rounded-btn bg-accent py-3.5 text-center text-sm font-semibold text-accent-ink"

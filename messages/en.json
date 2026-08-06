@@ -159,15 +159,8 @@
     "colorOnly": "Color: {color}",
     "remove": "Remove",
     "summaryTitle": "Order summary",
-    "couponPlaceholder": "Coupon code",
-    "apply": "Apply",
-    "toastCouponApplied": "{percent}% discount applied",
-    "toastCouponInvalid": "Invalid coupon code",
     "products": "Products",
-    "discount": "Discount",
-    "delivery": "Delivery",
-    "free": "Free",
-    "total": "Total",
+    "deliveryCalculatedAtCheckout": "Delivery cost is calculated at the next step",
     "proceedToCheckout": "Proceed to checkout"
   },
   "checkout": {

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   if (!body.ism?.trim()) return NextResponse.json({ error: "Ismingizni kiriting" }, { status: 400 });
   if (!body.phone?.trim()) return NextResponse.json({ error: "Telefon raqamini kiriting" }, { status: 400 });
   if (!body.manzil?.trim()) return NextResponse.json({ error: "Yetkazib berish manzilini kiriting" }, { status: 400 });
-  if (!body.lines?.length) return NextResponse.json({ error: "Savatcha bo'sh" }, { status: 400 });
+  if (!body.lines?.length) return NextResponse.json({ error: "Savat bo'sh" }, { status: 400 });
 
   const productIds = [...new Set(body.lines.map((l) => l.productId))];
   const products = await prisma.product.findMany({ where: { id: { in: productIds } } });

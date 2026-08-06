@@ -159,15 +159,8 @@
     "colorOnly": "Цвет: {color}",
     "remove": "Удалить",
     "summaryTitle": "Итог заказа",
-    "couponPlaceholder": "Код купона",
-    "apply": "Применить",
-    "toastCouponApplied": "Скидка {percent}% применена",
-    "toastCouponInvalid": "Неверный код купона",
     "products": "Товары",
-    "discount": "Скидка",
-    "delivery": "Доставка",
-    "free": "Бесплатно",
-    "total": "Итого",
+    "deliveryCalculatedAtCheckout": "Стоимость доставки рассчитывается на следующем шаге",
     "proceedToCheckout": "Перейти к оформлению"
   },
   "checkout": {
