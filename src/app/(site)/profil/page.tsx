@@ -62,6 +62,18 @@ function ProfileContent() {
   const [ism, setIsm] = useState(customer?.ism ?? "");
   const [phone, setPhone] = useState(customer?.phone ?? "");
 
+  // CustomerProvider hydrates from localStorage asynchronously after mount,
+  // so a fresh/hard navigation straight to /profil (bookmark, refresh)
+  // leaves these fields empty even for a returning customer. Sync once,
+  // during render (not an effect) per React's guidance for "adjusting
+  // state when a prop changes" -- see the identical fix in checkout/page.tsx.
+  const [hydratedCustomer, setHydratedCustomer] = useState(customer);
+  if (customer && customer !== hydratedCustomer) {
+    setHydratedCustomer(customer);
+    setIsm(customer.ism);
+    setPhone(customer.phone);
+  }
+
   useEffect(() => {
     if (!customer) return;
     fetch(`/api/orders?phone=${encodeURIComponent(customer.phone)}`)

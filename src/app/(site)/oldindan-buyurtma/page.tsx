@@ -61,6 +61,17 @@ function PreorderContent() {
   const [manzil, setManzil] = useState("");
   const [payType, setPayType] = useState<"full" | "deposit">("deposit");
 
+  // CustomerProvider hydrates from localStorage asynchronously after mount,
+  // so a fresh/hard navigation straight to this page leaves these fields
+  // empty even for a returning customer. Sync once, during render (not an
+  // effect) per React's guidance -- see the identical fix in checkout/page.tsx.
+  const [hydratedCustomer, setHydratedCustomer] = useState(customer);
+  if (customer && customer !== hydratedCustomer) {
+    setHydratedCustomer(customer);
+    setIsm(customer.ism);
+    setPhone(customer.phone);
+  }
+
   const preorderCandidates = products.filter((p) => getTotalStock(p.id) <= 0);
 
   async function submit() {

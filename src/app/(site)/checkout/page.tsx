@@ -13,6 +13,7 @@ import { SELLER_CONTACT, PROVINCES } from "@/lib/constants";
 import { DELIVERY_METHODS, deliveryFeeFor } from "@/lib/delivery";
 import { formatSom } from "@/lib/format";
 import { useCurrency } from "@/lib/currency-context";
+import { useProvinceName } from "@/lib/provinces";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
 
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
   const { showToast } = useToast();
   const { customer, setCustomer } = useCustomer();
   const [submitting, setSubmitting] = useState(false);
+  const provinceName = useProvinceName();
 
   const DELIVERY_METHODS_UI: Record<string, { label: string; eta: string }> = {
     kuryer: { label: t("deliveryKuryerLabel"), eta: t("deliveryKuryerEta") },
@@ -39,6 +41,23 @@ export default function CheckoutPage() {
   const [manzil, setManzil] = useState(customer?.manzil ?? "");
   const [delivery, setDelivery] = useState("kuryer");
   const [payment, setPayment] = useState<"cash" | "card">("cash");
+
+  // CustomerProvider hydrates from localStorage asynchronously after mount,
+  // so on a fresh/hard navigation straight to /checkout (bookmark, refresh,
+  // shared link) `customer` is still null during the useState initializers
+  // above and the fields end up permanently empty even for a returning
+  // customer. Sync once, the first time a saved profile becomes available --
+  // done during render (not an effect) per React's own guidance for
+  // "adjusting state when a prop changes", so it applies before paint
+  // instead of causing a visible empty-then-filled flash.
+  const [hydratedCustomer, setHydratedCustomer] = useState(customer);
+  if (customer && customer !== hydratedCustomer) {
+    setHydratedCustomer(customer);
+    setIsm(customer.ism);
+    setPhone(customer.phone);
+    if (customer.viloyat) setViloyat(customer.viloyat);
+    if (customer.manzil) setManzil(customer.manzil);
+  }
 
   const deliveryFee = deliveryFeeFor(delivery);
   const total = subtotal + deliveryFee;
@@ -132,7 +151,7 @@ export default function CheckoutPage() {
                   className="rounded-btn border border-line bg-bg px-3.5 py-2.5 outline-none"
                 >
                   {PROVINCES.map((p) => (
-                    <option key={p} value={p}>{p}</option>
+                    <option key={p} value={p}>{provinceName(p)}</option>
                   ))}
                 </select>
               </label>
