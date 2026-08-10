@@ -4,7 +4,11 @@ import sharp from "sharp";
 import { getSupabaseAdmin, SUPABASE_BUCKET } from "@/lib/supabase";
 
 const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp"]);
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+// Kept under Vercel's hard 4.5MB Serverless Function request-body limit
+// (platform-level, not configurable via next.config.js) -- 4MB leaves
+// headroom for multipart/form-data overhead so real uploads near the
+// limit don't get killed by Vercel's own 413 before this check even runs.
+const MAX_SIZE_BYTES = 4 * 1024 * 1024;
 const MIN_DIMENSION = 600;
 
 export async function POST(req: NextRequest) {
@@ -16,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json({ error: `${file.name}: fayl hajmi 5MB dan katta` }, { status: 400 });
+    return NextResponse.json({ error: `${file.name}: fayl hajmi 4MB dan katta` }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());

@@ -50,8 +50,8 @@ export default function AdminCategoriesPage() {
       showToast("Faqat JPG, PNG yoki WebP");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      showToast("Fayl hajmi 5MB dan katta");
+    if (file.size > 4 * 1024 * 1024) {
+      showToast("Fayl hajmi 4MB dan katta");
       return;
     }
     setFile(file);
