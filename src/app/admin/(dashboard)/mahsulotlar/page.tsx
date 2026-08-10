@@ -7,6 +7,7 @@ import { useToast } from "@/lib/toast-context";
 import { ALL_COLORS, colorName } from "@/lib/colors";
 import { ACCESSORY_SIZE, SIZES } from "@/lib/constants";
 import { formatSom } from "@/lib/format";
+import { uploadImageDirect } from "@/lib/upload-image";
 import { Product } from "@/lib/types";
 
 interface UploadedImage {
@@ -88,8 +89,8 @@ export default function AdminProductsPage() {
         showToast(`${file.name}: faqat JPG, PNG yoki WebP`);
         return;
       }
-      if (file.size > 4 * 1024 * 1024) {
-        showToast(`${file.name}: fayl hajmi 4MB dan katta`);
+      if (file.size > 10 * 1024 * 1024) {
+        showToast(`${file.name}: fayl hajmi 10MB dan katta`);
         return;
       }
       const url = URL.createObjectURL(file);
@@ -117,15 +118,12 @@ export default function AdminProductsPage() {
         imageUrls.push(img.url);
         continue;
       }
-      const formData = new FormData();
-      formData.append("file", img.file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) {
-        showToast(data.error ?? "Rasm yuklanmadi");
+      try {
+        imageUrls.push(await uploadImageDirect(img.file));
+      } catch (e) {
+        showToast(e instanceof Error ? e.message : "Rasm yuklanmadi");
         return null;
       }
-      imageUrls.push(data.url);
     }
     return imageUrls;
   }
@@ -595,7 +593,7 @@ function ImagePicker({
       <p className="text-[13px] font-semibold text-ink">Mahsulot rasmlari</p>
       <p className="text-xs leading-relaxed text-muted">
         Format: JPG, PNG yoki WebP · Nisbat: kvadrat (1:1) · Tavsiya etilgan o&apos;lcham: 800×800px · Minimal:
-        600×600px · Maksimal fayl hajmi: 4MB. Bir nechta rasm yuklash mumkin — birini asosiy (muqova) rasm sifatida
+        600×600px · Maksimal fayl hajmi: 10MB. Bir nechta rasm yuklash mumkin — birini asosiy (muqova) rasm sifatida
         belgilang.
       </p>
       <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-btn border border-dashed border-line bg-surface px-4.5 py-3 text-[13px] font-semibold text-ink">

@@ -3,21 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { useToast } from "@/lib/toast-context";
+import { uploadImageDirect } from "@/lib/upload-image";
 
 interface Category {
   id: string;
   name: string;
   image: string | null;
   productCount: number;
-}
-
-async function uploadImage(file: File): Promise<string | null> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-  const data = await res.json();
-  if (!res.ok) return null;
-  return data.url as string;
 }
 
 export default function AdminCategoriesPage() {
@@ -50,8 +42,8 @@ export default function AdminCategoriesPage() {
       showToast("Faqat JPG, PNG yoki WebP");
       return;
     }
-    if (file.size > 4 * 1024 * 1024) {
-      showToast("Fayl hajmi 4MB dan katta");
+    if (file.size > 10 * 1024 * 1024) {
+      showToast("Fayl hajmi 10MB dan katta");
       return;
     }
     setFile(file);
@@ -64,9 +56,10 @@ export default function AdminCategoriesPage() {
     try {
       let image: string | null = null;
       if (newImageFile) {
-        image = await uploadImage(newImageFile);
-        if (!image) {
-          showToast("Rasm yuklanmadi (kamida 600×600px bo'lishi kerak)");
+        try {
+          image = await uploadImageDirect(newImageFile);
+        } catch (e) {
+          showToast(e instanceof Error ? e.message : "Rasm yuklanmadi");
           return;
         }
       }
@@ -92,9 +85,10 @@ export default function AdminCategoriesPage() {
     try {
       let image: string | null | undefined = undefined;
       if (editImageFile) {
-        image = await uploadImage(editImageFile);
-        if (!image) {
-          showToast("Rasm yuklanmadi (kamida 600×600px bo'lishi kerak)");
+        try {
+          image = await uploadImageDirect(editImageFile);
+        } catch (e) {
+          showToast(e instanceof Error ? e.message : "Rasm yuklanmadi");
           return;
         }
       } else if (editImageRemoved) {
