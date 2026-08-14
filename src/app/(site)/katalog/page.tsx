@@ -8,15 +8,12 @@ import clsx from "clsx";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useProductsData } from "@/lib/products-data";
 import { useCurrency } from "@/lib/currency-context";
-import { useColorName } from "@/lib/colors";
-import { useMaterialName } from "@/lib/materials";
+import { ALL_COLORS, useColorName } from "@/lib/colors";
+import { ALL_MATERIALS, useMaterialName } from "@/lib/materials";
 import { Product } from "@/lib/types";
 
 const SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
-const COLORS = ["#1b1a16", "#f4f1ea", "#8a8880", "#6b4a2f", "#2c4a7a", "#0a5c3a", "#a83232", "#d8c7a8"];
 const RATINGS = [4.5, 4.0, 3.5];
-const BRANDS = ["Qadam", "Zamin", "Uzstep", "Terra", "Volna", "Silk Road", "Atlas"];
-const MATERIALS = ["Charm", "Zamsh", "Mesh", "Tekstil", "Rezina"];
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -25,7 +22,6 @@ function toggle<T>(list: T[], value: T): T[] {
 interface FilterValues {
   sizes: number[];
   categories: string[];
-  brands: string[];
   colors: string[];
   materials: string[];
   priceMin: number;
@@ -47,7 +43,6 @@ function matchesFilters(
 ): boolean {
   if (except !== "sizes" && f.sizes.length && !f.sizes.some((s) => p.sizes.includes(s))) return false;
   if (except !== "categories" && f.categories.length && !f.categories.includes(p.category)) return false;
-  if (except !== "brands" && f.brands.length && !f.brands.includes(p.brand)) return false;
   if (except !== "colors" && f.colors.length && !f.colors.some((c) => p.colors.includes(c))) return false;
   if (except !== "materials" && f.materials.length && !f.materials.includes(p.material)) return false;
   if (p.price < f.priceMin || p.price > f.priceMax) return false;
@@ -60,10 +55,19 @@ function matchesFilters(
 }
 
 const EMPTY_FILTERS: FilterValues = {
-  sizes: [], categories: [], brands: [], colors: [], materials: [],
+  sizes: [], categories: [], colors: [], materials: [],
   priceMin: 0, priceMax: 2000000, minRating: 0,
   onSale: false, inStock: false, onlyNew: false, popular: false,
 };
+
+function filtersFromParams(searchParams: ReturnType<typeof useSearchParams>): FilterValues {
+  const category = searchParams.get("category");
+  return {
+    ...EMPTY_FILTERS,
+    categories: category ? [category] : [],
+    onSale: searchParams.get("sale") === "1",
+  };
+}
 
 function CatalogContent() {
   const searchParams = useSearchParams();
@@ -86,15 +90,10 @@ function CatalogContent() {
       .then(setAllCategories);
   }, []);
 
-  const initialFilters: FilterValues = {
-    ...EMPTY_FILTERS,
-    categories: searchParams.get("category") ? [searchParams.get("category")!] : [],
-    onSale: searchParams.get("sale") === "1",
-  };
+  const initialFilters: FilterValues = filtersFromParams(searchParams);
 
   const [sizes, setSizes] = useState<number[]>(initialFilters.sizes);
   const [categories, setCategories] = useState<string[]>(initialFilters.categories);
-  const [brands, setBrands] = useState<string[]>(initialFilters.brands);
   const [colors, setColors] = useState<string[]>(initialFilters.colors);
   const [materials, setMaterials] = useState<string[]>(initialFilters.materials);
   const [priceMin, setPriceMin] = useState(initialFilters.priceMin);
@@ -130,8 +129,37 @@ function CatalogContent() {
   // not the live draft state above, drives the product grid.
   const [appliedFilters, setAppliedFilters] = useState<FilterValues>(initialFilters);
 
+  // Re-sync every filter to the URL whenever it changes via client-side
+  // navigation within /katalog (e.g. picking a different category from the
+  // hamburger menu). The useState initializers above only run once at
+  // mount, and Next.js reuses this same component instance across
+  // same-route navigations, so without this the grid keeps showing
+  // whichever category/sale/sort was active the first time this page
+  // mounted. Adjusting state during render (React's documented pattern for
+  // this) instead of in a useEffect avoids both an extra visible frame and
+  // this repo's react-hooks/set-state-in-effect rule.
+  const paramsKey = searchParams.toString();
+  const [syncedParamsKey, setSyncedParamsKey] = useState(paramsKey);
+  if (paramsKey !== syncedParamsKey) {
+    setSyncedParamsKey(paramsKey);
+    const fresh = filtersFromParams(searchParams);
+    setSizes(fresh.sizes);
+    setCategories(fresh.categories);
+    setColors(fresh.colors);
+    setMaterials(fresh.materials);
+    setPriceMin(fresh.priceMin);
+    setPriceMax(fresh.priceMax);
+    setMinRating(fresh.minRating);
+    setOnSale(fresh.onSale);
+    setInStock(fresh.inStock);
+    setOnlyNew(fresh.onlyNew);
+    setPopular(fresh.popular);
+    setSort(searchParams.get("sort") ?? "new");
+    setAppliedFilters(fresh);
+  }
+
   const draftFilters: FilterValues = {
-    sizes, categories, brands, colors, materials,
+    sizes, categories, colors, materials,
     priceMin, priceMax, minRating, onSale, inStock, onlyNew, popular,
   };
 
@@ -147,7 +175,6 @@ function CatalogContent() {
   function clearFilters() {
     setSizes(EMPTY_FILTERS.sizes);
     setCategories(EMPTY_FILTERS.categories);
-    setBrands(EMPTY_FILTERS.brands);
     setColors(EMPTY_FILTERS.colors);
     setMaterials(EMPTY_FILTERS.materials);
     setPriceMin(EMPTY_FILTERS.priceMin);
@@ -236,7 +263,7 @@ function CatalogContent() {
               <FilterSidebar
                 {...{
                   sizes, setSizes, categories, setCategories,
-                  brands, setBrands, colors, setColors, materials, setMaterials,
+                  colors, setColors, materials, setMaterials,
                   priceMin, setPriceMin, priceMax, setPriceMax, minRating, setMinRating,
                   onSale, setOnSale, inStock, setInStock, onlyNew, setOnlyNew, popular, setPopular,
                   clearFilters, allCategories,
@@ -320,7 +347,6 @@ function CatalogContent() {
 interface FilterProps {
   sizes: number[]; setSizes: (v: number[]) => void;
   categories: string[]; setCategories: (v: string[]) => void;
-  brands: string[]; setBrands: (v: string[]) => void;
   colors: string[]; setColors: (v: string[]) => void;
   materials: string[]; setMaterials: (v: string[]) => void;
   priceMin: number; setPriceMin: (v: number) => void;
@@ -399,19 +425,9 @@ function FilterSidebar(p: FilterProps) {
         </div>
       </FilterSection>
 
-      <FilterSection label={t("brandLabel")}>
-        <div className="flex flex-wrap gap-1.5">
-          {BRANDS.map((b) => (
-            <Pill key={b} active={p.brands.includes(b)} onClick={() => p.setBrands(toggle(p.brands, b))}>
-              {b} ({countFor("brands", (product) => product.brand === b)})
-            </Pill>
-          ))}
-        </div>
-      </FilterSection>
-
       <FilterSection label={t("colorLabel")}>
         <div className="flex flex-wrap gap-1.5">
-          {COLORS.map((hex) => (
+          {ALL_COLORS.map((hex) => (
             <Pill key={hex} active={p.colors.includes(hex)} onClick={() => p.setColors(toggle(p.colors, hex))}>
               <span className="inline-flex items-center gap-1.5">
                 <span
@@ -427,7 +443,7 @@ function FilterSidebar(p: FilterProps) {
 
       <FilterSection label={t("materialLabel")}>
         <div className="flex flex-wrap gap-1.5">
-          {MATERIALS.map((m) => (
+          {ALL_MATERIALS.map((m) => (
             <Pill key={m} active={p.materials.includes(m)} onClick={() => p.setMaterials(toggle(p.materials, m))}>
               {materialName(m)} ({countFor("materials", (product) => product.material === m)})
             </Pill>
