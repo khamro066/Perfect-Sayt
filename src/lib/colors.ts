@@ -9,6 +9,15 @@ export const COLOR_NAMES: Record<string, string> = {
   "#0a5c3a": "Yashil",
   "#a83232": "Qizil",
   "#d8c7a8": "Bej",
+  "#b6b8ba": "Kumush",
+  "#bd9a3f": "Oltin",
+  "#16233f": "Siyohrang",
+  "#6b1f2e": "Bordo",
+  "#d9a0ab": "Pushti",
+  "#e0b429": "Sariq",
+  "#c2701c": "To'q sariq",
+  "#c9c7c2": "Och kulrang",
+  "#4a4a48": "To'q kulrang",
 };
 
 export function colorName(hex: string): string {
@@ -29,6 +38,15 @@ const COLOR_TRANSLATIONS: Record<string, { ru: string; en: string }> = {
   "Yashil": { ru: "Зелёный", en: "Green" },
   "Qizil": { ru: "Красный", en: "Red" },
   "Bej": { ru: "Бежевый", en: "Beige" },
+  "Kumush": { ru: "Серебристый", en: "Silver" },
+  "Oltin": { ru: "Золотой", en: "Gold" },
+  "Siyohrang": { ru: "Тёмно-синий", en: "Navy" },
+  "Bordo": { ru: "Бордовый", en: "Burgundy" },
+  "Pushti": { ru: "Розовый", en: "Pink" },
+  "Sariq": { ru: "Жёлтый", en: "Yellow" },
+  "To'q sariq": { ru: "Тёмно-оранжевый", en: "Dark orange" },
+  "Och kulrang": { ru: "Светло-серый", en: "Light gray" },
+  "To'q kulrang": { ru: "Тёмно-серый", en: "Dark gray" },
 };
 
 // Falls back to the raw Uzbek name whenever a hex or its name has no
