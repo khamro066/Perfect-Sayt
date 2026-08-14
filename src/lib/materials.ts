@@ -10,6 +10,8 @@ const MATERIAL_TRANSLATIONS: Record<string, { ru: string; en: string }> = {
   "Rezina": { ru: "Резина", en: "Rubber" },
 };
 
+export const ALL_MATERIALS = Object.keys(MATERIAL_TRANSLATIONS);
+
 // Falls back to the raw Uzbek value whenever a material has no translation
 // entry yet (e.g. one the admin just added) — never crashes or shows
 // "undefined".
