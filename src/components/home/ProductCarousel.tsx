@@ -38,6 +38,8 @@ export function ProductCarousel({
     scrollerRef.current?.scrollTo({ left: scrollerRef.current.scrollWidth, behavior: "smooth" });
   }
 
+  const cardSizeClass = "w-[45vw] shrink-0 snap-start sm:w-[260px]";
+
   return (
     <section className="mx-auto max-w-[1280px] px-2 py-8 sm:px-6">
       <div className="mb-5 flex items-center gap-3">
@@ -53,10 +55,13 @@ export function ProductCarousel({
           className="flex snap-x snap-mandatory gap-1 overflow-x-auto scroll-smooth pb-1 sm:gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {products.map((p) => (
-            <div key={p.id} className="w-[45vw] shrink-0 snap-start sm:w-[260px]">
+            <div key={p.id} className={cardSizeClass}>
               <ProductCard product={p} />
             </div>
           ))}
+          <div className={cardSizeClass}>
+            <ViewAllCard href={href} label={viewAllLabel} />
+          </div>
         </div>
         {canScrollForward && (
           // Button itself keeps a 40x40 touch target; the visible circle
@@ -73,5 +78,26 @@ export function ProductCarousel({
         )}
       </div>
     </section>
+  );
+}
+
+// Trailing tile at the end of the row, styled to match a ProductCard's
+// dimensions/shape so it reads as a natural continuation of the row. Links
+// to the same destination as the section's own "Barchasini ko'rish" link.
+function ViewAllCard({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="group flex h-full flex-col bg-surface transition-shadow duration-200 hover:shadow-[0_14px_34px_rgba(0,0,0,0.10)]"
+    >
+      <div className="flex aspect-square w-full items-center justify-center bg-surface-2">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-surface text-ink shadow-[0_2px_8px_rgba(0,0,0,0.14)] transition-transform group-hover:translate-x-0.5">
+          <ChevronRight size={20} />
+        </span>
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-1 p-2.5 text-center sm:gap-1.5 sm:p-4">
+        <span className="text-[13px] font-bold text-accent sm:text-base">{label}</span>
+      </div>
+    </Link>
   );
 }
