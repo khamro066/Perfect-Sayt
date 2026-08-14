@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Images } from "lucide-react";
 import clsx from "clsx";
 import { Product } from "@/lib/types";
 import { useProductsData } from "@/lib/products-data";
@@ -29,29 +29,15 @@ export function ProductCard({ product }: { product: Product }) {
 
   const images = product.images ?? [];
   const hasGallery = images.length > 1;
-  const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeImage, setActiveImage] = useState(0);
 
-  // Tracks which slide is centered as the user swipes/scrolls, so the dot
-  // indicator and arrow visibility (hide "prev" at the start, "next" at
-  // the end) stay in sync regardless of whether the change came from a
-  // touch swipe or an arrow click.
-  useEffect(() => {
-    if (!hasGallery) return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    function onScroll() {
-      if (!el) return;
-      setActiveImage(Math.round(el.scrollLeft / el.clientWidth));
-    }
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [hasGallery]);
-
-  function goToImage(e: React.MouseEvent, index: number) {
+  // Tapping cycles forward, wrapping back to the first image after the
+  // last — a discrete tap can't conflict with the card row's horizontal
+  // scroll the way a swipe-to-change-image gesture would.
+  function cycleImage(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    scrollerRef.current?.scrollTo({ left: index * scrollerRef.current.clientWidth, behavior: "smooth" });
+    setActiveImage((i) => (i + 1) % images.length);
   }
 
   return (
@@ -62,26 +48,9 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative aspect-square w-full overflow-hidden bg-surface-2">
         {images.length === 0 ? (
           <PlaceholderImage label={`${product.name} · 800×800px`} className="h-full w-full" />
-        ) : hasGallery ? (
-          <div
-            ref={scrollerRef}
-            className="flex h-full w-full snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {images.map((src, i) => (
-              <div key={i} className="relative h-full w-full shrink-0 snap-center">
-                <Image
-                  src={src}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 639px) 45vw, 260px"
-                  className="object-cover"
-                />
-              </div>
-            ))}
-          </div>
         ) : (
           <Image
-            src={images[0]}
+            src={images[activeImage]}
             alt={product.name}
             fill
             sizes="(max-width: 639px) 45vw, 260px"
@@ -90,40 +59,20 @@ export function ProductCard({ product }: { product: Product }) {
         )}
 
         {hasGallery && (
-          <>
-            {activeImage > 0 && (
-              <button
-                onClick={(e) => goToImage(e, activeImage - 1)}
-                aria-label={t("prevImage")}
-                className="absolute left-1.5 top-1/2 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-ink opacity-0 shadow-[0_2px_8px_rgba(0,0,0,0.14)] backdrop-blur-sm transition-opacity group-hover:opacity-100 sm:flex"
-              >
-                <ChevronLeft size={15} />
-              </button>
-            )}
-            {activeImage < images.length - 1 && (
-              <button
-                onClick={(e) => goToImage(e, activeImage + 1)}
-                aria-label={t("nextImage")}
-                className="absolute right-1.5 top-1/2 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-ink opacity-0 shadow-[0_2px_8px_rgba(0,0,0,0.14)] backdrop-blur-sm transition-opacity group-hover:opacity-100 sm:flex"
-              >
-                <ChevronRight size={15} />
-              </button>
-            )}
-            <div className="pointer-events-none absolute bottom-1.5 left-1/2 flex -translate-x-1/2 gap-1">
-              {images.map((_, i) => (
-                <span
-                  key={i}
-                  className={clsx(
-                    "h-1.5 w-1.5 rounded-full transition-colors",
-                    i === activeImage ? "bg-white" : "bg-white/50"
-                  )}
-                />
-              ))}
-            </div>
-          </>
+          <div className="pointer-events-none absolute bottom-1.5 left-1/2 flex -translate-x-1/2 gap-1">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={clsx(
+                  "h-1.5 w-1.5 rounded-full transition-colors",
+                  i === activeImage ? "bg-white" : "bg-white/50"
+                )}
+              />
+            ))}
+          </div>
         )}
 
-        <div className="pointer-events-none absolute left-1.5 top-1.5 flex flex-col gap-1 sm:left-2.5 sm:top-2.5 sm:gap-1.5">
+        <div className="pointer-events-none absolute left-1.5 top-1.5 flex flex-col items-start gap-1 sm:left-2.5 sm:top-2.5 sm:gap-1.5">
           {product.isNew && (
             <span className="rounded-pill bg-accent px-1.5 py-0.5 text-[9px] font-semibold text-accent-ink sm:px-2.5 sm:py-1 sm:text-[11px]">
               {t("newBadge")}
@@ -138,6 +87,15 @@ export function ProductCard({ product }: { product: Product }) {
             <span className="rounded-pill bg-ink px-1.5 py-0.5 text-[9px] font-semibold text-bg sm:px-2.5 sm:py-1 sm:text-[11px]">
               {t("soldOutBadge")}
             </span>
+          )}
+          {hasGallery && (
+            <button
+              onClick={cycleImage}
+              aria-label={t("nextImage")}
+              className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-ink shadow-[0_2px_8px_rgba(0,0,0,0.14)] backdrop-blur-sm"
+            >
+              <Images size={14} />
+            </button>
           )}
         </div>
         <button
