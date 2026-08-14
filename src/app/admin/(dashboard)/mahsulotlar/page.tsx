@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/lib/toast-context";
 import { ALL_COLORS, colorName } from "@/lib/colors";
+import { ALL_MATERIALS } from "@/lib/materials";
 import { ACCESSORY_SIZE, SIZES } from "@/lib/constants";
 import { formatSom } from "@/lib/format";
 import { uploadImageDirect } from "@/lib/upload-image";
@@ -22,6 +23,7 @@ interface UploadedImage {
 interface AdminProduct extends Product {
   totalStock: number;
   activeOrderCount: number;
+  stock: { colorHex: string; size: number; quantity: number }[];
 }
 
 function toggle<T>(list: T[], value: T): T[] {
@@ -45,6 +47,7 @@ export default function AdminProductsPage() {
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [material, setMaterial] = useState(ALL_MATERIALS[0]);
   const [kind, setKind] = useState<"shoe" | "accessory">("shoe");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
@@ -63,9 +66,12 @@ export default function AdminProductsPage() {
   const [editBrand, setEditBrand] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editMaterial, setEditMaterial] = useState(ALL_MATERIALS[0]);
   const [editHasDiscount, setEditHasDiscount] = useState(false);
   const [editDiscountPct, setEditDiscountPct] = useState("");
   const [editImages, setEditImages] = useState<UploadedImage[]>([]);
+  const [editColors, setEditColors] = useState<string[]>([]);
+  const [editQuantities, setEditQuantities] = useState<Record<string, string>>({});
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   function refetch() {
@@ -172,7 +178,7 @@ export default function AdminProductsPage() {
           gender: "Erkaklar",
           kind,
           category,
-          material: "Charm",
+          material,
           price: finalPrice,
           oldPrice: hasDiscount && pct > 0 ? basePrice : undefined,
           description: "",
@@ -191,7 +197,7 @@ export default function AdminProductsPage() {
 
       setName(""); setBrand(""); setPrice(""); setImages([]);
       setSelectedColors([]); setSelectedSizes([]); setQuantities({});
-      setHasDiscount(false); setDiscountPct("");
+      setHasDiscount(false); setDiscountPct(""); setMaterial(ALL_MATERIALS[0]);
       showToast("Mahsulot qo'shildi");
       refetch();
     } finally {
@@ -213,15 +219,24 @@ export default function AdminProductsPage() {
     setEditBrand(p.brand);
     setEditCategory(p.category);
     setEditPrice(String(p.oldPrice ?? p.price));
+    setEditMaterial(p.material);
     setEditHasDiscount(!!p.oldPrice);
     setEditDiscountPct(p.oldPrice ? String(Math.round((1 - p.price / p.oldPrice) * 100)) : "");
     setEditImages((p.images ?? []).map((url, i) => ({ id: `${p.id}-${i}`, url, primary: i === 0 })));
+    setEditColors(p.colors);
+    setEditQuantities(
+      Object.fromEntries(p.stock.map((s) => [`${s.colorHex}-${s.size}`, String(s.quantity)]))
+    );
   }
 
   async function submitEdit() {
     if (!editTarget) return;
     if (!editName.trim() || !editPrice) {
       showToast("Nom va narxni kiriting");
+      return;
+    }
+    if (editColors.length === 0) {
+      showToast("Kamida bitta rangni tanlang");
       return;
     }
 
@@ -234,6 +249,14 @@ export default function AdminProductsPage() {
       const basePrice = Number(editPrice);
       const finalPrice = editHasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
 
+      const stockEntries = editColors.flatMap((hex) =>
+        editTarget.sizes.map((size) => ({
+          colorHex: hex,
+          size,
+          quantity: Math.max(0, Math.floor(Number(editQuantities[`${hex}-${size}`]) || 0)),
+        }))
+      );
+
       const res = await fetch(`/api/admin/products/${editTarget.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -241,9 +264,12 @@ export default function AdminProductsPage() {
           name: editName.trim(),
           brand: editBrand.trim() || "Perfect",
           category: editCategory,
+          material: editMaterial,
           price: finalPrice,
           oldPrice: editHasDiscount && pct > 0 ? basePrice : null,
           images: imageUrls,
+          colors: editColors,
+          stockEntries,
         }),
       });
 
@@ -270,6 +296,7 @@ export default function AdminProductsPage() {
           <LabeledInput label="Brend" value={brand} onChange={setBrand} placeholder="Brend (ixtiyoriy)" />
           <LabeledSelect label="Kategoriya" value={category} onChange={setCategory} options={categories} />
           <LabeledInput label="Narx (so'm)" value={price} onChange={setPrice} placeholder="890000" type="number" />
+          <LabeledSelect label="Material" value={material} onChange={setMaterial} options={ALL_MATERIALS} />
         </div>
 
         <div className="mt-4">
@@ -523,7 +550,84 @@ export default function AdminProductsPage() {
               <LabeledInput label="Brend" value={editBrand} onChange={setEditBrand} placeholder="Brend" />
               <LabeledSelect label="Kategoriya" value={editCategory} onChange={setEditCategory} options={categories} />
               <LabeledInput label="Narx (so'm)" value={editPrice} onChange={setEditPrice} placeholder="890000" type="number" />
+              <LabeledSelect label="Material" value={editMaterial} onChange={setEditMaterial} options={ALL_MATERIALS} />
             </div>
+
+            <div className="mt-4">
+              <p className="mb-2 text-[13px] font-semibold text-ink">Rang(lar)</p>
+              <div className="flex flex-wrap gap-2.5">
+                {ALL_COLORS.map((hex) => (
+                  <button
+                    key={hex}
+                    type="button"
+                    title={colorName(hex)}
+                    onClick={() => setEditColors(toggle(editColors, hex))}
+                    className="h-[30px] w-[30px] rounded-full border border-line"
+                    style={{
+                      background: hex,
+                      boxShadow: editColors.includes(hex)
+                        ? "0 0 0 2px var(--surface), 0 0 0 4px var(--accent)"
+                        : undefined,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {editTarget && editColors.length > 0 && editTarget.sizes.length > 0 && (
+              <div className="mt-4 rounded-[12px] bg-surface-2 p-4">
+                <p className="mb-1 text-[13px] font-semibold text-ink">Qoldiqlar</p>
+                <p className="mb-3 text-xs text-muted">
+                  {editTarget.kind === "shoe"
+                    ? "Har bir rang × o'lcham birikmasi uchun aniq miqdorni kiriting."
+                    : "Har bir rang uchun aniq miqdorni kiriting."}
+                </p>
+                <div
+                  className={clsx(
+                    "grid gap-3 border-b border-line pb-2 text-xs font-bold uppercase tracking-[0.05em] text-muted",
+                    editTarget.kind === "shoe" ? "grid-cols-[1.4fr_0.8fr_1fr_1fr]" : "grid-cols-[1.4fr_1fr_1fr]"
+                  )}
+                >
+                  <span>Rang</span>
+                  {editTarget.kind === "shoe" && <span>O&apos;lcham</span>}
+                  <span>Qoldiq</span><span>Holat</span>
+                </div>
+                {editColors.flatMap((hex) =>
+                  editTarget.sizes
+                    .slice()
+                    .sort((a, b) => a - b)
+                    .map((size) => {
+                      const key = `${hex}-${size}`;
+                      const qtyValue = editQuantities[key] ?? "";
+                      const status = stockStatus(Math.floor(Number(qtyValue) || 0));
+                      return (
+                        <div
+                          key={key}
+                          className={clsx(
+                            "grid items-center gap-3 border-b border-line py-2.5 text-[13.5px] text-ink last:border-b-0",
+                            editTarget.kind === "shoe" ? "grid-cols-[1.4fr_0.8fr_1fr_1fr]" : "grid-cols-[1.4fr_1fr_1fr]"
+                          )}
+                        >
+                          <span className="flex items-center gap-1.5 text-muted">
+                            <span className="h-3.5 w-3.5 rounded-full border border-line" style={{ background: hex }} />
+                            {colorName(hex)}
+                          </span>
+                          {editTarget.kind === "shoe" && <span>{size}</span>}
+                          <input
+                            type="number"
+                            min={0}
+                            value={qtyValue}
+                            onChange={(e) => setEditQuantities((prev) => ({ ...prev, [key]: e.target.value }))}
+                            placeholder="0"
+                            className="w-24 rounded-[8px] border border-line bg-surface px-2.5 py-1.5 text-[13px] outline-none"
+                          />
+                          <span className="font-bold" style={{ color: status.color }}>{status.label}</span>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+            )}
 
             <ImagePicker images={editImages} setImages={setEditImages} handleFiles={handleFiles} />
 

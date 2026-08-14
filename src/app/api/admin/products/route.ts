@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeProduct } from "@/lib/serializers";
+import { ALL_MATERIALS } from "@/lib/materials";
 
 const ACTIVE_STATUSES = ["Yangi", "TolovTekshirilmoqda", "Tasdiqlandi", "Tayyorlanmoqda", "Yolda"] as const;
 
@@ -25,6 +26,7 @@ export async function GET() {
       ...serializeProduct(p),
       totalStock: p.stock.reduce((sum, s) => sum + s.quantity, 0),
       activeOrderCount: new Set(p.orderLines.map((l) => l.orderId)).size,
+      stock: p.stock.map((s) => ({ colorHex: s.colorHex, size: s.size, quantity: s.quantity })),
     }))
   );
 }
@@ -63,6 +65,9 @@ export async function POST(req: NextRequest) {
   }
   if (!body.sizes?.length) {
     return NextResponse.json({ error: "Kamida bitta o'lchamni tanlang" }, { status: 400 });
+  }
+  if (body.material !== undefined && !ALL_MATERIALS.includes(body.material)) {
+    return NextResponse.json({ error: "Noma'lum material" }, { status: 400 });
   }
 
   const category = await prisma.category.findFirst({ where: { name: body.category } });
