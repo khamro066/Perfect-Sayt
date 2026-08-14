@@ -138,18 +138,14 @@ export default function ProductPage() {
             )}
           </div>
           <div className="mt-3 grid grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((i) => (
+            {images.map((src, i) => (
               <button
                 key={i}
                 onClick={() => setGalleryIndex(i)}
                 className="relative aspect-square overflow-hidden rounded-[12px]"
                 style={{ boxShadow: galleryIndex === i ? "0 0 0 2px var(--accent)" : "0 0 0 2px transparent" }}
               >
-                {images[i] ? (
-                  <Image src={images[i]} alt="" fill sizes="120px" className="object-cover" />
-                ) : (
-                  <PlaceholderImage label={`${i + 1}`} className="h-full w-full" />
-                )}
+                <Image src={src} alt="" fill sizes="120px" className="object-cover" />
               </button>
             ))}
           </div>
