@@ -17,19 +17,18 @@ interface UpdateProductBody {
   oldPrice?: number | null;
   images?: string[];
   material?: string;
-  // Both optional and only reconciled when colors is present — sizes stay
-  // fixed at creation time (adding/removing a size isn't exposed by the
-  // edit UI), but the color list and its per-size stock quantities are.
+  // Both optional, reconciled independently when present. OrderLine
+  // snapshots its own colorHex/size (no FK to ProductColor/ProductSize/
+  // Stock), so removing a color or size a product used to offer can never
+  // violate order history.
   colors?: string[];
+  sizes?: number[];
   stockEntries?: StockEntryInput[];
 }
 
 // Product-level fields (name/brand/category/price/discount/images) plus,
-// when provided, a full reconciliation of the product's colors and their
-// per-size Stock rows. Sizes themselves stay fixed post-creation — only
-// colors and quantities are editable here. OrderLine snapshots its own
-// colorHex/size (no FK to ProductColor/Stock), so removing a color a
-// product used to offer can never violate order history.
+// when provided, a full reconciliation of the product's colors, sizes, and
+// their per-(color,size) Stock rows.
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = (await req.json()) as Partial<UpdateProductBody>;
@@ -43,6 +42,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (body.colors !== undefined && body.colors.length === 0) {
     return NextResponse.json({ error: "Kamida bitta rangni tanlang" }, { status: 400 });
   }
+  if (body.sizes !== undefined && body.sizes.length === 0) {
+    return NextResponse.json({ error: "Kamida bitta o'lchamni tanlang" }, { status: 400 });
+  }
   if (body.material !== undefined && !ALL_MATERIALS.includes(body.material)) {
     return NextResponse.json({ error: "Noma'lum material" }, { status: 400 });
   }
@@ -54,25 +56,36 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     categoryId = category.id;
   }
 
-  if (body.colors !== undefined) {
-    const [existingColors, sizes] = await Promise.all([
+  if (body.colors !== undefined || body.sizes !== undefined) {
+    const [existingColors, existingSizes] = await Promise.all([
       prisma.productColor.findMany({ where: { productId: id } }),
       prisma.productSize.findMany({ where: { productId: id } }),
     ]);
-    const existingHexes = new Set(existingColors.map((c) => c.hex));
-    const newHexes = new Set(body.colors);
-    const toAdd = body.colors.filter((hex) => !existingHexes.has(hex));
-    const toRemove = existingColors.filter((c) => !newHexes.has(c.hex));
+
+    const colorsToAdd = body.colors ? body.colors.filter((hex) => !existingColors.some((c) => c.hex === hex)) : [];
+    const colorsToRemove = body.colors ? existingColors.filter((c) => !body.colors!.includes(c.hex)) : [];
+    const sizesToAdd = body.sizes ? body.sizes.filter((s) => !existingSizes.some((es) => es.size === s)) : [];
+    const sizesToRemove = body.sizes ? existingSizes.filter((es) => !body.sizes!.includes(es.size)) : [];
+
+    // Final desired cross-join, used to backfill any (color,size) Stock row
+    // that a caller's colors/sizes change implies but didn't also cover via
+    // stockEntries -- upsert with update:{} so it never clobbers a quantity
+    // stockEntries is about to set right after this transaction.
+    const finalColorHexes = body.colors ?? existingColors.map((c) => c.hex);
+    const finalSizes = body.sizes ?? existingSizes.map((s) => s.size);
 
     await prisma.$transaction([
-      ...toRemove.map((c) => prisma.stock.deleteMany({ where: { productId: id, colorHex: c.hex } })),
-      ...toRemove.map((c) => prisma.productColor.delete({ where: { id: c.id } })),
-      ...toAdd.map((hex) => prisma.productColor.create({ data: { productId: id, hex } })),
-      ...toAdd.flatMap((hex) =>
-        sizes.map((s) =>
+      ...colorsToRemove.map((c) => prisma.stock.deleteMany({ where: { productId: id, colorHex: c.hex } })),
+      ...colorsToRemove.map((c) => prisma.productColor.delete({ where: { id: c.id } })),
+      ...sizesToRemove.map((s) => prisma.stock.deleteMany({ where: { productId: id, size: s.size } })),
+      ...sizesToRemove.map((s) => prisma.productSize.delete({ where: { id: s.id } })),
+      ...colorsToAdd.map((hex) => prisma.productColor.create({ data: { productId: id, hex } })),
+      ...sizesToAdd.map((s) => prisma.productSize.create({ data: { productId: id, size: s } })),
+      ...finalColorHexes.flatMap((hex) =>
+        finalSizes.map((size) =>
           prisma.stock.upsert({
-            where: { productId_colorHex_size: { productId: id, colorHex: hex, size: s.size } },
-            create: { productId: id, colorHex: hex, size: s.size, quantity: 0 },
+            where: { productId_colorHex_size: { productId: id, colorHex: hex, size } },
+            create: { productId: id, colorHex: hex, size, quantity: 0 },
             update: {},
           })
         )

@@ -71,6 +71,7 @@ export default function AdminProductsPage() {
   const [editDiscountPct, setEditDiscountPct] = useState("");
   const [editImages, setEditImages] = useState<UploadedImage[]>([]);
   const [editColors, setEditColors] = useState<string[]>([]);
+  const [editSizes, setEditSizes] = useState<number[]>([]);
   const [editQuantities, setEditQuantities] = useState<Record<string, string>>({});
   const [editSubmitting, setEditSubmitting] = useState(false);
 
@@ -229,6 +230,7 @@ export default function AdminProductsPage() {
     setEditDiscountPct(p.oldPrice ? String(Math.round((1 - p.price / p.oldPrice) * 100)) : "");
     setEditImages((p.images ?? []).map((url, i) => ({ id: `${p.id}-${i}`, url, primary: i === 0 })));
     setEditColors(p.colors);
+    setEditSizes(p.sizes);
     setEditQuantities(
       Object.fromEntries(p.stock.map((s) => [`${s.colorHex}-${s.size}`, String(s.quantity)]))
     );
@@ -244,6 +246,10 @@ export default function AdminProductsPage() {
       showToast("Kamida bitta rangni tanlang");
       return;
     }
+    if (editTarget.kind === "shoe" && editSizes.length === 0) {
+      showToast("Kamida bitta o'lchamni tanlang");
+      return;
+    }
 
     setEditSubmitting(true);
     try {
@@ -254,8 +260,11 @@ export default function AdminProductsPage() {
       const basePrice = Number(editPrice);
       const finalPrice = editHasDiscount && pct > 0 ? Math.round(basePrice * (1 - pct / 100)) : basePrice;
 
+      // Accessories keep their fixed reserved size (ACCESSORY_SIZE) --
+      // editSizes only reflects real shoe sizes, so it's never sent for them.
+      const effectiveEditSizes = editTarget.kind === "shoe" ? editSizes : editTarget.sizes;
       const stockEntries = editColors.flatMap((hex) =>
-        editTarget.sizes.map((size) => ({
+        effectiveEditSizes.map((size) => ({
           colorHex: hex,
           size,
           quantity: Math.max(0, Math.floor(Number(editQuantities[`${hex}-${size}`]) || 0)),
@@ -274,6 +283,7 @@ export default function AdminProductsPage() {
           oldPrice: editHasDiscount && pct > 0 ? basePrice : null,
           images: imageUrls,
           colors: editColors,
+          ...(editTarget.kind === "shoe" && { sizes: editSizes }),
           stockEntries,
         }),
       });
@@ -579,7 +589,30 @@ export default function AdminProductsPage() {
               </div>
             </div>
 
-            {editTarget && editColors.length > 0 && editTarget.sizes.length > 0 && (
+            {editTarget.kind === "shoe" && (
+              <div className="mt-4">
+                <p className="mb-2 text-[13px] font-semibold text-ink">O&apos;lchamlar</p>
+                <div className="flex flex-wrap gap-2">
+                  {SIZES.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setEditSizes(toggle(editSizes, s))}
+                      className={clsx(
+                        "min-w-[46px] rounded-[10px] border px-2 py-2.5 text-sm font-semibold",
+                        editSizes.includes(s)
+                          ? "border-accent bg-accent text-accent-ink"
+                          : "border-line bg-surface text-ink"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {editTarget && editColors.length > 0 && (editTarget.kind === "shoe" ? editSizes.length > 0 : editTarget.sizes.length > 0) && (
               <div className="mt-4 rounded-[12px] bg-surface-2 p-4">
                 <p className="mb-1 text-[13px] font-semibold text-ink">Qoldiqlar</p>
                 <p className="mb-3 text-xs text-muted">
@@ -598,7 +631,7 @@ export default function AdminProductsPage() {
                   <span>Qoldiq</span><span>Holat</span>
                 </div>
                 {editColors.flatMap((hex) =>
-                  editTarget.sizes
+                  (editTarget.kind === "shoe" ? editSizes : editTarget.sizes)
                     .slice()
                     .sort((a, b) => a - b)
                     .map((size) => {
