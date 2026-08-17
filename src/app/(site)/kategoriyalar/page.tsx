@@ -13,7 +13,7 @@ export default async function KategoriyalarPage() {
     orderBy: { name: "asc" },
     include: { products: { where: { deletedAt: null }, select: { kind: true } } },
   });
-  // This page lists shoe categories only — accessory categories (e.g. Koshelyok)
+  // This page lists shoe categories only — accessory categories (e.g. Aksessuarlar)
   // are browsed via the hamburger menu's separate Aksessuarlar accordion.
   const shoeCategories = categories.filter((cat) => !cat.products.some((p) => p.kind === "accessory"));
 

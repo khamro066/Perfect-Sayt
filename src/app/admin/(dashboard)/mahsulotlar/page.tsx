@@ -198,6 +198,11 @@ export default function AdminProductsPage() {
       setName(""); setBrand(""); setPrice(""); setImages([]);
       setSelectedColors([]); setSelectedSizes([]); setQuantities({});
       setHasDiscount(false); setDiscountPct(""); setMaterial(ALL_MATERIALS[0]);
+      // Reset like every other field above -- without this, the dropdown
+      // silently kept whatever category the previous product used, which
+      // is how accessory products ended up saved under a leftover shoe
+      // category with no valid accessory option to switch to.
+      setCategory(categories[0] ?? "");
       showToast("Mahsulot qo'shildi");
       refetch();
     } finally {

@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { useProductsData } from "@/lib/products-data";
 
 const SHOE_SUBCATEGORIES = ["Kundalik", "Klassik", "Lofer va mokasin", "Krossovka", "Botinka", "Yozgi poyabzal"];
-const ACCESSORY_SUBCATEGORIES = ["Koshelyok"];
+const ACCESSORY_SUBCATEGORIES = ["Aksessuarlar"];
 
 function AccordionNavItem({
   label, open, onToggle, children,
