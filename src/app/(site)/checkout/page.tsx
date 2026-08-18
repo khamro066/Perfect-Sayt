@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Send, Phone } from "lucide-react";
 import clsx from "clsx";
 import { useCart } from "@/lib/cart-context";
@@ -20,6 +20,8 @@ import { CurrencySwitcher } from "@/components/layout/CurrencySwitcher";
 export default function CheckoutPage() {
   const router = useRouter();
   const t = useTranslations("checkout");
+  const tCurrency = useTranslations("currency");
+  const locale = useLocale();
   const { lines, subtotal, clear } = useCart();
   const { products } = useProductsData();
   const { currency, formatPrice } = useCurrency();
@@ -240,7 +242,7 @@ export default function CheckoutPage() {
             <span>{formatPrice(total)}</span>
           </div>
           <p className="mb-4 mt-1 text-xs text-muted">
-            {currency !== "UZS" ? t("uzsChargeNote", { amount: formatSom(total) }) : " "}
+            {currency !== "UZS" ? t("uzsChargeNote", { amount: formatSom(total, locale, tCurrency("som")) }) : " "}
           </p>
           <button
             onClick={placeOrder}

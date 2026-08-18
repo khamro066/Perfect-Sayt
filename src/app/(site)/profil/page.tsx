@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
 import { useCustomer } from "@/lib/customer-context";
 import { useFavorites } from "@/lib/favorites-context";
@@ -41,6 +41,8 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const t = useTranslations("profile");
   const tReview = useTranslations("reviewModal");
+  const tCurrency = useTranslations("currency");
+  const locale = useLocale();
   const { customer, setCustomer } = useCustomer();
   const { favorites } = useFavorites();
   const { products } = useProductsData();
@@ -136,7 +138,7 @@ function ProfileContent() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-ink">{formatSom(o.total)}</p>
+                          <p className="font-bold text-ink">{formatSom(o.total, locale, tCurrency("som"))}</p>
                           <span
                             className="mt-1 inline-block rounded-pill bg-surface-2 px-2.5 py-1 text-xs font-semibold"
                             style={{ color: STATUS_COLOR[o.status] }}
@@ -178,7 +180,7 @@ function ProfileContent() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-ink">{formatSom(o.total)}</p>
+                        <p className="font-bold text-ink">{formatSom(o.total, locale, tCurrency("som"))}</p>
                         <span className="mt-1 inline-block rounded-pill bg-surface-2 px-2.5 py-1 text-xs font-semibold" style={{ color: STATUS_COLOR[o.status] }}>
                           {o.status}
                         </span>

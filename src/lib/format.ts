@@ -1,5 +1,11 @@
-export function formatSom(amount: number): string {
-  return `${Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")} so'm`;
+// somLabel is the translated currency word (from the "currency.som" message
+// key) -- kept as a plain parameter here rather than importing next-intl
+// directly, since this file has no component/hook context of its own and
+// is also called from admin pages that are intentionally Uzbek-only.
+export function formatSom(amount: number, locale: string = "uz", somLabel: string = "so'm"): string {
+  const separator = locale === "en" ? "," : " ";
+  const numberFormatted = Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+  return `${numberFormatted} ${somLabel}`;
 }
 
 export function formatDateUz(date: Date): string {

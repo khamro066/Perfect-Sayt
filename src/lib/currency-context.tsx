@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { formatSom } from "./format";
 import { setCurrency as persistCurrency } from "./currency-actions";
 import {
@@ -24,6 +25,10 @@ interface CurrencyContextValue {
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
+// next-intl's short locale codes mapped to real BCP-47 tags for Intl number
+// formatting (grouping separator + decimal comma/period) of non-UZS amounts.
+const NUMBER_LOCALES: Record<string, string> = { uz: "uz-UZ", ru: "ru-RU", en: "en-US" };
+
 function readCookie(name: string): string | undefined {
   return document.cookie
     .split("; ")
@@ -32,6 +37,8 @@ function readCookie(name: string): string | undefined {
 }
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
+  const locale = useLocale();
+  const t = useTranslations("currency");
   const [currency, setCurrencyState] = useState<Currency>(DEFAULT_CURRENCY);
   const [rates, setRates] = useState<Record<string, number> | null>(null);
 
@@ -55,16 +62,16 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   const formatPrice = useCallback(
     (amountInUzs: number, opts?: { wholeNumber?: boolean }) => {
-      if (currency === "UZS" || !rates?.[currency]) return formatSom(amountInUzs);
+      if (currency === "UZS" || !rates?.[currency]) return formatSom(amountInUzs, locale, t("som"));
       const converted = amountInUzs * rates[currency];
       const decimals = opts?.wholeNumber ? 0 : converted < 100 ? 2 : 0;
-      const formatted = converted.toLocaleString("en-US", {
+      const formatted = converted.toLocaleString(NUMBER_LOCALES[locale] ?? "en-US", {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
       });
       return `~${formatted} ${CURRENCY_SYMBOLS[currency]}`;
     },
-    [currency, rates]
+    [currency, rates, locale, t]
   );
 
   return (

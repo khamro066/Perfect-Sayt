@@ -8,7 +8,6 @@ import { CartProvider } from "@/lib/cart-context";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { CustomerProvider } from "@/lib/customer-context";
 import { ProductsDataProvider } from "@/lib/products-data";
-import { CurrencyProvider } from "@/lib/currency-context";
 
 const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-heading",
@@ -43,11 +42,9 @@ export default async function RootLayout({
           <ToastProvider>
             <CustomerProvider>
               <ProductsDataProvider>
-                <CurrencyProvider>
-                  <FavoritesProvider>
-                    <CartProvider>{children}</CartProvider>
-                  </FavoritesProvider>
-                </CurrencyProvider>
+                <FavoritesProvider>
+                  <CartProvider>{children}</CartProvider>
+                </FavoritesProvider>
               </ProductsDataProvider>
             </CustomerProvider>
           </ToastProvider>

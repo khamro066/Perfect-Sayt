@@ -1,4 +1,7 @@
 {
+  "currency": {
+    "som": "so'm"
+  },
   "header": {
     "menu": "Menyu",
     "search": "Qidiruv",

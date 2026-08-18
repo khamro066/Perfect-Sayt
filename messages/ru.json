@@ -1,4 +1,7 @@
 {
+  "currency": {
+    "som": "сум"
+  },
   "header": {
     "menu": "Меню",
     "search": "Поиск",
