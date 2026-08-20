@@ -201,7 +201,12 @@ export default async function HomePage() {
         href="/katalog?sale=1"
         viewAllLabel={t("viewAll")}
         products={discounted}
-        badge={<span className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">SALE</span>}
+        // ProductCarousel renders {title}{badge}{viewAllLink} as siblings,
+        // which JSX compiles to a children array once there's more than one
+        // — elements created here and threaded in via a prop (rather than
+        // written literally at that array's call site) don't get React's
+        // static-position key exemption, so this needs an explicit key.
+        badge={<span key="badge" className="rounded-pill bg-danger px-2.5 py-1 text-[11px] font-bold text-white">SALE</span>}
       />
 
       <section className="mx-auto max-w-[1280px] px-6 py-8">
