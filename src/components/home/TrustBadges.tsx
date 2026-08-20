@@ -95,7 +95,7 @@ export function TrustBadges() {
               }}
               onClick={() => toggle(i)}
               aria-expanded={openIndex === i}
-              className="flex items-center justify-center gap-2 sm:justify-start"
+              className="btn-press flex items-center justify-center gap-2 sm:justify-start"
             >
               <Icon size={18} className="shrink-0 text-accent" />
               <span className="text-[12.5px] font-semibold leading-tight text-ink sm:text-sm">{item.title}</span>

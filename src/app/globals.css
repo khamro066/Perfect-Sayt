@@ -170,3 +170,29 @@ h1, h2, h3, h4, h5, h6 {
 .animate-overlay-fade-in {
   animation: overlay-fade-in 0.2s ease;
 }
+
+/* Tactile press feedback for primary buttons (Telegram/iOS-style "squish").
+   Pure CSS :active — browsers apply/remove it correctly on their own for
+   drag-off, rapid taps, and multi-touch, so unlike a JS-driven press state
+   it can never get stuck. transform-only, so nothing around the button
+   reflows. The two transitions are intentionally asymmetric: a quick
+   ease-out down on press, a slightly springier one (gentle overshoot) back
+   up on release — matches the site's existing overshoot curve used for
+   mini-cart-pop/slide-in-left, just faster and reused here for touch. */
+.btn-press {
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-press:active {
+  transform: scale(0.96);
+  transition: transform 110ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-press {
+    transition: none;
+  }
+  .btn-press:active {
+    transform: none;
+    transition: none;
+  }
+}

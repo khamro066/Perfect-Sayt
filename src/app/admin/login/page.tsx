@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-btn bg-accent py-3.5 text-[15px] font-semibold text-accent-ink disabled:opacity-60"
+          className="btn-press rounded-btn bg-accent py-3.5 text-[15px] font-semibold text-accent-ink disabled:opacity-60"
         >
           {submitting ? "Tekshirilmoqda…" : "Kirish"}
         </button>

@@ -156,7 +156,7 @@ export default async function HomePage() {
             </p>
             <Link
               href="/katalog"
-              className="mt-1.5 w-fit rounded-btn bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
+              className="btn-press mt-1.5 w-fit rounded-btn bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
             >
               {t("collectionCta")}
             </Link>

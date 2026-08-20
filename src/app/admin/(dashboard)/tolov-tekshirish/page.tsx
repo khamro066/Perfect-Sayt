@@ -71,13 +71,13 @@ export default function AdminPaymentVerificationPage() {
                     <span className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setStatus(o, "Tasdiqlandi")}
-                        className="rounded-[8px] bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-accent-ink"
+                        className="btn-press rounded-[8px] bg-accent px-3 py-1.5 text-[12.5px] font-semibold text-accent-ink"
                       >
                         Tasdiqlash
                       </button>
                       <button
                         onClick={() => setStatus(o, "Bekor qilindi")}
-                        className="rounded-[8px] border border-danger px-3 py-1.5 text-[12.5px] font-semibold text-danger"
+                        className="btn-press rounded-[8px] border border-danger px-3 py-1.5 text-[12.5px] font-semibold text-danger"
                       >
                         Bekor qilish
                       </button>

@@ -65,19 +65,19 @@ export default function AdminReviewsPage() {
                 <div className="mt-1 flex gap-2">
                   <button
                     onClick={() => setStatus(r.id, "approved")}
-                    className="rounded-[8px] bg-accent px-3.5 py-2 text-[12.5px] font-semibold text-accent-ink"
+                    className="btn-press rounded-[8px] bg-accent px-3.5 py-2 text-[12.5px] font-semibold text-accent-ink"
                   >
                     Tasdiqlash
                   </button>
                   <button
                     onClick={() => setStatus(r.id, "rejected")}
-                    className="rounded-[8px] border border-line bg-surface px-3.5 py-2 text-[12.5px] font-semibold text-ink"
+                    className="btn-press rounded-[8px] border border-line bg-surface px-3.5 py-2 text-[12.5px] font-semibold text-ink"
                   >
                     Rad etish
                   </button>
                   <button
                     onClick={() => deleteReview(r.id)}
-                    className="rounded-[8px] border border-danger bg-transparent px-3.5 py-2 text-[12.5px] font-semibold text-danger"
+                    className="btn-press rounded-[8px] border border-danger bg-transparent px-3.5 py-2 text-[12.5px] font-semibold text-danger"
                   >
                     O&apos;chirish
                   </button>

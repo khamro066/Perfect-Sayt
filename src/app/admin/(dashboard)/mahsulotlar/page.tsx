@@ -477,7 +477,7 @@ export default function AdminProductsPage() {
         <button
           onClick={submit}
           disabled={submitting || !category}
-          className="mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink disabled:opacity-60"
+          className="btn-press mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink disabled:opacity-60"
         >
           {submitting ? "Yuklanmoqda…" : "+ Mahsulotni qo'shish"}
         </button>
@@ -504,13 +504,13 @@ export default function AdminProductsPage() {
                   <div className="flex justify-self-end gap-2">
                     <button
                       onClick={() => openEdit(p)}
-                      className="whitespace-nowrap rounded-[8px] border border-line px-3 py-1.5 text-[12.5px] font-semibold text-ink"
+                      className="btn-press whitespace-nowrap rounded-[8px] border border-line px-3 py-1.5 text-[12.5px] font-semibold text-ink"
                     >
                       Tahrirlash
                     </button>
                     <button
                       onClick={() => setDeleteTarget(p)}
-                      className="whitespace-nowrap rounded-[8px] border border-danger px-3 py-1.5 text-[12.5px] font-semibold text-danger"
+                      className="btn-press whitespace-nowrap rounded-[8px] border border-danger px-3 py-1.5 text-[12.5px] font-semibold text-danger"
                     >
                       O&apos;chirish
                     </button>
@@ -538,10 +538,10 @@ export default function AdminProductsPage() {
               </div>
             )}
             <div className="mt-4 flex gap-2.5">
-              <button onClick={() => setDeleteTarget(null)} className="flex-1 rounded-[12px] border border-line bg-surface py-3.5 text-sm font-semibold text-ink">
+              <button onClick={() => setDeleteTarget(null)} className="btn-press flex-1 rounded-[12px] border border-line bg-surface py-3.5 text-sm font-semibold text-ink">
                 Bekor qilish
               </button>
-              <button onClick={confirmDelete} className="flex-1 rounded-[12px] bg-danger py-3.5 text-sm font-bold text-white">
+              <button onClick={confirmDelete} className="btn-press flex-1 rounded-[12px] bg-danger py-3.5 text-sm font-bold text-white">
                 O&apos;chirish
               </button>
             </div>
@@ -704,13 +704,13 @@ export default function AdminProductsPage() {
             </div>
 
             <div className="mt-4 flex gap-2.5">
-              <button onClick={() => setEditTarget(null)} className="flex-1 rounded-[12px] border border-line bg-surface py-3.5 text-sm font-semibold text-ink">
+              <button onClick={() => setEditTarget(null)} className="btn-press flex-1 rounded-[12px] border border-line bg-surface py-3.5 text-sm font-semibold text-ink">
                 Bekor qilish
               </button>
               <button
                 onClick={submitEdit}
                 disabled={editSubmitting}
-                className="flex-1 rounded-[12px] bg-accent py-3.5 text-sm font-bold text-accent-ink disabled:opacity-60"
+                className="btn-press flex-1 rounded-[12px] bg-accent py-3.5 text-sm font-bold text-accent-ink disabled:opacity-60"
               >
                 {editSubmitting ? "Saqlanmoqda…" : "Saqlash"}
               </button>

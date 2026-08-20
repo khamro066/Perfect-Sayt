@@ -155,7 +155,7 @@ export default function AdminCategoriesPage() {
           <button
             onClick={submitAdd}
             disabled={adding}
-            className="whitespace-nowrap rounded-[10px] bg-accent px-5.5 py-3 text-sm font-bold text-accent-ink disabled:opacity-60"
+            className="btn-press whitespace-nowrap rounded-[10px] bg-accent px-5.5 py-3 text-sm font-bold text-accent-ink disabled:opacity-60"
           >
             {adding ? "Yuklanmoqda…" : "+ Qo'shish"}
           </button>
@@ -214,13 +214,13 @@ export default function AdminCategoriesPage() {
                       <button
                         onClick={() => submitRename(c.id)}
                         disabled={saving}
-                        className="flex-1 rounded-[8px] bg-accent py-2 text-xs font-bold text-accent-ink disabled:opacity-60"
+                        className="btn-press flex-1 rounded-[8px] bg-accent py-2 text-xs font-bold text-accent-ink disabled:opacity-60"
                       >
                         {saving ? "Saqlanmoqda…" : "Saqlash"}
                       </button>
                       <button
                         onClick={() => { setEditing(null); setEditImageFile(null); setEditImagePreview(null); setEditImageRemoved(false); }}
-                        className="flex-1 rounded-[8px] border border-line py-2 text-xs font-semibold text-ink"
+                        className="btn-press flex-1 rounded-[8px] border border-line py-2 text-xs font-semibold text-ink"
                       >
                         Bekor qilish
                       </button>
@@ -245,13 +245,13 @@ export default function AdminCategoriesPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => { setEditing(c.id); setEditValue(c.name); setEditImageFile(null); setEditImagePreview(null); setEditImageRemoved(false); }}
-                        className="flex-1 rounded-[8px] border border-line py-2 text-xs font-semibold text-ink"
+                        className="btn-press flex-1 rounded-[8px] border border-line py-2 text-xs font-semibold text-ink"
                       >
                         Tahrirlash
                       </button>
                       <button
                         onClick={() => setDeleteTarget(c)}
-                        className="flex-1 rounded-[8px] border border-danger py-2 text-xs font-semibold text-danger"
+                        className="btn-press flex-1 rounded-[8px] border border-danger py-2 text-xs font-semibold text-danger"
                       >
                         O&apos;chirish
                       </button>
@@ -270,10 +270,10 @@ export default function AdminCategoriesPage() {
             <h3 className="font-bold text-ink">Kategoriyani o&apos;chirish</h3>
             <p className="mt-2 text-sm text-ink">«{deleteTarget.name}» kategoriyasini o&apos;chirmoqchimisiz?</p>
             <div className="mt-4 flex gap-2.5">
-              <button onClick={() => setDeleteTarget(null)} className="flex-1 rounded-[12px] border border-line py-3 text-sm font-semibold text-ink">
+              <button onClick={() => setDeleteTarget(null)} className="btn-press flex-1 rounded-[12px] border border-line py-3 text-sm font-semibold text-ink">
                 Bekor qilish
               </button>
-              <button onClick={confirmDelete} className="flex-1 rounded-[12px] bg-danger py-3 text-sm font-bold text-white">
+              <button onClick={confirmDelete} className="btn-press flex-1 rounded-[12px] bg-danger py-3 text-sm font-bold text-white">
                 O&apos;chirish
               </button>
             </div>

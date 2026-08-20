@@ -26,7 +26,7 @@ export function NewsletterForm() {
         placeholder={t("placeholder")}
         className="min-w-[220px] flex-1 rounded-btn border border-line bg-surface px-4 py-3 text-sm outline-none"
       />
-      <button type="submit" className="rounded-btn bg-accent px-5 py-3 text-sm font-semibold text-accent-ink">
+      <button type="submit" className="btn-press rounded-btn bg-accent px-5 py-3 text-sm font-semibold text-accent-ink">
         {t("subscribe")}
       </button>
     </form>

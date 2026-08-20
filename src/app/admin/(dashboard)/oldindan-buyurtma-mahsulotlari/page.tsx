@@ -104,7 +104,7 @@ export default function AdminPreorderProductsPage() {
             <input type="number" value={days} onChange={(e) => setDays(e.target.value)} placeholder="21" className="rounded-[10px] border border-line bg-bg px-3.5 py-2.5 text-sm text-ink outline-none" />
           </label>
         </div>
-        <button onClick={submit} className="mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">
+        <button onClick={submit} className="btn-press mt-4 rounded-btn bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">
           + Oldindan buyurtma mahsulotini qo&apos;shish
         </button>
       </div>
