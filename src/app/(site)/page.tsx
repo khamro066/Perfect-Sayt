@@ -5,6 +5,7 @@ import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 import { ProductCarousel } from "@/components/home/ProductCarousel";
 import { TrustBadges } from "@/components/home/TrustBadges";
+import { Product360Viewer } from "@/components/home/Product360Viewer";
 import { prisma } from "@/lib/prisma";
 import { serializeProduct } from "@/lib/serializers";
 
@@ -170,6 +171,28 @@ export default async function HomePage() {
               className="object-cover"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1280px] px-6 py-5">
+        <div className="relative grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] overflow-hidden rounded-[22px] border border-line bg-accent-soft">
+          <div className="flex flex-col justify-center gap-3.5 p-[clamp(28px,4vw,52px)]">
+            <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-medium text-ink">{t("loferTitle")}</h2>
+            <p className="max-w-[340px] text-[15px] leading-[1.6] text-muted">
+              {t("loferDesc")}
+            </p>
+            <Link
+              href={`/katalog?category=${encodeURIComponent("Lofer va mokasin")}`}
+              className="btn-press mt-1.5 w-fit rounded-btn bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
+            >
+              {t("loferCta")}
+            </Link>
+          </div>
+          <Product360Viewer
+            images={["/images/rotate-1.png", "/images/rotate-2.png", "/images/rotate-3.png", "/images/rotate-4.png"]}
+            alt="Lofer va mokasin"
+            hintLabel={t("rotateHint")}
+          />
         </div>
       </section>
 
